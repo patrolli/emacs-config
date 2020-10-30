@@ -1,0 +1,150 @@
+(electric-indent-mode 1)
+;;set open recent files
+(setq make-makeup-files nil)
+(require 'recentf)
+(recentf-mode 1)
+(setq recentf-max-menu-item 10)
+
+;; forbid autosaving and backup
+(setq make-backup-files nil)
+(setq auto-save-default nil)
+(set-face-attribute 'default nil :height 140)
+
+;; indent buffer 
+(defun indent-buffer()
+  (interactive)
+  (indent-region (point-min) (point-max)))
+
+(defun indent-region-or-buffer()
+  (interactive)
+  (save-excursion
+    (if (region-active-p)
+	(progn
+	  (indent-region (region-beginning) (region-end))
+	  (message "Indent selected region."))
+      (progn
+	(indent-buffer)
+	(message "Indent buffer.")))))
+
+;; expand the company 
+(setq hippie-expand-try-function-list '(try-expand-debbrev
+					try-expand-debbrev-all-buffers
+					try-expand-debbrev-from-kill
+					try-complete-file-name-partially
+					try-complete-file-name
+					try-expand-all-abbrevs
+					try-expand-list
+					try-expand-line
+					try-complete-lisp-symbol-partially
+					try-complete-lisp-symbol))
+
+(fset 'yes-or-no-p 'y-or-n-p)
+
+(setq dired-recursive-copies 'always)
+
+;; 配置dired，所有目录共用一个buffer
+(put 'dired-find-alternate-file 'disabled nil)
+;; 延迟加载dired，节省emacs启动时间
+(with-eval-after-load 'dired
+    (define-key dired-mode-map (kbd "RET") 'dired-find-alternate-file))
+;; 打开当前目录的dired mode，快捷键C－c C－j
+(require 'dired-x)
+(setq dired-dwin-target 1)
+
+;; 在elisp模式下，取消单引号的自动配对
+(sp-local-pair '(emacs-lisp-mode lisp-interaction-mode) "'" nil :actions nil)
+
+;; 高亮括号配对
+(define-advice show-paren-function (:around (fn) fix-show-paren-function)
+  "Highlight enclosing parens."
+  (cond ((looking-at-p "\\s(") (funcall fn))
+	(t (save-excursion
+	     (ignore-errors (backward-up-list))
+	     (funcall fn)))))
+(show-paren-mode 1)
+
+;; 加载指定路径下的所有 .org 文件
+(defun my/load-org () (interactive)
+ (progn  (mapc (lambda (file-name) (find-file-noselect file-name))
+         (directory-files-recursively "/mnt/c/Users/lixun/Documents/org/" "\.org$"))
+	 (message "Finish loading.")) "")
+
+
+(defun my/eprint ()
+  "Download PDF according to ArXiv ID or URL"
+  (interactive)
+  (let* ((entry (progn (bibtex-beginning-of-entry)
+                       (bibtex-parse-entry)))
+         (arxiv (substring (assoc-default  "eprint" entry) 1 -1))
+         (url (if (string-match "http" arxiv) arxiv (format "https://arxiv.org/pdf/%s.pdf" arxiv)))
+         (key (assoc-default  "=key=" entry))
+         (dpath (expand-file-name "./"))
+         (fpath (format "%s/%s.pdf" dpath key)))
+    (start-process-shell-command ""  nil (format "curl %s > %s" url fpath))
+    (message "download %s to %s" url fpath)))
+
+(defun my/cite-parse ()
+  (let* ((parsed-cite (org-ref-parse-cite))
+         (cite-key (nth 0 (car parsed-cite)))
+         (cite-end-pos (nth 2 (car parsed-cite)))
+         (line-end-pos (line-end-position))
+         (have-title (if (< cite-end-pos line-end-pos) t nil)))
+    (list cite-key have-title cite-end-pos line-end-pos)))
+
+(defun my/cite-title (key)
+  (substring
+   (with-temp-buffer
+     (insert
+      (assoc-default
+         "title"
+	 (with-temp-buffer
+	   (insert (org-ref-get-bibtex-entry key))
+	   (bibtex-beginning-of-entry)
+	   (bibtex-parse-entry)
+	   )))
+     (let ((fill-column 100000))
+       (fill-paragraph nil))
+     (buffer-string)
+     )
+   1 -1))
+
+(defun my/add-title ()
+  ""
+  (interactive)
+  (re-search-forward "cite:")
+  (let* ((parsed-cite (my/cite-parse))
+         (have-title (nth 1 parsed-cite))
+         (cite-key (nth 0 parsed-cite)))
+    (if have-title
+        (progn (next-line)
+	       (beginning-of-line))
+      (let ((title (my/cite-title cite-key)))
+        (end-of-line)
+        (insert " ")
+        (insert title)
+        (next-line)
+	(beginning-of-line)
+	))))
+
+;; (setq debug-on-error t)
+(defun my/ref-category-set ()
+  (interactive)
+  (let ((key (org-entry-get (point) "Custom_ID")))
+    (save-excursion
+      (with-current-buffer
+	(find-file "/mnt/c/Users/lixun/Documents/org/paper-taxonomy.org")
+	(goto-char (point-min))
+	(setq my-paper-note-category (if (search-forward key nil t)
+					 (nth 4 (org-heading-components))
+				       "Not Classify Yet"))
+	)
+      (switch-to-prev-buffer)
+      (org-entry-put (point) "TAXONOMY" (capitalize my-paper-note-category))
+      (outline-back-to-heading)
+      (org-set-tags   (replace-regexp-in-string "[:\s:-]" "" (capitalize my-paper-note-category)))
+      ;; (org-set-tags ":t:")
+      )))
+
+(global-auto-revert-mode t)
+
+(provide 'init-better-defaults)
