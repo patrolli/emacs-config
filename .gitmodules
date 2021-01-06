@@ -1,0 +1,6 @@
+[submodule "valign"]
+	path = valign
+	url = git@github.com:casouri/valign.git
+[submodule "nox"]
+	path = nox
+	url = git@github.com:manateelazycat/nox.git

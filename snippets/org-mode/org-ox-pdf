@@ -1,0 +1,13 @@
+# -*- mode: snippet -*-
+# key: org-ox-pdf
+# name: org export to latex&pdf
+#--
+#+TITLE: $0
+#+Author: Lixunsong
+#+LATEX_CLASS: note
+
+* $1
+
+
+bibliographystyle:unsrt
+bibliography:/mnt/c/Users/lixun/Documents/bibliography/library.bib

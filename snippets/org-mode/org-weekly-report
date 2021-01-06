@@ -1,0 +1,16 @@
+# -*- mode: snippet -*-
+# name: weekreport
+# key: weekreport
+# --
+#+TITLE: WeeklyReport$1
+#+Author: LiXunsong
+#+LATEX_CLASS: note
+
+* 总结
+$2
+
+* 工作计划
+$0
+
+bibliographystyle:unsrt
+bibliography:/mnt/c/Users/lixun/Documents/bibliography/library.bib

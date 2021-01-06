@@ -54,14 +54,16 @@
 ;; 在elisp模式下，取消单引号的自动配对
 (sp-local-pair '(emacs-lisp-mode lisp-interaction-mode) "'" nil :actions nil)
 
-;; 高亮括号配对
-(define-advice show-paren-function (:around (fn) fix-show-paren-function)
-  "Highlight enclosing parens."
-  (cond ((looking-at-p "\\s(") (funcall fn))
-	(t (save-excursion
-	     (ignore-errors (backward-up-list))
-	     (funcall fn)))))
-(show-paren-mode 1)
+;;高亮括号配对
+;; (define-advice show-paren-function (:around (fn) fix-show-paren-function)
+;;   "Highlight enclosing parens."
+;;   (cond ((looking-at-p "\\s(") (funcall fn))
+;; 	(t (save-excursion
+;; 	     (ignore-errors (backward-up-list))
+;; 	     (funcall fn)))))
+(show-paren-mode nil)
+;; 仅针对 elisp 文件显示括号配对
+(add-hook 'emacs-lisp-mode-hook 'show-paren-mode)
 
 ;; 加载指定路径下的所有 .org 文件
 (defun my/load-org () (interactive)
@@ -146,5 +148,72 @@
       )))
 
 (global-auto-revert-mode t)
+
+;; TODO: 递归地 sort 
+(defun my/org-sort-by-prio ()
+  (interactive)
+  (org-sort-entries t ?p)
+  (org-sort-entries t ?o))
+;; emacs gc 的优化
+;; (defvar k-gc-timer
+;;   (run-with-idle-timer 15 t
+;;                        'garbage-collect))
+
+;; (defmacro k-time (&rest body)
+;;   "Measure and return the time it takes evaluating BODY."
+;;   `(let ((time (current-time)))
+;;      ,@body
+;;      (float-time (time-since time))))
+
+;; (defvar k-gc-timer
+;;   (run-with-idle-timer 15 t
+;;                        (lambda ()
+;;                          (message "Garbage Collector has run for %.06fsec"
+;;                                   (k-time (garbage-collect))))))
+
+
+(defun my/helm-org-run-marked-heading-id-link ()
+     (interactive)
+     (with-helm-alive-p
+       (helm-exit-and-execute-action
+        'my/helm-org-marked-heading-id-link)))
+
+(defun my/helm-org-marked-heading-id-link (marker)
+     (let* ((victims (with-helm-buffer (helm-marked-candidates)))
+            (buffer (marker-buffer marker))
+            (filename (buffer-file-name buffer))
+            (rfloc (list nil filename nil marker)))
+       (when (and (= 1 (length victims))
+                  (equal (helm-get-selection) (car victims)))
+         ;; No candidates are marked; we are refiling the entry at point
+         ;; to the selected heading
+         (setq victims (list marker)))
+       (when (and victims buffer filename rfloc)
+         (cl-loop for victim in victims
+                  ;; do (org-with-point-at victim
+                  ;;      (org-refile nil nil rfloc))
+
+                  do (with-current-buffer (marker-buffer victim)
+         (let ((heading-id (save-excursion (goto-char (marker-position victim))
+                                           (org-id-get-create)
+                                           ))
+               (heading-name
+                (save-excursion
+                  (goto-char (marker-position victim))
+                  (org-entry-get nil "ITEM"))
+                )
+               )
+           (with-helm-current-buffer
+             (org-insert-link
+              nil (concat "id:" heading-id) heading-name)
+             (insert " ")
+             )))
+   ))))
+
+(add-to-list 'helm-org-headings-actions '("Insert id link(s) C-c h l" . my/helm-org-marked-heading-id-link) t)
+;; (add-to-list 'helm-org-rifle-actions '("Insert id link(s) C-c h l" . my/helm-org-marked-heading-id-link) t)
+
+
+(setq focus-follows-mouse t)
 
 (provide 'init-better-defaults)

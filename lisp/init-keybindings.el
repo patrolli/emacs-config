@@ -7,6 +7,7 @@
 (global-set-key (kbd "C-x C-f") 'counsel-find-file)
 (global-set-key (kbd "<f1> f") 'counsel-describe-function)
 (global-set-key (kbd "<f1> v") 'counsel-describe-variable)
+(global-set-key (kbd "C-c <f3>") 'counsel-bm)
 
 ;; help in emacs
 (global-set-key (kbd "<f1> C-f") 'find-function)
@@ -41,6 +42,8 @@
 (global-set-key (kbd "C-c a") 'org-agenda)
 (global-set-key (kbd "C-c c") 'org-capture)
 ;;(global-set-key (kbd "C-c T") 'org-table-toggle-column-width)
+;; (global-set-key (kbd "C-c l") 'org-store-link)
+;; (global-set-key (kbd "C-c C-l") 'org-insert-link)
 
 ;; 用C-n, C-p来上下移动company补全的内容
 (with-eval-after-load 'company
@@ -57,7 +60,7 @@
 (global-set-key (kbd "C--") 'er/contract-region)
 
 ;; ag, global keyword searching
-(global-set-key (kbd "C-c p s") 'helm-do-ag-project-root)
+(global-set-key (kbd "C-c C-x p s") 'helm-do-ag-project-root)
 
 ;; org-ref
 (global-set-key (kbd "C-c s") 'dblp-lookup)
