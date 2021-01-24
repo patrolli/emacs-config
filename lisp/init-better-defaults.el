@@ -216,4 +216,24 @@
 
 (setq focus-follows-mouse t)
 
+(require 'watch-other-window)
+(bind-key "M-n" #'watch-other-window-up-line)
+(bind-key "M-p" #'watch-other-window-down-line)
+(bind-key "M-o n" #'watch-other-window-up)
+(bind-key "M-o p" #'watch-other-window-down)
+
+;; 跳转光标
+(defun xah-pop-local-mark-ring ()
+  "Move cursor to last mark position of current buffer.
+Call this repeatedly will cycle all positions in `mark-ring'.
+URL `http://ergoemacs.org/emacs/emacs_jump_to_previous_position.html'
+Version 2016-04-04"
+  (interactive)
+  (set-mark-command t))
+
+(setq mark-ring-max 6)
+(setq global-mark-ring-max 6)
+(global-set-key (kbd "<f6>") 'xah-pop-local-mark-ring)
+(global-set-key (kbd "<f7>") 'pop-global-mark)
+
 (provide 'init-better-defaults)

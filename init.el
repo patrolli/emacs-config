@@ -4,7 +4,10 @@
 ;; You may delete these explanatory comments.(package-initialize) ;; You might already have this line
 (add-to-list 'load-path "~/.emacs.d/lisp")
 (add-to-list 'load-path "~/.emacs.d/nox")
-
+(add-to-list 'load-path "~/.emacs.d/iscroll")
+(add-to-list 'load-path "~/.emacs.d/watch-other-window")
+(add-to-list 'load-path "~/.emacs.d/alert-toast")
+(add-to-list 'load-path "~/.emacs.d/auto-save")
 
 ;; emacs garbage configurations
 (defun my-cleanup-gc ()
@@ -18,12 +21,29 @@
 ;; default
 (setq ring-bell-function 'ignore)
 
+(setq lxs/home-dir "/mnt/c/Users/lixun/")
+(setq-default sysTypeSpecific  system-type) 
+(cond 
+  ;; If type is "gnu/linux", override to "wsl/linux" if it's WSL.
+  ((eq sysTypeSpecific 'gnu/linux)  
+   (when (string-match "Linux.*Microsoft.*Linux" 
+                       (shell-command-to-string "uname -a"))
+ 
+     (setq-default sysTypeSpecific "wsl/linux") ;; for later use.
+     (setq
+      cmdExeBin"/mnt/c/Windows/System32/cmd.exe"
+      cmdExeArgs '("/c" "start" "") )
+     (setq
+      browse-url-generic-program  cmdExeBin
+      browse-url-generic-args     cmdExeArgs
+      browse-url-browser-function 'browse-url-generic)
+     )))
 
 (require 'init-packages)
 (require 'init-ui)
+(require 'init-org)
 (require 'init-better-defaults)
 (require 'custom)
-(require 'init-org)
 (require 'init-keybindings)
 (require 'init-prog)
 (setq custom-file "~/.emacs.d/lisp/custom.el")
@@ -32,7 +52,7 @@
   (interactive)
   (find-file "~/.emacs.d/init.el"))
 
-(add-hook 'after-init-hook #'fancy-battery-mode)
+;(add-hook 'after-init-hook #'fancy-qbattery-mode)
 (delete-selection-mode 1)
 
 (put 'dired-find-alternate-file 'disabled nil)

@@ -70,8 +70,6 @@
 	 (package-install pkg))))
 
 (require 'pyim)
-;;(require 'pyim-basedict)
-;;(pyim-basedict-enable)
 (setq default-input-method "pyim")
 (setq pyim-default-scheme 'xiaohe-shuangpin)
 (setq-default pyim-english-input-switch-functions
@@ -85,12 +83,15 @@
 	      '(pyim-probe-punctuation-line-beginning
 		pyim-probe-punctuation-after-punctuation))
 ;;(setq pyim-punctuation-translate-p '(no yes auto))
-(setq pyim-page-tooltip 'posframe)
+
 ;; 添加词库
 (setq pyim-dicts
       '((:name "pyim-bigdict" :file "/mnt/c/Users/lixun/Downloads/pyim-bigdict.pyim")))
 (add-hook 'emacs-startup-hook
           #'(lambda () (pyim-restart-1 t)))
+
+(setq pyim-translate-trigger-char "@")
+(setq pyim-page-tooltip 'posframe)
 ;; 使 ivy 支持拼音搜索
 (defun eh-ivy-cregexp (str)
     (let ((a (ivy--regex-plus str))
@@ -103,7 +104,9 @@
         '((t . eh-ivy-cregexp)))
 
 ;; open global Company
+(setq company-global-modes '(not org-mode));; 希望关闭 company 在 orgmode 中的补全
 (global-company-mode 1)
+
 ;; hungry-delete setting
 (require 'hungry-delete)
 ;; (global-hungry-delete-mode)
@@ -119,6 +122,8 @@
 ;; 使用 emacs 自带的 electric-pair-mode 取代 smartparens
 (electric-pair-mode t)
 (setq electric-pair-inhibit-predicate 'electric-pair-conservative-inhibit)
+(add-function :before-until electric-pair-inhibit-predicate
+  (lambda (c) (eq c ?<)))
 
 ;; config for popwin
 (require 'popwin)
@@ -126,19 +131,19 @@
 
 
 ;; cnfonts
-(require 'cnfonts)
-(cnfonts-enable)
+;;(require 'cnfonts)
+;;(cnfonts-enable)
 ;;(cnfonts-set-spacemacs-fallback-fonts)
-
-
-;; super-save config for auto-save buffers
-(setq auto-save-default nil)
-(super-save-mode +1)
-
-;; real-auto-save
-;;(require 'real-auto-save)
-;;(add-hook 'prog-mode-hook 'real-auto-save-mode)
-
+;; cnfonts 用来设置字体大小
+;; 目前较为舒服的设置是，英文字号 12.5
+(use-package cnfonts
+  :ensure t
+  :defer t
+  :init
+  (cnfonts-enable)
+  :config
+  (cnfonts-set-spacemacs-fallback-fonts)
+  )
 
 (use-package neotree
   :ensure t
@@ -148,10 +153,19 @@
 )
 
 ;; iedit 可以同时编辑多块区域
-(require 'iedit)
+(use-package iedit
+  :ensure t
+  :bind
+  ("M-s e" . 'iedit-mode))
 
 ;; expand-region 选择一块区域
 (require 'expand-region)
+
+;; 自动保存文件
+(require 'auto-save)
+(auto-save-enable)
+(setq auto-save-silent t)   ; quietly save
+
 
 ;;
 ;;(setq lsp-keymap-prefix "s-l")
@@ -300,6 +314,7 @@
                 ("S-<f3>" . bm-previous)
                 ("C-<f3>" . bm-toggle))
          )
+
 (defun bm-counsel-get-list (bookmark-overlays)
   (-map (lambda (bm)
           (with-current-buffer (overlay-buffer bm)
@@ -384,6 +399,9 @@ It has the ability to preview the bookmarks like `swiper-all'."
   (setq sql-sqlite-program "/usr/bin/sqlite3")
   (setq calibredb-program "/usr/bin/calibredb")
   (setq calibredb-format-all-the-icons t)
+  (setq calibredb-ref-default-bibliography (concat (file-name-as-directory calibredb-root-dir) "catalog.bib"))
+  ;; (add-to-list 'org-ref-default-bibliography calibredb-ref-default-bibliography)   ;; 这里要先加载 org-ref
+  (setq org-ref-get-pdf-filename-function 'org-ref-get-mendeley-filename)
   )
 
 (use-package hl-todo
@@ -441,6 +459,24 @@ It has the ability to preview the bookmarks like `swiper-all'."
 
 (use-package posframe
   :ensure t)
+
+(use-package benchmark-init
+  :ensure t
+  :config
+  ;; To disable collection of benchmark data after init is done.
+  (add-hook 'after-init-hook 'benchmark-init/deactivate))
+
+(use-package helm-dash
+  :ensure t
+  :config
+  (setq helm-dash-common-docsets '("Python 3" "PyTorch"))
+  (setq helm-dash-browser-func 'eww)  
+)
+
+(use-package vterm
+  :ensure t
+  :config
+  (setq vterm-buffer-name-string "vterm %s"))
 
 (provide 'init-packages)
 

@@ -2,7 +2,6 @@
 
 (global-set-key "\C-s" 'swiper)
 (global-set-key (kbd "C-c C-r") 'ivy-resume)
-(global-set-key (kbd "<f6>") 'ivy-resume)
 (global-set-key (kbd "M-x") 'counsel-M-x)
 (global-set-key (kbd "C-x C-f") 'counsel-find-file)
 (global-set-key (kbd "<f1> f") 'counsel-describe-function)
@@ -52,8 +51,8 @@
   (define-key company-active-map (kbd "C-n") #'company-select-next)
   (define-key company-active-map (kbd "C-p") #'company-select-previous))
 
-;; iedit keybinding
-(global-set-key (kbd "M-s e") 'iedit-mode) 
+
+
 
 ;; expand-region keybinding
 (global-set-key (kbd "C-=") 'er/expand-region)

@@ -23,7 +23,8 @@
                  ))
     (add-hook hook '(lambda () (nox-ensure))))
   ;; cpp 
-  (add-to-list 'nox-server-programs '(cpp-mode . ("clangd")))
+   (add-to-list 'nox-server-programs '(c++-mode . ("clangd")))
+   (add-to-list 'nox-server-programs '(c-mode . ("clangd")))
   ;; python + mspyls
   ;; for mspyls, we need 3 steps to prepare:
   ;; 1. Execute command 'nox-print-mspyls-download-url' get download url of mspyls.
@@ -48,15 +49,6 @@
   )
 
 
-(defun xref--pop-to-location@around (func item &optional action)
-  (let* ((marker (save-excursion
-                   (xref-location-marker (xref-item-location item))))
-         (buf (marker-buffer marker)))
-    (with-current-buffer buf
-      (read-only-mode)))
-  (funcall func item action))
-(advice-add 'xref--pop-to-location :around #'xref--pop-to-location@around)
-
 
 (defun xref--pop-to-location@around (func item &optional action)
   (let* ((marker (save-excursion
@@ -70,7 +62,7 @@
     (funcall func item action)
     ))
 
- (advice-add 'xref--pop-to-location :around #'xref--pop-to-location@around)
+(advice-add 'xref-pop-to-location :around #'xref--pop-to-location@around)
 
 ;; python
 (use-package pyvenv
