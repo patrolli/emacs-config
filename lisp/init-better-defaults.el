@@ -236,4 +236,21 @@ Version 2016-04-04"
 (global-set-key (kbd "<f6>") 'xah-pop-local-mark-ring)
 (global-set-key (kbd "<f7>") 'pop-global-mark)
 
+(defun my/vterm (command)
+  "Open a vterm by selecting a profile from a profile lists.
+"
+  (interactive
+   (let ((completion-ignore-case  t))
+     (list (completing-read "Choose: " '("local"
+                                         "aimax-ht -p 25051"; your profiles
+                                         "aimax-ht -p 25532"
+                                         "aimax-ht -p 25564"
+					 "diggers3") nil t))))
+  (if
+      (not (string-equal command "local"))
+      (with-current-buffer (vterm (concat "*" command "*"))
+        (vterm-send-string (format "ssh %s" command))
+         (vterm-send-return))
+    (vterm (concat "*vterm-" command "*"))))
+
 (provide 'init-better-defaults)

@@ -42,14 +42,17 @@
          doom-themes-enable-italic t) ; if nil, italics is universally disabled
        (load-theme 'doom-one-light t)
        (doom-themes-org-config)
+       (setq org-src-fontify-natively t)
+       (doom-themes-neotree-config)
 
-     ;; (setq org-src-fontify-natively nil)
+     (setq org-src-fontify-natively t)
 
      (with-eval-after-load 'org 
        (custom-theme-set-faces
         'user
         `(org-latex-and-related ((t (:foreground ,(doom-color 'green))))))
-       (setq org-highlight-latex-and-related '(latex script entities))))
+       (setq org-highlight-latex-and-related '(latex script entities)))
+     )
 
 
 

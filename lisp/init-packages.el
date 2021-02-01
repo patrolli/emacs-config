@@ -106,6 +106,12 @@
 ;; open global Company
 (setq company-global-modes '(not org-mode));; 希望关闭 company 在 orgmode 中的补全
 (global-company-mode 1)
+(use-package company-tabnine
+  :ensure t
+  :config
+  (add-to-list 'company-backends #'company-tabnine)
+  (setq company-idle-delay 0)
+  (setq company-show-numbers t))
 
 ;; hungry-delete setting
 (require 'hungry-delete)
@@ -144,14 +150,6 @@
   :config
   (cnfonts-set-spacemacs-fallback-fonts)
   )
-
-(use-package neotree
-  :ensure t
-  :bind
-  ("<f8>" . neotree-toggle)
-  ("C-<f8>" . neotree-refresh)
-)
-
 ;; iedit 可以同时编辑多块区域
 (use-package iedit
   :ensure t
@@ -476,7 +474,133 @@ It has the ability to preview the bookmarks like `swiper-all'."
 (use-package vterm
   :ensure t
   :config
-  (setq vterm-buffer-name-string "vterm %s"))
+  (setq vterm-buffer-name-string nil))
+
+(use-package centaur-tabs
+  :demand
+  :ensure t
+  :init
+  (setq centaur-tabs-enable-key-bindings t)
+  :config
+  (centaur-tabs-mode t)
+  (setq centaur-tabs-set-icons t)
+  (setq centaur-tabs-height 22)
+  (setq centaur-tabs-close-button "x")
+  (setq centaur-tabs-cycle-scope 'tabs)
+   (defun centaur-tabs-buffer-groups ()
+      "`centaur-tabs-buffer-groups' control buffers' group rules.
+
+    Group centaur-tabs with mode if buffer is derived from `eshell-mode' `emacs-lisp-mode' `dired-mode' `org-mode' `magit-mode'.
+    All buffer name start with * will group to \"Emacs\".
+    Other buffer group by `centaur-tabs-get-group-name' with project name."
+      (list
+	(cond
+	 ((or (string-equal "*" (substring (buffer-name) 0 1))
+	      (memq major-mode '(magit-process-mode
+				 magit-status-mode
+				 magit-diff-mode
+				 magit-log-mode
+				 magit-file-mode
+				 magit-blob-mode
+				 magit-blame-mode
+				 )))
+	  "Emacs")
+	 ((derived-mode-p 'prog-mode)
+	  "Editing")
+	 ((derived-mode-p 'dired-mode)
+	  "Dired")
+	 ((derived-mode-p 'vterm-mode)
+	  "Vterm")
+	 ((memq major-mode '(helpful-mode
+			     help-mode))
+	  "Help")
+	 ((memq major-mode '(org-mode
+			     org-agenda-clockreport-mode
+			     org-src-mode
+			     org-agenda-mode
+			     org-beamer-mode
+			     org-indent-mode
+			     org-bullets-mode
+			     org-cdlatex-mode
+			     org-agenda-log-mode
+			     diary-mode))
+	  "OrgMode")
+	 (t
+	  (centaur-tabs-get-group-name (current-buffer))))))
+   (defun centaur-tabs-hide-tab (x)
+  "Do no to show buffer X in tabs."
+  (let ((name (format "%s" x)))
+    (or
+     ;; Current window is not dedicated window.
+     (window-dedicated-p (selected-window))
+
+     ;; Buffer name not match below blacklist.
+     (string-prefix-p "*epc" name)
+     (string-prefix-p "*helm" name)
+     (string-prefix-p "*Helm" name)
+     (string-prefix-p "*Compile-Log*" name)
+     (string-prefix-p "*lsp" name)
+     (string-prefix-p "*company" name)
+     (string-prefix-p "*Flycheck" name)
+     (string-prefix-p "*tramp" name)
+     (string-prefix-p " *Mini" name)
+     (string-prefix-p "*help" name)
+     (string-prefix-p "*straight" name)
+     (string-prefix-p " *temp" name)
+     (string-prefix-p "*Help" name)
+     (string-prefix-p "*mybuf" name)
+     (string-prefix-p "*NOX" name)
+     ;; Is not magit buffer.
+     (and (string-prefix-p "magit" name)
+	  (not (file-name-extension name)))
+     )))
+   (defun tabs-timer-initialize (secs)
+  (setq tabs-timer (run-with-timer secs nil (lambda () (centaur-tabs-local-mode 1)))))
+
+(defun tabs-timer-hide ()
+  (tabs-timer-initialize 3))
+
+;; (add-hook 'window-setup-hook 'tabs-timer-hide)
+;; (add-hook 'find-file-hook 'tabs-timer-hide)
+
+(defun centaur-tabs-switch-and-hide (arg)
+  (cancel-timer tabs-timer)
+  (centaur-tabs-local-mode 1)
+  (cond ((equal arg 'backward)
+         (centaur-tabs-backward))
+        ((equal arg 'forward)
+         (centaur-tabs-forward))
+        ((equal arg 'backward-group)
+         (centaur-tabs-backward-group))
+        ((equal arg 'forward-group)
+         (centaur-tabs-forward-group)))
+  (centaur-tabs-local-mode 0)
+  (setq tabs-timer (tabs-timer-initialize 2)))
+
+(defun centaur-tabs-forward-and-hide ()
+  (interactive)
+  (centaur-tabs-switch-and-hide 'forward))
+
+(defun centaur-tabs-backward-and-hide ()
+  (interactive)
+  (centaur-tabs-switch-and-hide 'backward))
+
+(defun centaur-tabs-forward-group-and-hide ()
+  (interactive)
+  (centaur-tabs-switch-and-hide 'forward-group))
+
+(defun centaur-tabs-backward-group-and-hide ()
+  (interactive)
+  (centaur-tabs-switch-and-hide 'backward-group))
+  :bind
+  ;; ("C-x ," . centaur-tabs-backward-and-hide)
+  ;; ("C-x /" . centaur-tabs-forward-and-hide)
+  ("C-x t s" . centaur-tabs-counsel-switch-group)
+  ("C-x t p" . centaur-tabs-group-by-projectile-project)
+  ("C-x t g" . centaur-tabs-group-buffer-groups))
+
+
 
 (provide 'init-packages)
+
 

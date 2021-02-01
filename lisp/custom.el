@@ -12,7 +12,7 @@
  '(company-minimum-prefix-length 2)
  '(compilation-message-face 'default)
  '(custom-safe-themes
-   '("bffa9739ce0752a37d9b1eee78fc00ba159748f50dc328af4be661484848e476" default))
+   '("99ea831ca79a916f1bd789de366b639d09811501e8c092c85b2cb7d697777f93" "e6ff132edb1bfa0645e2ba032c44ce94a3bd3c15e3929cdf6c049802cf059a2a" "76bfa9318742342233d8b0b42e824130b3a50dcc732866ff8e47366aed69de11" "bffa9739ce0752a37d9b1eee78fc00ba159748f50dc328af4be661484848e476" default))
  '(dired-guess-shell-alist-user nil)
  '(fci-rule-color "#3C3D37")
  '(flycheck-global-modes nil)
@@ -48,7 +48,7 @@
  '(magit-diff-use-overlays nil)
  '(nox-python-server "mspyls")
  '(org-agenda-files
-   '("/mnt/c/Users/lixun/Documents/org/gtd/learning.org" "/mnt/c/Users/lixun/Documents/org/gtd/webclips.org" "/mnt/c/Users/lixun/Documents/org/gtd/time-tracking.org" "/mnt/c/Users/lixun/Documents/org/gtd/someday.org" "/mnt/c/Users/lixun/Documents/org/gtd/repeater.org" "/mnt/c/Users/lixun/Documents/org/gtd/projects.org" "/mnt/c/Users/lixun/Documents/org/gtd/next.org" "/mnt/c/Users/lixun/Documents/org/gtd/inbox.org" "/mnt/c/Users/lixun/Documents/org/gtd/capture.org"))
+   '("/mnt/c/Users/lixun/Documents/org/journal.org" "/mnt/c/Users/lixun/Documents/org/gtd/learning.org" "/mnt/c/Users/lixun/Documents/org/gtd/webclips.org" "/mnt/c/Users/lixun/Documents/org/gtd/time-tracking.org" "/mnt/c/Users/lixun/Documents/org/gtd/someday.org" "/mnt/c/Users/lixun/Documents/org/gtd/repeater.org" "/mnt/c/Users/lixun/Documents/org/gtd/projects.org" "/mnt/c/Users/lixun/Documents/org/gtd/next.org" "/mnt/c/Users/lixun/Documents/org/gtd/inbox.org" "/mnt/c/Users/lixun/Documents/org/gtd/capture.org"))
  '(org-format-latex-options
    '(:foreground default :background default :scale 1.5 :html-foreground "Black" :html-background "Transparent" :html-scale 1.0 :matchers
 		 ("begin" "$1" "$" "$$" "\\(" "\\[")))
@@ -78,7 +78,7 @@
 
 ")
  '(package-selected-packages
-   '(doom-themes helm helm-dash org-roam-server benchmark-init org-latex-impatient org-roam dashboard go-translate vterm switch-window helm-org ebib json-mode hl-todo calibredb ox-hugo ox-latex org-pomodoro which-key nox rainbow-delimiters rainbow-mode all-the-icons fancy-battery projectile persp-mode Persp-mode spaceline spaceline-config powerline spacemacs-theme yasnippet ox-wk magit leetcode request helm-org-rifle poker chess xahk-mode org imenu-list openwith window-numbering ace-jump-mode undo-tree window-number ace-window material-theme org-ref cdlatex auctex company-lsp pyvenv lsp-python-ms use-package flycheck lsp-mode helm-ag expand-region iedit neotree company hungry-delete smex swiper counsel smartparens popwin pyim super-save js2-mode nodejs-repl exec-path-from-shell monokai-theme solarized-theme leuven-theme))
+   '(company-tabnine treemacs-magit treemacs-icons-dired treemacs-projectile treemacs markdown-toc grip-mode centaur-tabs eyebrowse org-superstar-mode org-superstar ibuffer-vc ibuffer-projectile all-the-icons-ibuffer all-the-icons-dired diredfl doom-themes helm helm-dash org-roam-server benchmark-init org-latex-impatient org-roam dashboard go-translate vterm switch-window helm-org ebib json-mode hl-todo calibredb ox-hugo ox-latex org-pomodoro which-key nox rainbow-delimiters rainbow-mode all-the-icons fancy-battery projectile persp-mode Persp-mode spaceline spaceline-config powerline spacemacs-theme yasnippet ox-wk magit leetcode request helm-org-rifle poker chess xahk-mode org imenu-list openwith window-numbering ace-jump-mode undo-tree window-number ace-window material-theme org-ref cdlatex auctex company-lsp pyvenv lsp-python-ms use-package flycheck lsp-mode helm-ag expand-region iedit neotree company hungry-delete smex swiper counsel smartparens popwin pyim super-save js2-mode nodejs-repl exec-path-from-shell monokai-theme solarized-theme leuven-theme))
  '(pdf-view-midnight-colors '("#b2b2b2" . "#292b2e"))
  '(pos-tip-background-color "#FFFACE")
  '(pos-tip-foreground-color "#272822")
@@ -115,6 +115,6 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- )
+ '(org-latex-and-related ((t (:foreground "#50a14f")))))
 
 (provide 'custom)

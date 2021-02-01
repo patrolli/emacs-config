@@ -12,6 +12,7 @@
 (setq lxs/org-agenda-directory (concat lxs/home-dir "Documents/org/gtd/"))
 (setq org-agenda-files
       (find-lisp-find-files lxs/org-agenda-directory "\.org$"))
+(add-to-list 'org-agenda-files (concat lxs/home-dir "Documents/" "org/" "org-roam-files/" "paper_index.org"))
 
 (require 'org-tempo)
 (add-hook 'org-mode-hook (lambda () (toggle-truncate-lines)))
@@ -83,12 +84,14 @@
                ((org-agenda-overriding-header "In Progress")
                 (org-agenda-files '(,(concat lxs/org-agenda-directory "someday.org")
                                     ,(concat lxs/org-agenda-directory "projects.org")
-                                    ,(concat lxs/org-agenda-directory "next.org")))
+                                    ,(concat lxs/org-agenda-directory "next.org")
+				    ,(concat lxs/home-dir "Documents/" "org/" "org-roam-files/" "paper_index.org")))
                 ))
          (todo "TODO"
                ((org-agenda-overriding-header "Projects")
                 (org-agenda-files '(,(concat lxs/org-agenda-directory "projects.org")
-				    ,(concat lxs/org-agenda-directory "learning.org")))
+				    ,(concat lxs/org-agenda-directory "learning.org")
+				  ,(concat lxs/home-dir "Documents/" "org/" "org-roam-files/" "paper_index.org")))
                 ))
          (todo "TODO"
                ((org-agenda-overriding-header "One-off Tasks")
@@ -111,6 +114,9 @@
              `("r" "Reading" todo ""
                ((org-agenda-files '(,(concat lxs/org-agenda-directory "reading.org"))))))
 (add-to-list 'org-agenda-custom-commands `,lxs/org-agenda-todo-view)
+
+;; 设置 agenda 显示位置
+(setq org-agenda-window-setup 'current-window)
 
 (defun lxs/switch-to-agenda ()
   (interactive)
@@ -573,6 +579,10 @@ it can be passed in POS."
 
 (define-key org-mode-map (kbd "C-c C-q") 'counsel-org-tag)
 
-
+;; org-superstar-mode 美化 orgmode 的 headline
+(use-package org-superstar
+  :ensure t
+  :config
+  (add-hook 'org-mode-hook #'org-superstar-mode))
 
 (provide 'init-org)
