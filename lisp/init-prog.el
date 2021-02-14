@@ -6,6 +6,8 @@
   ;; 对于 nox+mspyls, 需要指定 python 解释器的路径， vitural envs 似乎不能够起到作用
   (defvar lsp-python "/home/lixunsong/anaconda3/envs/py-emacs/bin/python3.7")
   (defvar lsp-search-paths [])
+  :bind
+  (:map nox-mode-map ("C-." . nox-show-doc))
   :config
   ;; add hooks TODO: why :hook failed?
    (dolist (hook (list
@@ -46,6 +48,7 @@
                            "~/.emacs.d/nox/mspyls/Microsoft.Python.LanguageServer"))
   ;; pyls configuration is simple~
   ;; (add-to-list 'nox-server-programs '(python-mode . ("python-language-server" "pyls")))
+
   )
 
 
@@ -64,6 +67,7 @@
 
 (advice-add 'xref-pop-to-location :around #'xref--pop-to-location@around)
 
+(setq python-shell-interpreter "/home/lixunsong/anaconda3/envs/py-emacs/bin/python3.7")
 ;; python
 (use-package pyvenv
   :ensure t

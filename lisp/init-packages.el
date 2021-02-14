@@ -5,7 +5,7 @@
 		      ("melpa" . "http://elpa.emacs-china.org/melpa/"))))
 
 ;; 注意 elpa.emacs-china.org 是 Emacs China 中文社区在国内搭建的一个 ELPA 镜像
-
+;;
  ;; cl - Common Lisp Extension
  (require 'cl)
 
@@ -69,29 +69,43 @@
        (when (not (package-installed-p pkg))
 	 (package-install pkg))))
 
-(require 'pyim)
-(setq default-input-method "pyim")
-(setq pyim-default-scheme 'xiaohe-shuangpin)
-(setq-default pyim-english-input-switch-functions
+(use-package pyim
+  :ensure nil
+  :demand t
+  :init
+  ;; (setq pyim-dicts
+  ;; 	'((:name "pyim-bigdict" :file "/mnt/c/Users/lixun/Downloads/pyim-bigdict.pyim")))  ;; 添加词库
+  (setq pyim-dicts
+	'((:name "pyim-another-dict" :file "~/.emacs.d/pyim-dict/pyim-another-dict.pyim")))  ;; 添加词库
+  (setq pyim-translate-trigger-char "@")
+  (setq pyim-page-length 5)
+  (setq pyim-page-tooltip 'posframe)
+  (setq pyim-default-scheme 'xiaohe-shuangpin)
+  :hook
+  ('emacs-startup-hook . (lambda () (pyim-restart-1 t)))
+  :bind
+  (("M-j" . pyim-convert-string-at-point) ;与 pyim-probe-dynamic-english 配合
+   ("C-;" . pyim-delete-word-from-personal-buffer))
+  :config
+  ;; (use-package pyim-basedict
+  ;;   :ensure t
+  ;;   :config (pyim-basedict-enable))
+  (setq default-input-method "pyim")
+  (setq pyim-dcache-backend 'pyim-dregcache)
+  (setq-default pyim-english-input-switch-functions
                 '(pyim-probe-dynamic-english
                   pyim-probe-isearch-mode
                   pyim-probe-program-mode
                   pyim-probe-org-structure-template))
-(setq pyim-dcache-backend 'pyim-dregcache)
-;; 自动半角全角切换
-(setq-default pyim-punctuation-half-width-functions
+  (setq-default pyim-punctuation-half-width-functions
 	      '(pyim-probe-punctuation-line-beginning
-		pyim-probe-punctuation-after-punctuation))
-;;(setq pyim-punctuation-translate-p '(no yes auto))
+		pyim-probe-punctuation-after-punctuation)) ;; 自动半角全角切换
+  )
 
-;; 添加词库
-(setq pyim-dicts
-      '((:name "pyim-bigdict" :file "/mnt/c/Users/lixun/Downloads/pyim-bigdict.pyim")))
-(add-hook 'emacs-startup-hook
-          #'(lambda () (pyim-restart-1 t)))
+;; (add-hook 'emacs-startup-hook
+;;           #'(lambda () (pyim-restart-1 t)))
 
-(setq pyim-translate-trigger-char "@")
-(setq pyim-page-tooltip 'posframe)
+
 ;; 使 ivy 支持拼音搜索
 (defun eh-ivy-cregexp (str)
     (let ((a (ivy--regex-plus str))
@@ -106,20 +120,91 @@
 ;; open global Company
 (setq company-global-modes '(not org-mode));; 希望关闭 company 在 orgmode 中的补全
 (global-company-mode 1)
+
 (use-package company-tabnine
-  :ensure t
+  :defer 1
+  :disabled t  ;; 停用 tabnine
+  :custom
+  (company-tabnine-max-num-results 9)
+  :bind
+  (("M-q" . company-other-backend))
+  :hook
+  (lsp-after-open . (lambda ()
+                      (setq company-tabnine-max-num-results 3)
+                      (add-to-list 'company-transformers 'company//sort-by-tabnine t)
+                      (add-to-list 'company-backends '(company-capf :with company-tabnine :separate))))
+  (kill-emacs . company-tabnine-kill-process)
   :config
+  ;; Enable TabNine on default
   (add-to-list 'company-backends #'company-tabnine)
-  (setq company-idle-delay 0)
-  (setq company-show-numbers t))
+  (setq company-idle-delay 0.2)
+  (setq company-show-numbers t)
+  (add-hook 'nox-managed-mode-hook
+           #'(lambda ()
+               (when (nox-managed-p)
+                 (setq-local company-backends
+                            (append  company-backends '(company-tabnine))))))
+  ;; Integrate company-tabnine with lsp-mode
+;;   (defun company//sort-by-tabnine (candidates)
+;;     (if (or (functionp company-backend)
+;;             (not (and (listp company-backend) (memq 'company-tabnine company-backends))))
+;;         candidates
+;;       (let ((candidates-table (make-hash-table :test #'equal))
+;;             candidates-lsp
+;;             candidates-tabnine)
+;;         (dolist (candidate candidates)
+;;           (if (eq (get-text-property 0 'company-backend candidate)
+;;                   'company-tabnine)
+;;               (unless (gethash candidate candidates-table)
+;;                 (push candidate candidates-tabnine))
+;;             (push candidate candidates-lsp)
+;;             (puthash candidate t candidates-table)))
+;;         (setq candidates-lsp (nreverse candidates-lsp))
+;;         (setq candidates-tabnine (nreverse candidates-tabnine))
+;;         (nconc (seq-take candidates-tabnine 3)
+;;                (seq-take candidates-lsp 6)))))
+;;   (setq company-tabnine--disable-next-transform nil)
+;; (defun my-company--transform-candidates (func &rest args)
+;;   (if (not company-tabnine--disable-next-transform)
+;;       (apply func args)
+;;     (setq company-tabnine--disable-next-transform nil)
+;;     (car args)))
+
+;; (defun my-company-tabnine (func &rest args)
+;;   (when (eq (car args) 'candidates)
+;;     (setq company-tabnine--disable-next-transform t))
+;;   (apply func args))
+
+;; (advice-add #'company--transform-candidates :around #'my-company--transform-candidates)
+;; (advice-add #'company-tabnine :around #'my-company-tabnine)
+)
+
+
 
 ;; hungry-delete setting
-(require 'hungry-delete)
+;; (require 'hungry-delete)
 ;; (global-hungry-delete-mode)
-(add-hook 'prog-mode-hook #'hungry-delete-mode)
+;; (add-hook 'prog-mode-hook #'hungry-delete-mode)
 ;; config for swiper
-(ivy-mode 1)
-(setq ivy-use-vitual-buffers t)
+(use-package ivy
+  :ensure t
+  :bind
+  (("\C-s" . 'swiper)
+   ("M-x" . 'counsel-M-x)
+   ("C-x C-f" . 'counsel-find-file)
+   ("C-c C-r" . 'ivy-resume)
+   ("<f1> f" . 'counsel-describe-function)
+   ("<f1> v" . 'counsel-describe-variable)
+   ("C-c <f3>" . 'counsel-bm)
+   ("C-x b" . 'ivy-switch-buffer)
+   ("C-c g" . 'counsel-git)
+   ("C-c j" . 'counsel-git-grep)
+   ("C-c k" . 'counsel-ag))
+  (:map minibuffer-local-map ("C-r" . 'counsel-minibuffer-history))
+  :config
+  (ivy-mode 1)
+  (setq ivy-wrap t)
+  (setq ivy-use-vitual-buffers t))
 
 ;;smartparens
 (require 'smartparens-config)
@@ -136,36 +221,41 @@
 (popwin-mode 1)
 
 
-;; cnfonts
-;;(require 'cnfonts)
-;;(cnfonts-enable)
-;;(cnfonts-set-spacemacs-fallback-fonts)
 ;; cnfonts 用来设置字体大小
 ;; 目前较为舒服的设置是，英文字号 12.5
-(use-package cnfonts
-  :ensure t
-  :defer t
-  :init
-  (cnfonts-enable)
-  :config
-  (cnfonts-set-spacemacs-fallback-fonts)
-  )
+;; (use-package cnfonts
+;;   :ensure t
+;;   :defer t
+;;   :init
+;;   (cnfonts-enable)
+;;   :config
+;;   (cnfonts-set-spacemacs-fallback-fonts)
+;;   )
+
+
+
 ;; iedit 可以同时编辑多块区域
-(use-package iedit
-  :ensure t
-  :bind
-  ("M-s e" . 'iedit-mode))
+;; (use-package iedit
+;;   :ensure t
+;;   :bind
+;;   ("M-s e" . 'iedit-mode))
 
 ;; expand-region 选择一块区域
-(require 'expand-region)
+(use-package expand-region
+  :bind
+  ("C-=" . 'er/expand-region)
+  ("C--" . 'er/contract-region))
+
 
 ;; 自动保存文件
-(require 'auto-save)
-(auto-save-enable)
-(setq auto-save-silent t)   ; quietly save
+(use-package auto-save
+  :load-path "~/.emacs.d/auto-save/"
+  :config
+  (auto-save-enable)
+  (setq auto-save-silent t)   ; quietly save
+  )
 
-
-;;
+;;;;
 ;;(setq lsp-keymap-prefix "s-l")
 ;;(require 'lsp-mode)
 ;; Enable LSP backend.
@@ -200,7 +290,33 @@
 (global-flycheck-mode -1)
 
 ;; 切换窗口
-(window-numbering-mode 1)
+;; (window-numbering-mode 1)
+
+(use-package winum
+  :ensure t
+  :init
+  (setq winum-keymap
+    (let ((map (make-sparse-keymap)))
+      (define-key map (kbd "M-1") 'winum-select-window-1)
+      (define-key map (kbd "M-2") 'winum-select-window-2)
+      (define-key map (kbd "M-3") 'winum-select-window-3)
+      (define-key map (kbd "M-4") 'winum-select-window-4)
+      (define-key map (kbd "M-5") 'winum-select-window-5)
+      (define-key map (kbd "M-6") 'winum-select-window-6)
+      (define-key map (kbd "M-7") 'winum-select-window-7)
+      (define-key map (kbd "M-8") 'winum-select-window-8)
+      map))
+  :config
+  (setq window-numbering-scope            'global
+      winum-reverse-frame-list          nil
+      winum-auto-assign-0-to-minibuffer nil
+      winum-auto-setup-mode-line        t
+      winum-format                      " %s "
+      winum-mode-line-position          1
+      winum-ignored-buffers             '(" *which-key*")
+      winum-ignored-buffers-regexp      '(" \\*Treemacs-.*"))
+  (winum-mode)
+  )
 
 ;; undo-tree, C-x u: show the undo-tree for current file
 (require 'undo-tree)
@@ -228,6 +344,7 @@
 (add-hook 'org-mode-hook #'yas-minor-mode)
 
 ;; projectile configuration
+;; to remove project managed by projectile, use the command projectile-remove-known-project
 (use-package projectile
   :ensure t
   :init
@@ -235,7 +352,7 @@
   :bind (:map projectile-mode-map
 	      ("C-c p" . projectile-command-map))
   :config
-  (require 'projectile))
+  (setq projectile-switch-project-action 'projectile-dired))
 
 (use-package rainbow-mode
   :ensure t
@@ -380,6 +497,9 @@ It has the ability to preview the bookmarks like `swiper-all'."
 (define-key isearch-mode-map (kbd "<M-return>") 'counsel-bm-from-isearch)
 
 (use-package which-key
+  :defer t
+  :disabled t
+  :diminish
   :ensure t
   :config
   (which-key-mode)
@@ -402,20 +522,7 @@ It has the ability to preview the bookmarks like `swiper-all'."
   (setq org-ref-get-pdf-filename-function 'org-ref-get-mendeley-filename)
   )
 
-(use-package hl-todo
-  :ensure t
-  :config
-  (add-hook 'prog-mode-hook 'hl-todo-mode)
-  (setq hl-todo-keyword-faces
-      '(("TODO"   . "#FF0000")
-        ("FIXME"  . "#FF0000")
-        ("DEBUG"  . "#A020F0")
-        ("GOTCHA" . "#FF4500")
-        ("STUB"   . "#1E90FF")))
-  (define-key hl-todo-mode-map (kbd "C-c b") 'hl-todo-previous)
-  (define-key hl-todo-mode-map (kbd "C-c f") 'hl-todo-next)
-  (define-key hl-todo-mode-map (kbd "C-c o") 'hl-todo-occur)
-  (define-key hl-todo-mode-map (kbd "C-c i") 'hl-todo-insert))
+
 
 (use-package json-mode
   :ensure t)
@@ -480,13 +587,13 @@ It has the ability to preview the bookmarks like `swiper-all'."
   :demand
   :ensure t
   :init
-  (setq centaur-tabs-enable-key-bindings t)
   :config
   (centaur-tabs-mode t)
   (setq centaur-tabs-set-icons t)
   (setq centaur-tabs-height 22)
   (setq centaur-tabs-close-button "x")
   (setq centaur-tabs-cycle-scope 'tabs)
+  (add-hook 'dired-mode-hook 'centaur-tabs-local-mode)
    (defun centaur-tabs-buffer-groups ()
       "`centaur-tabs-buffer-groups' control buffers' group rules.
 
@@ -495,7 +602,7 @@ It has the ability to preview the bookmarks like `swiper-all'."
     Other buffer group by `centaur-tabs-get-group-name' with project name."
       (list
 	(cond
-	 ((or (string-equal "*" (substring (buffer-name) 0 1))
+	 ((or
 	      (memq major-mode '(magit-process-mode
 				 magit-status-mode
 				 magit-diff-mode
@@ -517,16 +624,17 @@ It has the ability to preview the bookmarks like `swiper-all'."
 	 ((memq major-mode '(org-mode
 			     org-agenda-clockreport-mode
 			     org-src-mode
-			     org-agenda-mode
 			     org-beamer-mode
 			     org-indent-mode
 			     org-bullets-mode
 			     org-cdlatex-mode
 			     org-agenda-log-mode
-			     diary-mode))
+			     diary-mode
+			     bibtex-mode))
 	  "OrgMode")
 	 (t
 	  (centaur-tabs-get-group-name (current-buffer))))))
+   ;;(centaur-tabs-group-by-projectile-project) ;; 按 projectile 来组织
    (defun centaur-tabs-hide-tab (x)
   "Do no to show buffer X in tabs."
   (let ((name (format "%s" x)))
@@ -550,6 +658,12 @@ It has the ability to preview the bookmarks like `swiper-all'."
      (string-prefix-p "*Help" name)
      (string-prefix-p "*mybuf" name)
      (string-prefix-p "*NOX" name)
+     (string-prefix-p "*Org Note" name)
+     (string-prefix-p "*calibredb" name)
+     (string-prefix-p "*Backtrace" name)
+     (string-prefix-p "*Org Agenda" name)
+     (string-prefix-p "*Ilist" name)
+     (string-prefix-p "*DBLP" name)
      ;; Is not magit buffer.
      (and (string-prefix-p "magit" name)
 	  (not (file-name-extension name)))
@@ -595,11 +709,34 @@ It has the ability to preview the bookmarks like `swiper-all'."
   :bind
   ;; ("C-x ," . centaur-tabs-backward-and-hide)
   ;; ("C-x /" . centaur-tabs-forward-and-hide)
-  ("C-x t s" . centaur-tabs-counsel-switch-group)
+  ("C-x C-o" . centaur-tabs-counsel-switch-group)
   ("C-x t p" . centaur-tabs-group-by-projectile-project)
+  ("C-c <C-right>" . centaur-tabs-forward)
+  ("C-c <C-left>" . centaur-tabs-backward)
+  ("C-c <C-up>" . centaur-tabs-backward-group)
+  ("C-c <C-down>" . centaur-tabs-forward-group)
   ("C-x t g" . centaur-tabs-group-buffer-groups))
 
 
+(require 'color-rg)
+(define-key global-map (kbd "C-x l") (make-sparse-keymap))
+(global-set-key (kbd "C-x l p") 'color-rg-search-project)
+(global-set-key (kbd "C-x l i") 'color-rg-search-input)
+(global-set-key (kbd "C-x l s") 'color-rg-search-symbol)
+(global-set-key (kbd "C-x l o") 'lxs/search-org)
+
+
+(global-set-key (kbd "C-l") nil)
+(use-package avy
+  :defer t
+  :bind
+  (("C-l c" . avy-goto-char-timer)
+   ("C-l l" . avy-goto-line))
+  :custom
+  (avy-timeout-seconds 0.3)
+  (avy-style 'pre)
+  :custom-face
+  (avy-lead-face ((t (:background "#51afef" :foreground "#f2241f" :weight bold)))))
 
 (provide 'init-packages)
 

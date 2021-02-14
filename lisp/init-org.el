@@ -1,7 +1,8 @@
 ;; config for org-agenda
 ;; i modify the path, in order to sync the org documents by jianguo
 ;; (setq org-agenda-files '("/mnt/c/Users/lixun/Documents/org/tdd.org" "/mnt/c/Users/lixun/Documents/org/inbox.org"))
-
+(use-package org
+    :defer t)
 (require 'org-agenda)
 (server-start)
 (with-eval-after-load 'org
@@ -13,6 +14,8 @@
 (setq org-agenda-files
       (find-lisp-find-files lxs/org-agenda-directory "\.org$"))
 (add-to-list 'org-agenda-files (concat lxs/home-dir "Documents/" "org/" "org-roam-files/" "paper_index.org"))
+
+(setq org-agenda-archives-mode t)
 
 (require 'org-tempo)
 (add-hook 'org-mode-hook (lambda () (toggle-truncate-lines)))
@@ -59,6 +62,7 @@
                " | %U | %^{类别|吃饭|日用|其他} | %^{描述} | %^{金额} |" :kill-buffer t)
       ("s" "code snippet" entry (file ,(concat lxs/home-dir "Documents/" "org/" "snippet.org"))
        "* %<%Y-%m-%d> - %^{title}\t%^g\n#+BEGIN_SRC %^{language}\n%^C%?\n#+END_SRC")
+      ("h" "hugo blog file" entry (file lxs/creat-hugo-file) "* ")
 ))
 
 (setq org-protocol-default-template-key nil)
@@ -85,6 +89,7 @@
                 (org-agenda-files '(,(concat lxs/org-agenda-directory "someday.org")
                                     ,(concat lxs/org-agenda-directory "projects.org")
                                     ,(concat lxs/org-agenda-directory "next.org")
+                                    ,(concat lxs/org-agenda-directory "learning.org")
 				    ,(concat lxs/home-dir "Documents/" "org/" "org-roam-files/" "paper_index.org")))
                 ))
          (todo "TODO"
@@ -98,6 +103,10 @@
                 (org-agenda-files '(,(concat lxs/org-agenda-directory "next.org")
 				    ,(concat lxs/org-agenda-directory "someday.org")))
                 (org-agenda-skip-function '(org-agenda-skip-entry-if 'deadline 'scheduled))))
+	 (todo "TODO|NEXT"
+	       ((org-agenda-overriding-header "Reading")
+		(org-agenda-files '(,(concat lxs/org-agenda-directory "reading.org")))
+		))
 	 (todo "TODO"
 	       ((org-agenda-overriding-header "Blogs")
 		(org-agenda-files '(,(concat lxs/home-dir "Documents/" "org/" "HugoBlogs/" "short-notes.org")))))
@@ -137,6 +146,14 @@
      (org-archive-subtree)
      (setq org-map-continue-from (outline-previous-heading)))
    "/DONE"'agenda))
+
+(defun org-archive-cancelled-tasks ()
+  (interactive)
+  (org-map-entries
+   (lambda ()
+     (org-archive-subtree)
+     (setq org-map-continue-from (outline-previous-heading)))
+   "/CANCELLED"'agenda))
 
 (setq org-todo-keywords
       '((sequence "TODO(t)" "NEXT(n)" "|" "DONE(d)")
@@ -254,6 +271,7 @@
                  (if (not org-agenda-persistent-marks) "" " (kept marked)")))))
 
 (setq org-agenda-bulk-custom-functions `((,lxs/org-agenda-bulk-process-key lxs/org-agenda-process-inbox-item)))
+
 (defun lxs/org-inbox-capture ()
   (interactive)
   "Capture a task in agenda mode."
@@ -334,7 +352,7 @@
     (define-key org-agenda-mode-map (kbd "P") 'org-pomodoro))
   (setq org-pomodoro-length 25)
   ;; (setq org-pomodoro-manual-break t)
-  (setq org-pomodoro-long-break-frequency 2)
+  (setq org-pomodoro-long-break-frequency 3)
   (setq org-pomodoro-long-break-length 15))
 
 ;; org habit
@@ -487,11 +505,15 @@ it can be passed in POS."
                ("C-c n f" . org-roam-find-file)
                ("C-c n g" . org-roam-graph)
 	       ("C-c n b" . org-roam-switch-to-buffer)
-	       ("C-c n t" . org-roam-tag-add))
+	       ("C-c n t" . org-roam-tag-add)
+	       ("C-c n j" . org-roam-dailies-capture-today)
+	       ("C-c n a" . org-roam-dailies-today)
+	       ("C-c n y" . org-roam-dailies-yesterday))
               :map org-mode-map
               (("C-c n i" . org-roam-insert))
               (("C-c n I" . org-roam-insert-immediate)))
       :config
+      (setq org-roam-verbose nil)
       (setq org-roam-capture-templates
         '(("d" "default" plain (function org-roam--capture-get-point)
            "%?"
@@ -502,7 +524,11 @@ it can be passed in POS."
            "%?"
            :file-name "private-${slug}"
            :head "#+TITLE: ${title}\n"
-           :unnarrowed t)))
+           :unnarrowed t)
+	  ("s" "code snippet" plain (function org-roam--capture-get-point)
+	   "* code\n#+BEGIN_SRC %^{language}\n%^C%?\n#+END_SRC\n* description\n"
+	   :file-name "snippet-${slug}"
+	   :head "#+TITLE: ${title}\n#+CREATED: %U\n#+LAST_MODIFIED: %U\n#+roam_tags: \"code snippet\"\n#+AUTHOR: Li Xunsong\n")))
       (setq org-roam-ref-capture-templates
         '(("r" "ref" plain (function org-roam--capture-get-point)
            "%?"
@@ -517,6 +543,38 @@ it can be passed in POS."
                :head "#+title: ${title}\n#+roam_key: ${ref}\n#+roam_alias:\n#+roam_tags: websites\n"
                :immediate-finish t
                :unnarrowed t))
+	;; 设置 org-roam-dailies
+	(setq org-roam-dailies-directory "daily/")
+	(setq org-roam-dailies-capture-templates
+	      '( ;; ("d" "default" entry
+		 ;;  #'org-roam-capture--get-point
+		 ;;  "* %?"
+		 ;;  :file-name "daily/%<%Y-%m-%d>"
+		 ;;  :head "#+title: %<%Y-%m-%d>\n\n* 工作 \n\n* 备忘 \n\n* 随笔 \n\n* 总结 \n\n")
+		("w" "work" entry
+		 #'org-roam-capture--get-point
+		 "* %<[%H:%M:%S]> - %?"
+		 :file-name "daily/%<%Y-%m-%d>"
+		 :head "#+TITLE: Journal %<%Y-%m-%d>\n#+DATE: %<%Y-%m-%d>\n#+ROAM_ALIAS:\n#+ROAM_TAGS: private journal\n\n"
+		 :olp ("工作"))
+		("n" "notes" entry
+		 #'org-roam-capture--get-point
+		 "* %<[%H:%M:%S]> - %?"
+		 :file-name "daily/%<%Y-%m-%d>"
+		 :head "#+TITLE: Journal %<%Y-%m-%d>\n#+DATE: %<%Y-%m-%d>\n#+ROAM_ALIAS:\n#+ROAM_TAGS: private journal\n\n"
+		 :olp ("备忘"))
+		("j" "journal" entry
+		 #'org-roam-capture--get-point
+		 "* %<[%H:%M:%S]> - %?"
+		 :file-name "daily/%<%Y-%m-%d>"
+		 :head "#+TITLE: Journal %<%Y-%m-%d>\n#+DATE: %<%Y-%m-%d>\n#+ROAM_ALIAS:\n#+ROAM_TAGS: private journal\n\n"
+		 :olp ("随笔"))
+		("r" "review" entry
+		 #'org-roam-capture--get-point
+		 "* %<[%H:%M:%S]> - %?"
+		 :file-name "daily/%<%Y-%m-%d>"
+		 :head "#+TITLE: Journal %<%Y-%m-%d>\n#+DATE: %<%Y-%m-%d>\n#+ROAM_ALIAS:\n#+ROAM_TAGS: private journal\n\n"
+		 :olp ("总结"))))
 	)
 
 (add-hook 'before-save-hook #'zp/org-set-last-modified)
@@ -552,7 +610,7 @@ it can be passed in POS."
 (setq orb-templates
       '(("r" "ref" plain (function org-roam-capture--get-point) ""
          :file-name "${citekey}"
-         :head "#+TITLE:${title}\n#+ROAM_KEY: ${ref}\n#+CREATED: %U\n#+LAST_MODIFIED: %U\n#+STARTUP inlineimages latexpreview\n\n* Motivation\n\n* Method\n\n* Comment\n\n* Ref\n" 
+         :head "#+TITLE: ${title}\n#+ROAM_KEY: ${ref}\n#+ROAM_TAGS: \n#+ROAM_ALIAS: \n#+AUTHOR: Li Xunsong\n#+CREATED: %U\n#+LAST_MODIFIED: %U\n#+STARTUP: inlineimages latexpreview hideblocks\n\n* Motivation\n\n* Method\n\n* Comment\n\n* Ref\n" 
          :unnarrowed t)))
 
 ;; 这个 package 有一些问题
@@ -584,5 +642,20 @@ it can be passed in POS."
   :ensure t
   :config
   (add-hook 'org-mode-hook #'org-superstar-mode))
+
+(define-advice org-agenda-goto (:around (orig-fn &rest args) "new-frame")
+  (let ((display-buffer-overriding-action '(display-buffer-at-bottom)))
+    (apply orig-fn args)))
+
+(require 'org-crypt)
+(require 'epa-file)
+(epa-file-enable)
+(org-crypt-use-before-save-magic)
+(setq org-tags-exclude-from-inheritance (quote ("crypt")))
+(setq org-crypt-key nil)
+
+;; 默认打开 org 文件，不显示代码块
+(add-hook 'org-mode-hook 'org-hide-block-all)
+(add-hook 'org-mode-hook 'org-overview)
 
 (provide 'init-org)

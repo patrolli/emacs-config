@@ -40,16 +40,7 @@
 
 (fset 'yes-or-no-p 'y-or-n-p)
 
-(setq dired-recursive-copies 'always)
 
-;; 配置dired，所有目录共用一个buffer
-(put 'dired-find-alternate-file 'disabled nil)
-;; 延迟加载dired，节省emacs启动时间
-(with-eval-after-load 'dired
-    (define-key dired-mode-map (kbd "RET") 'dired-find-alternate-file))
-;; 打开当前目录的dired mode，快捷键C－c C－j
-(require 'dired-x)
-(setq dired-dwin-target 1)
 
 ;; 在elisp模式下，取消单引号的自动配对
 (sp-local-pair '(emacs-lisp-mode lisp-interaction-mode) "'" nil :actions nil)
@@ -252,5 +243,34 @@ Version 2016-04-04"
         (vterm-send-string (format "ssh %s" command))
          (vterm-send-return))
     (vterm (concat "*vterm-" command "*"))))
+
+;; 使用 color-rg 来对 org 文件进行检索
+(defun lxs/search-org ()
+  (interactive)
+  (color-rg-search-input (color-rg-read-input) (concat lxs/home-dir "Documents/" "org/"))
+  )
+
+;; 使用 windows 的程序来打开文件
+;; 将这个命令绑定到 dired mode 的 C-c C-o
+;; 可以用来打开 pdf, word, ppt 等
+(defun xah-open-in-xternal-app-from-wsl()
+  "open desktop by send command from wsl into powershell"
+  (interactive)
+  (let* ((powershell "/mnt/c/Windows/System32/WindowsPowerShell/v1.0/powershell.exe")
+         (directory (replace-regexp-in-string "/mnt/\\([a-zA-Z]\\)" "\\1:" default-directory))
+         (-file-list
+          (if (string-equal major-mode "dired-mode")
+              (dired-get-marked-files)
+            (list (buffer-file-name))))
+         )
+    (shell-command (concat powershell " -command \"start " (replace-regexp-in-string "/mnt/\\([a-zA-Z]\\)" "\\1:" (nth 0 -file-list)) "\""))
+    )
+  )
+
+;; can also enter C-c M-b Tab to quickly fold code block
+(defun my/org-code-block-fold ()
+  (interactive)
+  (call-interactively 'org-previous-block)
+  (org-cycle))
 
 (provide 'init-better-defaults)

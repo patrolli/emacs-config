@@ -2,9 +2,10 @@
 
 (scroll-bar-mode -1)
 (global-linum-mode -1)
+(menu-bar-mode -1) ;; 默认不开启 menu-bar, 只在需要时手动打开 
 (setq inhibit-splash-screen t)
 ;; open emacs default full-screen
-(setq initial-frame-alist (quote ((fullscreen . maximized))))
+(setq initial-frame-alist (quote ((fullscreen . fullboth))))
 ;; highlight current line
 (global-hl-line-mode 1)
 ;; monokai
@@ -40,10 +41,9 @@
        :config
        (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
          doom-themes-enable-italic t) ; if nil, italics is universally disabled
-       (load-theme 'doom-one-light t)
+       (load-theme 'doom-one t)
        (doom-themes-org-config)
-       (setq org-src-fontify-natively t)
-       (doom-themes-neotree-config)
+       ;; (doom-themes-neotree-config)
 
      (setq org-src-fontify-natively t)
 
@@ -61,31 +61,39 @@
 ;; (setq leuven-scale-org-agenda-structure nil)
 ;;(load-theme 'material-light t)
 
-;; (use-package powerline :ensure)
-;; (require 'powerline)
-;; (powerline-default-theme)
+;; (use-package spaceline
+;;   :ensure t
+;;   :init
+;;   (setq powerline-default-separator 'slant)
+;;   :config
+;;   (use-package persp-mode :ensure)
+;;   (use-package projectile :ensure)
+;;   (require 'spaceline-config)
+;;   (require 'spaceline-segments)
+;;   (spaceline-helm-mode 1)
+;;   (spaceline-spacemacs-theme)
+;;   (spaceline-toggle-minor-modes-off)
+;;   (spaceline-toggle-buffer-size-off)
+;;   (spaceline-toggle-persp-name-on)
+;;   (spaceline-toggle-projectile-root-on))
 
-(use-package spaceline
+;; use doom-modeline instead of spaceline
+(use-package doom-modeline
   :ensure t
-  :init
-  (setq powerline-default-separator 'slant)
-  :config
-  (use-package persp-mode :ensure)
-  (use-package projectile :ensure)
-  (require 'spaceline-config)
-  (require 'spaceline-segments)
-  (spaceline-helm-mode 1)
-  (spaceline-spacemacs-theme)
-  (spaceline-toggle-minor-modes-off)
-  (spaceline-toggle-buffer-size-off)
-  (spaceline-toggle-persp-name-on)
-  (spaceline-toggle-projectile-root-on))
+  :hook (after-init . doom-modeline-mode))
 
 ;; all-the-icons
 (use-package all-the-icons
   :ensure t
+  :init
   :config
   :functions (all-the-icons-icon-for-buffer))
+
+
+(use-package all-the-icons-ivy
+  :init (add-hook 'after-init-hook 'all-the-icons-ivy-setup)
+  :config
+  (add-to-list 'all-the-icons-ivy-file-commands 'counsel-ibuffer))
 
 ;; dashboard
 (use-package dashboard
@@ -97,5 +105,23 @@
                         (bookmarks . 5)
                         (projects . 5)
                         (agenda . 5))))
+
+;; automatically change the theme without be mess up
+(defcustom load-theme-before-hook nil
+  "Functions to run before load theme."
+  :type 'hook)
+
+(defcustom load-theme-after-hook nil
+  "Functions to run after load theme."
+  :type 'hook)
+
+(defun load-theme-hook-wrapper (origin-func theme &rest args)
+  "A wrapper of hooks around `load-theme'."
+  (mapc #'disable-theme custom-enabled-themes)
+  (run-hook-with-args 'load-theme-before-hook theme)
+  (apply origin-func theme args)
+  (run-hook-with-args 'load-theme-after-hook theme))
+
+(advice-add 'load-theme :around #'load-theme-hook-wrapper)
 
 (provide 'init-ui)
