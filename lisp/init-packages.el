@@ -7,67 +7,8 @@
 ;; 注意 elpa.emacs-china.org 是 Emacs China 中文社区在国内搭建的一个 ELPA 镜像
 ;;
  ;; cl - Common Lisp Extension
- (require 'cl)
+ (require 'cl-lib)
 
- ;; Add Packages
- (defvar my/packages '(
-		;; --- Auto-completion ---
-		company
-		company-lsp
-		;; --- Better Editor ---
-		hungry-delete
-		smex
-		swiper
-		counsel
-		smartparens
-		popwin
-		pyim
-		super-save
-		cnfonts
-		neotree
-		iedit
-		expand-region
-		lsp-mode
-		flycheck
-		use-package
-		org-ref
-		helm-org-rifle
-		magit
-		;; --- Major Mode ---
-		js2-mode
-		xahk-mode
-		;; --- Minor Mode ---
-		nodejs-repl
-		exec-path-from-shell
-		cdlatex
-		undo-tree
-		ace-jump-mode
-		window-numbering
-		openwith
-		imenu-list
-		ox-wk
-		yasnippet
-		;; --- Themes ---
-		monokai-theme
-		solarized-theme
-		leuven-theme
-		material-theme
-		;; solarized-theme
-		) "Default packages")
-
- (setq package-selected-packages my/packages)
-
- (defun my/packages-installed-p ()
-     (loop for pkg in my/packages
-	   when (not (package-installed-p pkg)) do (return nil)
-	   finally (return t)))
-
- (unless (my/packages-installed-p)
-     (message "%s" "Refreshing package database...")
-     (package-refresh-contents)
-     (dolist (pkg my/packages)
-       (when (not (package-installed-p pkg))
-	 (package-install pkg))))
 
 (use-package pyim
   :ensure nil
@@ -101,10 +42,6 @@
 	      '(pyim-probe-punctuation-line-beginning
 		pyim-probe-punctuation-after-punctuation)) ;; 自动半角全角切换
   )
-
-;; (add-hook 'emacs-startup-hook
-;;           #'(lambda () (pyim-restart-1 t)))
-
 
 ;; 使 ivy 支持拼音搜索
 (defun eh-ivy-cregexp (str)
@@ -179,12 +116,6 @@
 ;; (advice-add #'company-tabnine :around #'my-company-tabnine)
 )
 
-
-
-;; hungry-delete setting
-;; (require 'hungry-delete)
-;; (global-hungry-delete-mode)
-;; (add-hook 'prog-mode-hook #'hungry-delete-mode)
 ;; config for swiper
 (use-package ivy
   :ensure t
@@ -207,9 +138,7 @@
   (setq ivy-use-vitual-buffers t))
 
 ;;smartparens
-(require 'smartparens-config)
-;; (add-hook 'emacs-lisp-mode-hook 'smartparens-mode)
-;; (smartparens-global-mode t)
+;; (add-hook 'emacs-lisp-mode-hook 'smartparens-mode);
 ;; 使用 emacs 自带的 electric-pair-mode 取代 smartparens
 (electric-pair-mode t)
 (setq electric-pair-inhibit-predicate 'electric-pair-conservative-inhibit)
@@ -217,9 +146,10 @@
   (lambda (c) (eq c ?<)))
 
 ;; config for popwin
-(require 'popwin)
-(popwin-mode 1)
-
+(use-package popwin
+  :defer t
+  :config
+  (popwin-mode 1))
 
 ;; cnfonts 用来设置字体大小
 ;; 目前较为舒服的设置是，英文字号 12.5
@@ -232,16 +162,9 @@
 ;;   (cnfonts-set-spacemacs-fallback-fonts)
 ;;   )
 
-
-
-;; iedit 可以同时编辑多块区域
-;; (use-package iedit
-;;   :ensure t
-;;   :bind
-;;   ("M-s e" . 'iedit-mode))
-
 ;; expand-region 选择一块区域
 (use-package expand-region
+  :defer t
   :bind
   ("C-=" . 'er/expand-region)
   ("C--" . 'er/contract-region))
@@ -250,50 +173,23 @@
 ;; 自动保存文件
 (use-package auto-save
   :load-path "~/.emacs.d/auto-save/"
+  :defer t
   :config
   (auto-save-enable)
   (setq auto-save-silent t)   ; quietly save
+  (setq auto-save-idle 2)
   )
-
-;;;;
-;;(setq lsp-keymap-prefix "s-l")
-;;(require 'lsp-mode)
-;; Enable LSP backend.
-;;(push 'company-lsp company-backends)
-;;(add-hook 'python-mode-hook #'lsp)
-
-;; set prefix for lsp-command-keymap (few alternatives - "C-l", "C-c l")
-;; (setq lsp-keymap-prefix "s-l")
-
-;; (use-package lsp-mode
-;;   :hook (;; replace XXX-mode with concrete major-mode(e. g. python-mode)
-;; 	 (c-mode . lsp)
-;; 	 (c++-mode .  lsp)
-;; 	 (python-mode . lsp))
-;;   :commands lsp)
-;; (add-hook 'c-mode-hook 'lsp)
-;; (add-hook 'c++-mode-hook 'lsp)
-;; (setq lsp-diagnostic-package :none)
-;; (setq lsp-diagnostic-package :none)
-;; (require 'lsp-python-ms)
-;; (setq lsp-python-ms-auto-install-server t)
-;; (setq lsp-python-ms-executable
-;;       "~/python-language-server/output/bin/Release/linux-x64/publish/Microsoft.Python.LanguageServer")
 
 (use-package valign
         :load-path "~/.emacs.d/valign/"
         :config
         (add-hook 'org-mode-hook #'valign-mode))
 
-;; flycheck
-;; (add-hook 'after-init-hook #'global-flycheck-mode)
-(global-flycheck-mode -1)
-
 ;; 切换窗口
 ;; (window-numbering-mode 1)
-
 (use-package winum
   :ensure t
+  :defer t
   :init
   (setq winum-keymap
     (let ((map (make-sparse-keymap)))
@@ -319,29 +215,36 @@
   )
 
 ;; undo-tree, C-x u: show the undo-tree for current file
-(require 'undo-tree)
-(global-undo-tree-mode 1)
+(use-package undo-tree
+  :defer t
+  :config
+  (global-undo-tree-mode 1)
+  )
 
 ;; i want to open pdf with external app
-(require 'openwith)
-(openwith-mode t)
-;; (setq openwith-associations '(("\\.pdf\\'" "qpdfview" (file))))
-;; (setq openwith-associations '(("\\.pdf\\'" " ~/bin/FoxitReader" (file))))
-(setq openwith-associations '(("\\.pdf\\'" " okular" (file))))
+(use-package openwith
+  :defer t
+  :config
+  (openwith-mode t)
+  (setq openwith-associations '(("\\.pdf\\'" " okular" (file))))
+  )
 
 ;; imenu-list
 ;; (global-set-key (kbd "C-c l") 'imenu-list-minor-mode)
-(global-set-key (kbd "C-'") #'imenu-list-smart-toggle)
-(setq imenu-list-position 'right)
-(setq imenu-list-focus-after-activation t)
-
+(use-package imenu
+  :bind
+  (("C-'" . imenu-list-smart-toggle))
+  :config
+  (setq imenu-list-position 'right)
+  (setq imenu-list-focus-after-activation t)   
+   )
 ;; wiki format converter from org
-(require 'ox-wk)
+;; (require 'ox-wk)
 ;; yasnippet, code template
-(require 'yasnippet)
-(yas-reload-all)
-(add-hook 'prog-mode-hook #'yas-minor-mode)
-(add-hook 'org-mode-hook #'yas-minor-mode)
+(use-package yasnippet
+  :hook
+  ((prog-mode . yas-minor-mode)
+   (org-mode . yas-minor-mode)))
 
 ;; projectile configuration
 ;; to remove project managed by projectile, use the command projectile-remove-known-project
@@ -360,7 +263,7 @@
   (progn
     (defun @-enable-rainbow ()
       (rainbow-mode t))
-    (add-hook 'prog-mode-hook '@-enable-rainbow)
+    ;; (add-hook 'prog-mode-hook '@-enable-rainbow)
     (add-hook 'lisp-interaction-mode-hook '@-enable-rainbow)
     ))
 
@@ -374,7 +277,8 @@
     (add-hook 'lisp-interaction-mode-hook '@-enable-rainbow-delimiters)))
 
 (use-package bm
-         :ensure t
+  :ensure t
+  :defer t
          :demand t
 
          :init
@@ -393,7 +297,7 @@
          (setq-default bm-buffer-persistence t)
 
          ;; Loading the repository from file when on start up.
-         (add-hook 'after-init-hook 'bm-repository-load)
+         ;; (add-hook 'after-init-hook 'bm-repository-load)
 
          ;; Saving bookmarks
          (add-hook 'kill-buffer-hook #'bm-buffer-save)
@@ -507,7 +411,7 @@ It has the ability to preview the bookmarks like `swiper-all'."
 
 (use-package calibredb
   :ensure t
-  ;; :defer t
+  :defer t
   :init
   ;; (autoload 'calibredb "calibredb")
   :config
@@ -525,22 +429,24 @@ It has the ability to preview the bookmarks like `swiper-all'."
 
 
 (use-package json-mode
+  :defer t
   :ensure t)
 
 (use-package ebib
+  :defer t
   :ensure t
   :config
   (setq ebib-preload-bib-files ["/mnt/c/Users/lixun/Documents/bibliography/library.bib"]))
 
 ;;pdf tools
-(use-package pdf-tools
-   :pin manual
-   :config
-   (pdf-tools-install)
-   (setq-default pdf-view-display-size 'fit-width)
-   (define-key pdf-view-mode-map (kbd "C-s") 'isearch-forward)
-   :custom
-   (pdf-annot-activate-created-annotations t "automatically annotate highlights"))
+;; (use-package pdf-tools
+;;    :pin manual
+;;    :config
+;;    (pdf-tools-install)
+;;    (setq-default pdf-view-display-size 'fit-width)
+;;    (define-key pdf-view-mode-map (kbd "C-s") 'isearch-forward)
+;;    :custom
+;;    (pdf-annot-activate-created-annotations t "automatically annotate highlights"))
 
 ;; (setq TeX-view-program-selection '((output-pdf "PDF Tools"))
 ;;       TeX-view-program-list '(("PDF Tools" TeX-pdf-tools-sync-view))
@@ -550,19 +456,62 @@ It has the ability to preview the bookmarks like `swiper-all'."
 ;;           #'TeX-revert-document-buffer)
 
 (use-package helm-org
-  :ensure t)
+  :ensure t
+  :disabled t
+  (defun lxs/helm-org-run-marked-heading-id-link ()
+     (interactive)
+     (with-helm-alive-p
+       (helm-exit-and-execute-action
+        'my/helm-org-marked-heading-id-link)))
+
+(defun lxs/helm-org-marked-heading-id-link (marker)
+     (let* ((victims (with-helm-buffer (helm-marked-candidates)))
+            (buffer (marker-buffer marker))
+            (filename (buffer-file-name buffer))
+            (rfloc (list nil filename nil marker)))
+       (when (and (= 1 (length victims))
+                  (equal (helm-get-selection) (car victims)))
+         ;; No candidates are marked; we are refiling the entry at point
+         ;; to the selected heading
+         (setq victims (list marker)))
+       (when (and victims buffer filename rfloc)
+         (cl-loop for victim in victims
+                  ;; do (org-with-point-at victim
+                  ;;      (org-refile nil nil rfloc))
+
+                  do (with-current-buffer (marker-buffer victim)
+         (let ((heading-id (save-excursion (goto-char (marker-position victim))
+                                           (org-id-get-create)
+                                           ))
+               (heading-name
+                (save-excursion
+                  (goto-char (marker-position victim))
+                  (org-entry-get nil "ITEM"))
+                )
+               )
+           (with-helm-current-buffer
+             (org-insert-link
+              nil (concat "id:" heading-id) heading-name)
+             (insert " ")
+             )))
+   ))))
+
+(add-to-list 'helm-org-headings-actions '("Insert id link(s) C-c h l" . my/helm-org-marked-heading-id-link) t))
 
 (use-package go-translate
+  :defer t
   :ensure t
+  :bind
+  ("C-c t" . go-translate)
   :config
   (setq go-translate-base-url "https://translate.google.cn")
   (setq go-translate-local-language "zh-CN")
   (setq go-translate-token-current (cons 430675 2721866130))
-  (global-set-key "\C-ct" 'go-translate)
-  (setq go-translate-buffer-follow-p t)  
+  (setq go-translate-buffer-follow-p t)
   )
 
 (use-package posframe
+  :defer t
   :ensure t)
 
 (use-package benchmark-init
@@ -573,6 +522,7 @@ It has the ability to preview the bookmarks like `swiper-all'."
 
 (use-package helm-dash
   :ensure t
+  :defer t
   :config
   (setq helm-dash-common-docsets '("Python 3" "PyTorch"))
   (setq helm-dash-browser-func 'eww)  
@@ -580,6 +530,7 @@ It has the ability to preview the bookmarks like `swiper-all'."
 
 (use-package vterm
   :ensure t
+  :defer t
   :config
   (setq vterm-buffer-name-string nil))
 
@@ -718,12 +669,17 @@ It has the ability to preview the bookmarks like `swiper-all'."
   ("C-x t g" . centaur-tabs-group-buffer-groups))
 
 
-(require 'color-rg)
-(define-key global-map (kbd "C-x l") (make-sparse-keymap))
-(global-set-key (kbd "C-x l p") 'color-rg-search-project)
-(global-set-key (kbd "C-x l i") 'color-rg-search-input)
-(global-set-key (kbd "C-x l s") 'color-rg-search-symbol)
-(global-set-key (kbd "C-x l o") 'lxs/search-org)
+(use-package color-rg
+  :load-path "~/.emacs.d/color-rg/"
+  :init
+  (define-key global-map (kbd "C-x l") (make-sparse-keymap))
+  :bind
+  (("C-x l p" . color-rg-search-project)
+   ("C-x l i" . color-rg-search-input)
+   ("C-x l s" . color-rg-search-symbol)
+   ("C-x l o" . lxs/search-org)
+   )
+  )
 
 
 (global-set-key (kbd "C-l") nil)

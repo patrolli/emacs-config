@@ -1,8 +1,7 @@
 ;; config for org-agenda
 ;; i modify the path, in order to sync the org documents by jianguo
 ;; (setq org-agenda-files '("/mnt/c/Users/lixun/Documents/org/tdd.org" "/mnt/c/Users/lixun/Documents/org/inbox.org"))
-(use-package org
-    :defer t)
+(use-package org)
 (require 'org-agenda)
 (server-start)
 (with-eval-after-load 'org

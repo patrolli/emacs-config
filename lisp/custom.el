@@ -13,7 +13,7 @@
  '(company-minimum-prefix-length 2)
  '(compilation-message-face 'default)
  '(custom-safe-themes
-   '("93ed23c504b202cf96ee591138b0012c295338f38046a1f3c14522d4a64d7308" "990e24b406787568c592db2b853aa65ecc2dcd08146c0d22293259d400174e37" "77113617a0642d74767295c4408e17da3bfd9aa80aaa2b4eeb34680f6172d71a" "4bca89c1004e24981c840d3a32755bf859a6910c65b829d9441814000cf6c3d0" "d74c5485d42ca4b7f3092e50db687600d0e16006d8fa335c69cf4f379dbd0eee" "e1ef2d5b8091f4953fe17b4ca3dd143d476c106e221d92ded38614266cea3c8b" "99ea831ca79a916f1bd789de366b639d09811501e8c092c85b2cb7d697777f93" "e6ff132edb1bfa0645e2ba032c44ce94a3bd3c15e3929cdf6c049802cf059a2a" "76bfa9318742342233d8b0b42e824130b3a50dcc732866ff8e47366aed69de11" "bffa9739ce0752a37d9b1eee78fc00ba159748f50dc328af4be661484848e476" default))
+   '("c4bdbbd52c8e07112d1bfd00fee22bf0f25e727e95623ecb20c4fa098b74c1bd" "6c9cbcdfd0e373dc30197c5059f79c25c07035ff5d0cc42aa045614d3919dab4" "01cf34eca93938925143f402c2e6141f03abb341f27d1c2dba3d50af9357ce70" "93ed23c504b202cf96ee591138b0012c295338f38046a1f3c14522d4a64d7308" "990e24b406787568c592db2b853aa65ecc2dcd08146c0d22293259d400174e37" "77113617a0642d74767295c4408e17da3bfd9aa80aaa2b4eeb34680f6172d71a" "4bca89c1004e24981c840d3a32755bf859a6910c65b829d9441814000cf6c3d0" "d74c5485d42ca4b7f3092e50db687600d0e16006d8fa335c69cf4f379dbd0eee" "e1ef2d5b8091f4953fe17b4ca3dd143d476c106e221d92ded38614266cea3c8b" "99ea831ca79a916f1bd789de366b639d09811501e8c092c85b2cb7d697777f93" "e6ff132edb1bfa0645e2ba032c44ce94a3bd3c15e3929cdf6c049802cf059a2a" "76bfa9318742342233d8b0b42e824130b3a50dcc732866ff8e47366aed69de11" "bffa9739ce0752a37d9b1eee78fc00ba159748f50dc328af4be661484848e476" default))
  '(debug-on-error nil)
  '(dired-guess-shell-alist-user nil)
  '(display-battery-mode t)
@@ -88,7 +88,7 @@
 
 ")
  '(package-selected-packages
-   '(doom-modeline diff-hl all-the-icons-ivy winum company-tabnine treemacs-magit treemacs-icons-dired treemacs-projectile treemacs markdown-toc grip-mode centaur-tabs eyebrowse org-superstar-mode org-superstar ibuffer-vc ibuffer-projectile all-the-icons-ibuffer all-the-icons-dired diredfl doom-themes helm helm-dash org-roam-server benchmark-init org-latex-impatient org-roam dashboard go-translate vterm switch-window helm-org ebib json-mode hl-todo calibredb ox-hugo ox-latex org-pomodoro which-key nox rainbow-delimiters rainbow-mode all-the-icons fancy-battery projectile persp-mode Persp-mode spaceline spaceline-config powerline spacemacs-theme yasnippet ox-wk magit request helm-org-rifle poker chess xahk-mode org imenu-list openwith window-numbering ace-jump-mode undo-tree window-number ace-window material-theme org-ref cdlatex auctex company-lsp pyvenv lsp-python-ms use-package flycheck lsp-mode helm-ag expand-region iedit neotree company hungry-delete swiper counsel smartparens popwin pyim super-save js2-mode nodejs-repl exec-path-from-shell monokai-theme solarized-theme leuven-theme))
+   '(doom-modeline diff-hl all-the-icons-ivy winum company-tabnine treemacs-magit treemacs-icons-dired treemacs-projectile treemacs markdown-toc grip-mode centaur-tabs eyebrowse org-superstar-mode org-superstar ibuffer-vc ibuffer-projectile all-the-icons-ibuffer all-the-icons-dired diredfl doom-themes helm helm-dash org-roam-server benchmark-init org-latex-impatient org-roam dashboard go-translate vterm switch-window helm-org ebib json-mode hl-todo calibredb ox-hugo ox-latex org-pomodoro which-key nox rainbow-delimiters rainbow-mode all-the-icons fancy-battery projectile Persp-mode spaceline spaceline-config powerline spacemacs-theme yasnippet ox-wk magit request helm-org-rifle poker chess xahk-mode org imenu-list openwith window-numbering ace-jump-mode undo-tree window-number ace-window material-theme org-ref cdlatex auctex company-lsp pyvenv lsp-python-ms use-package flycheck lsp-mode helm-ag expand-region iedit neotree company hungry-delete swiper counsel popwin pyim super-save js2-mode nodejs-repl exec-path-from-shell monokai-theme solarized-theme leuven-theme))
  '(pdf-view-midnight-colors '("#b2b2b2" . "#292b2e"))
  '(pos-tip-background-color "#FFFACE")
  '(pos-tip-foreground-color "#272822")
@@ -121,7 +121,7 @@
  '(vc-annotate-very-old-color nil)
  '(weechat-color-list
    '(unspecified "#272822" "#3C3D37" "#F70057" "#F92672" "#86C30D" "#A6E22E" "#BEB244" "#E6DB74" "#40CAE4" "#66D9EF" "#FB35EA" "#FD5FF0" "#74DBCD" "#A1EFE4" "#F8F8F2" "#F8F8F0"))
- '(winner-mode t))
+)
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
