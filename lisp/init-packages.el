@@ -1,17 +1,12 @@
- (when (>= emacs-major-version 24)   
-   (require 'package)
-     (package-initialize)
-     (setq package-archives '(("gnu"   . "http://elpa.emacs-china.org/gnu/")
-		      ("melpa" . "http://elpa.emacs-china.org/melpa/"))))
-
+ 
 ;; 注意 elpa.emacs-china.org 是 Emacs China 中文社区在国内搭建的一个 ELPA 镜像
 ;;
  ;; cl - Common Lisp Extension
  (require 'cl-lib)
 
-
 (use-package pyim
   :ensure nil
+  :disabled t
   :demand t
   :init
   ;; (setq pyim-dicts
@@ -41,18 +36,48 @@
   (setq-default pyim-punctuation-half-width-functions
 	      '(pyim-probe-punctuation-line-beginning
 		pyim-probe-punctuation-after-punctuation)) ;; 自动半角全角切换
-  )
-
-;; 使 ivy 支持拼音搜索
-(defun eh-ivy-cregexp (str)
+  ;; 使 ivy 支持拼音搜索
+  (defun eh-ivy-cregexp (str)
     (let ((a (ivy--regex-plus str))
           (b (let ((case-fold-search nil))
                (pyim-cregexp-build str))))
       (if (and a (stringp a))
           (concat a "\\|" b)
         a)))
-(setq ivy-re-builders-alist
+  (setq ivy-re-builders-alist
         '((t . eh-ivy-cregexp)))
+  )
+
+(use-package rime
+  :custom
+  (default-input-method "rime")
+  :config
+  (setq default-input-method "rime"
+	rime-show-candidate 'posframe);;
+  (setq rime-user-data-dir "~/.config/fcitx/rime")
+  (define-key rime-mode-map (kbd "M-j") 'rime-force-enable)
+  (setq rime-disable-predicates
+        '(rime-predicate-evil-mode-p
+          rime-predicate-after-alphabet-char-p
+          rime-predicate-space-after-cc-p
+          rime-predicate-punctuation-after-space-cc-p
+          rime-predicate-prog-in-code-p
+	  ;; rime-predicate-current-input-punctuation-p
+          ;; rime-predicate-after-ascii-char-p
+	  rime-predicate-punctuation-after-ascii-p
+	  ;; rime-predicate-space-after-ascii-p
+          rime-predicate-current-uppercase-letter-p
+          ))
+  (setq mode-line-mule-info '((:eval (rime-lighter))))
+  (setq rime-inline-ascii-trigger 'shift-l)
+  (setq rime-posframe-properties
+      (list :background-color "#333333"
+            :foreground-color "#dcdccc"
+            :font "WenQuanYi Micro Hei Mono-14"
+            :internal-border-width 10))
+  (add-hook 'find-file-hook #'toggle-input-method) 
+  )
+
 
 ;; open global Company
 (setq company-global-modes '(not org-mode));; 希望关闭 company 在 orgmode 中的补全
@@ -173,7 +198,6 @@
 ;; 自动保存文件
 (use-package auto-save
   :load-path "~/.emacs.d/auto-save/"
-  :defer t
   :config
   (auto-save-enable)
   (setq auto-save-silent t)   ; quietly save
@@ -190,6 +214,8 @@
 (use-package winum
   :ensure t
   :defer t
+  :hook
+  (after-init . winum-mode)
   :init
   (setq winum-keymap
     (let ((map (make-sparse-keymap)))
@@ -519,14 +545,6 @@ It has the ability to preview the bookmarks like `swiper-all'."
   :config
   ;; To disable collection of benchmark data after init is done.
   (add-hook 'after-init-hook 'benchmark-init/deactivate))
-
-(use-package helm-dash
-  :ensure t
-  :defer t
-  :config
-  (setq helm-dash-common-docsets '("Python 3" "PyTorch"))
-  (setq helm-dash-browser-func 'eww)  
-)
 
 (use-package vterm
   :ensure t

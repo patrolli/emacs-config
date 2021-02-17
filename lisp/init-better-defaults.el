@@ -1,6 +1,6 @@
 ;; (electric-indent-mode 1)
 ;;set open recent files
-(setq make-makeup-files nil)
+
 ;; (require 'recentf)
 ;; (recentf-mode 1)
 ;; (setq recentf-max-menu-item 10)

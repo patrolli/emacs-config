@@ -1,5 +1,14 @@
 (use-package org
   :ensure nil
+  :commands (org-dynamic-block-define)
+  :bind
+  (:map org-mode-map
+  ("<" . (lambda ()
+                  "Insert org template."
+                  (interactive)
+                  (if (or (region-active-p) (looking-back "^\s*" 1))
+                      (org-hydra/body)
+                    (self-insert-command 1)))))
   :init
   (setq lxs/org-agenda-directory (concat lxs/home-dir "Documents/org/gtd/"))
   :hook
@@ -8,20 +17,76 @@
    (org-mode . org-overview)
    (org-mode . turn-on-org-cdlatex))
   ;; (add-hook 'LaTeX-mode-hook 'turn-on-cdlatex)
+  :pretty-hydra
+  ((:title (pretty-hydra-title "Org Template" 'fileicon "org" :face 'all-the-icons-green :height 1.1 :v-adjust 0.0)
+    :color blue :quit-key "q")
+   ("Basic"
+    (("a" (hot-expand "<a") "ascii")
+     ("c" (hot-expand "<c") "center")
+     ("C" (hot-expand "<C") "comment")
+     ("e" (hot-expand "<e") "example")
+     ("E" (hot-expand "<E") "export")
+     ("h" (hot-expand "<h") "html")
+     ("l" (hot-expand "<l") "latex")
+     ("n" (hot-expand "<n") "note")
+     ("o" (hot-expand "<q") "quote")
+     ("v" (hot-expand "<v") "verse"))
+    "Head"
+    (("i" (hot-expand "<i") "index")
+     ("A" (hot-expand "<A") "ASCII")
+     ("I" (hot-expand "<I") "INCLUDE")
+     ("H" (hot-expand "<H") "HTML")
+     ("L" (hot-expand "<L") "LaTeX"))
+    "Source"
+    (("s" (hot-expand "<s") "src")
+     ("m" (hot-expand "<s" "emacs-lisp") "emacs-lisp")
+     ("y" (hot-expand "<s" "python :results output") "python")
+     ("p" (hot-expand "<s" "perl") "perl")
+     ("r" (hot-expand "<s" "ruby") "ruby")
+     ("S" (hot-expand "<s" "sh") "sh")
+     ("g" (hot-expand "<s" "go :imports '\(\"fmt\"\)") "golang"))
+    "Misc"
+    (("u" (hot-expand "<s" "plantuml :file CHANGE.png") "plantuml")
+     ("Y" (hot-expand "<s" "ipython :session :exports both :results raw drawer\n$0") "ipython")
+     ("P" (progn
+            (insert "#+HEADERS: :results output :exports both :shebang \"#!/usr/bin/env perl\"\n")
+            (hot-expand "<s" "perl")) "Perl tangled")
+     ("<" self-insert-command "ins"))))
   
   :bind
-  (("C-c a" . org-agenda))
-  (:map org-mode-map
-	("C-c C-q" . counsel-org-tag))
   :config
-  ;; set agenda files
-
-  ;; (mapc '(lambda () (find-lisp-find-files lxs/org-agenda-directory "\.org$")) (org-agenda-files))
-  ;; (setq org-agenda-files
-  ;; 	(find-lisp-find-files lxs/org-agenda-directory "\.org$"))
-  (setq org-agenda-files (directory-files-recursively lxs/org-agenda-directory "\\.org$"))
-  (add-to-list 'org-agenda-files (concat lxs/home-dir "Documents/" "org/" "org-roam-files/" "paper_index.org"))
   
+  ;; For hydra
+  (defun hot-expand (str &optional mod)
+    "Expand org template.
+STR is a structure template string recognised by org like <s. MOD is a
+string with additional parameters to add the begin line of the
+structure element. HEADER string includes more parameters that are
+prepended to the element after the #+HEADER: tag."
+    (let (text)
+      (when (region-active-p)
+        (setq text (buffer-substring (region-beginning) (region-end)))
+        (delete-region (region-beginning) (region-end)))
+      (insert str)
+      (if (fboundp 'org-try-structure-completion)
+          (org-try-structure-completion) ; < org 9
+        (progn
+          ;; New template expansion since org 9
+          (require 'org-tempo nil t)
+          (org-tempo-complete-tag)))
+      (when mod (insert mod) (forward-line))
+      (when text (insert text))))
+  
+  (setq org-ellipsis (if (and (display-graphic-p) (char-displayable-p ?⏷)) "\t⏷" nil)
+	org-startup-indented t
+	org-hide-emphasis-markers t
+	org-catch-invisible-edits 'smart
+	org-priority-faces '((?A . error)
+                             (?B . warning)
+                             (?C . success)))
+  
+  (with-eval-after-load 'counsel
+    (bind-key [remap org-set-tags-command] #'counsel-org-tag org-mode-map))
   ;; 让 org 支持中文的格式标记
   (setq org-emphasis-regexp-components '("-[:multibyte:][:space:]('\"{" "-[:multibyte:][:space:].,:!?;'\")}\\[" "[:space:]" "." 1))
   (org-set-emph-re 'org-emphasis-regexp-components org-emphasis-regexp-components)
@@ -33,6 +98,14 @@
     :hook (org-mode . org-superstar-mode)
   :config
   (add-hook 'org-mode-hook #'org-superstar-mode))
+
+  (use-package org-fancy-priorities
+    :diminish
+    :hook (org-mode . org-fancy-priorities-mode)
+    :init (setq org-fancy-priorities-list
+                (if (and (display-graphic-p) (char-displayable-p ?⯀))
+                    '("⯀" "⯀" "⯀" "⯀")
+                  '("HIGH" "MEDIUM" "LOW" "OPTIONAL"))))
 
   ;; 在 org-mode 中流畅地翻阅图片  
   (use-package iscroll
@@ -159,7 +232,7 @@ it can be passed in POS."
 
 ;; save
 (use-package org-pomodoro
-  :defer t
+  :after org-agenda
   :ensure t
   :bind
   (:map org-agenda-mode-map ("P" . org-pomodoro))
@@ -185,10 +258,20 @@ it can be passed in POS."
 
 ;; org agenda and gtd setting
 (use-package org-agenda
+  :init
   :defer t
-  :init  
+  :bind
+  (:map org-agenda-mode-map
+	("i" . org-agenda-clock-in)
+	("r" . lxs/org-process-inbox)
+	("R" . org-agenda-refile)
+	("c" . lxs/org-inbox-capture))
+  :hook
+  (after-init . org-agenda-mode)
   :config
   ;; 一些基础配置
+  (setq org-agenda-files (directory-files-recursively lxs/org-agenda-directory "\\.org$"))
+  (add-to-list 'org-agenda-files (concat lxs/home-dir "Documents/" "org/" "org-roam-files/" "paper_index.org"))
   (setq org-agenda-archives-mode t)
   ;; org-todo-list config
   (setq org-agenda-todo-list-sublevels nil)
@@ -279,7 +362,6 @@ it can be passed in POS."
     (interactive)
     (org-agenda nil " "))
   (bind-key "<f5>" 'lxs/switch-to-agenda)
-  
   ;; 设置默认的 tag
   (setq org-tag-alist (quote (("@home" . ?h)
                             ("@school" . ?s)
@@ -397,10 +479,10 @@ it can be passed in POS."
 	(org-agenda-change-all-lines newhead hdmarker))))
 
   
-  ;; (defun lxs/org-inbox-capture ()
-  ;;   (interactive)
-  ;;   "Capture a task in agenda mode."
-  ;;   (org-capture nil "i"))  ;; 存疑，似乎没有用到过
+  (defun lxs/org-inbox-capture ()
+    (interactive)
+    "Capture a task in agenda mode."
+    (org-capture nil "i"))  ;; 存疑，似乎没有用到过
   
   ;; archive done and cancelled tasks
   (defun org-archive-done-tasks ()
@@ -418,12 +500,6 @@ it can be passed in POS."
        (org-archive-subtree)
        (setq org-map-continue-from (outline-previous-heading)))
      "/CANCELLED"'agenda))
-  :bind
-  (:map org-agenda-mode-map
-	("i" . org-agenda-clock-in)
-	("r" . lxs/org-process-inbox)
-	("R" . org-agenda-refile)
-	("c" . lxs/org-inbox-capture))
   
   )
 
@@ -492,11 +568,10 @@ it can be passed in POS."
 
 (use-package org-roam
   :ensure t
-  :defer t
   :hook
   (after-init . org-roam-mode)
   :custom
-      (org-roam-directory "/mnt/c/Users/lixun/Documents/org/org-roam-files")
+  (org-roam-directory (concat lxs/home-dir "Documents/" "org/" "org-roam-files"))
       :bind (:map org-roam-mode-map
               (("C-c n l" . org-roam)
                ("C-c n f" . org-roam-find-file)
@@ -591,11 +666,25 @@ it can be passed in POS."
         org-roam-server-network-label-truncate-length 60
         org-roam-server-network-label-wrap-length 20))
 
-(use-package helm-bibtex
-  :defer t
+(use-package org-ref
   :ensure t
+  :after org
+  :config
+  (setq reftex-default-bibliography '("/mnt/c/Users/lixun/Documents/bibliography/library.bib"))
+  (use-package helm-bibtex
+    :ensure t
+    :after org-ref
   :config
   (setq bibtex-completion-bibliography (concat lxs/home-dir "Documents/" "bibliography/" "library.bib")))
+  ;; see org-ref for use of these variables
+  (setq org-ref-bibliography-notes "/mnt/c/Users/lixun/Documents/org/paper-reading.org"
+	org-ref-default-bibliography '("/mnt/c/Users/lixun/Documents/bibliography/library.bib")
+	org-ref-pdf-directory "/mnt/c/Users/lixun/Documents/bibliography")
+  (global-set-key (kbd "C-c ]") 'org-ref-helm-insert-cite-link)
+  (global-set-key (kbd "C-c s") 'dblp-lookup)
+  )
+
+
 
 (use-package org-roam-bibtex
   :ensure t
@@ -628,19 +717,6 @@ it can be passed in POS."
     (shell-command (format "pandoc %s -o %s --reference-doc=%s" (buffer-file-name) docx-file template-file))
     (message "Convert finish: %s" docx-file)))
 
-
-(use-package org-ref
-  :bind
-  (:map org-mode
-	("C-c ]" . org-ref-helm-insert-cite-link)
-	("C-c s" . dblp-lookup))
-  :config
-  (setq reftex-default-bibliography '("/mnt/c/Users/lixun/Documents/bibliography/library.bib"))
-  ;; see org-ref for use of these variables
-  (setq org-ref-bibliography-notes "/mnt/c/Users/lixun/Documents/org/paper-reading.org"
-	org-ref-default-bibliography '("/mnt/c/Users/lixun/Documents/bibliography/library.bib")
-	org-ref-pdf-directory "/mnt/c/Users/lixun/Documents/bibliography")
-  )
 
 (server-start)
 

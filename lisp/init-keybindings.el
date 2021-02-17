@@ -16,8 +16,6 @@
 ;; bind hippie completation
 (global-set-key (kbd "s-/") 'hippie-expand)
 
-;; bind pyim probe
-;; (global-set-key (kbd "M-j") 'pyim-convert-string-at-point)
 
 ;; short key mapping
 ;; (setq-default abbrev-mode t)
