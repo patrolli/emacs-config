@@ -1,8 +1,5 @@
 (setq dired-recursive-copies 'always)
 
-;;
-
-
 ;; 配置dired，所有目录共用一个buffer
 (put 'dired-find-alternate-file 'disabled nil)
 ;; 延迟加载dired，节省emacs启动时间

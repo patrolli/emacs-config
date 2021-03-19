@@ -5,43 +5,9 @@
 ;; (recentf-mode 1)
 ;; (setq recentf-max-menu-item 10)
 
-;; forbid autosaving and backup
-(setq make-backup-files nil)
-
-;; indent buffer 
-(defun indent-buffer()
-  (interactive)
-  (indent-region (point-min) (point-max)))
-
-(defun indent-region-or-buffer()
-  (interactive)
-  (save-excursion
-    (if (region-active-p)
-	(progn
-	  (indent-region (region-beginning) (region-end))
-	  (message "Indent selected region."))
-      (progn
-	(indent-buffer)
-	(message "Indent buffer.")))))
-
-;; expand the company 
-(setq hippie-expand-try-function-list '(try-expand-debbrev
-					try-expand-debbrev-all-buffers
-					try-expand-debbrev-from-kill
-					try-complete-file-name-partially
-					try-complete-file-name
-					try-expand-all-abbrevs
-					try-expand-list
-					try-expand-line
-					try-complete-lisp-symbol-partially
-					try-complete-lisp-symbol))
 
 (fset 'yes-or-no-p 'y-or-n-p)
 
-
-(show-paren-mode nil)
-;; 仅针对 elisp 文件显示括号配对
-(add-hook 'emacs-lisp-mode-hook 'show-paren-mode)
 
 ;; 加载指定路径下的所有 .org 文件
 (defun my/load-org () (interactive)
@@ -134,14 +100,8 @@
   (org-sort-entries t ?o))
 
 
-
-;; (add-to-list 'helm-org-rifle-actions '("Insert id link(s) C-c h l" . my/helm-org-marked-heading-id-link) t)
-
-
-(setq focus-follows-mouse t)
-
 (use-package watch-other-window
-  :load-path "~/.emacs.d/watch-other-window/"
+  :load-path "watch-other-window/"
   :bind
   (:map prog-mode-map
 	("M-n" . watch-other-window-up-line)
@@ -150,8 +110,6 @@
 	("M-o p" . watch-other-window-down)
 	)
   )
-
-
 
 ;; 跳转光标
 (defun xah-pop-local-mark-ring ()
@@ -164,30 +122,11 @@ Version 2016-04-04"
 
 (setq mark-ring-max 6)
 (setq global-mark-ring-max 6)
-(global-set-key (kbd "<f6>") 'xah-pop-local-mark-ring)
-(global-set-key (kbd "<f7>") 'pop-global-mark)
-
-(defun my/vterm (command)
-  "Open a vterm by selecting a profile from a profile lists.
-"
-  (interactive
-   (let ((completion-ignore-case  t))
-     (list (completing-read "Choose: " '("local"
-                                         "aimax-ht -p 25051"; your profiles
-                                         "aimax-ht -p 25532"
-                                         "aimax-ht -p 25564"
-					 "diggers3") nil t))))
-  (if
-      (not (string-equal command "local"))
-      (with-current-buffer (vterm (concat "*" command "*"))
-        (vterm-send-string (format "ssh %s" command))
-         (vterm-send-return))
-    (vterm (concat "*vterm-" command "*"))))
 
 ;; 使用 color-rg 来对 org 文件进行检索
 (defun lxs/search-org ()
   (interactive)
-  (color-rg-search-input (color-rg-read-input) (concat lxs/home-dir "Documents/" "org/"))
+  (color-rg-search-input (color-rg-read-input) (concat lxs-home-dir "Documents/" "org/"))
   )
 
 ;; 使用 windows 的程序来打开文件

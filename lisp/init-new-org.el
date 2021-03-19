@@ -1,21 +1,32 @@
+(require 'init-custom)
+(require 'init-const)
+
 (use-package org
   :ensure nil
   :commands (org-dynamic-block-define)
+  :defer t
   :bind
+  (("C-c a" . org-agenda)
+   ("C-c b" . org-switchb)
+   ("C-c c" . org-capture)
   (:map org-mode-map
   ("<" . (lambda ()
                   "Insert org template."
                   (interactive)
                   (if (or (region-active-p) (looking-back "^\s*" 1))
                       (org-hydra/body)
-                    (self-insert-command 1)))))
+                    (self-insert-command 1))))))
   :init
-  (setq lxs/org-agenda-directory (concat lxs/home-dir "Documents/org/gtd/"))
+  (setq lxs/org-agenda-directory (concat lxs-home-dir "Documents/org/gtd/"))
   :hook
   ((org-mode . toggle-truncate-lines)
    (org-mode . org-hide-block-all)
    (org-mode . org-overview)
-   (org-mode . turn-on-org-cdlatex))
+   (org-mode . turn-on-org-cdlatex)
+   (org-mode . (lambda ()
+                       "Beautify org symbols."
+                       (setq prettify-symbols-alist lxs-prettify-org-symbols-alist)
+                       (prettify-symbols-mode 1))))
   ;; (add-hook 'LaTeX-mode-hook 'turn-on-cdlatex)
   :pretty-hydra
   ((:title (pretty-hydra-title "Org Template" 'fileicon "org" :face 'all-the-icons-green :height 1.1 :v-adjust 0.0)
@@ -52,10 +63,8 @@
             (insert "#+HEADERS: :results output :exports both :shebang \"#!/usr/bin/env perl\"\n")
             (hot-expand "<s" "perl")) "Perl tangled")
      ("<" self-insert-command "ins"))))
-  
-  :bind
+
   :config
-  
   ;; For hydra
   (defun hot-expand (str &optional mod)
     "Expand org template.
@@ -76,7 +85,7 @@ prepended to the element after the #+HEADER: tag."
           (org-tempo-complete-tag)))
       (when mod (insert mod) (forward-line))
       (when text (insert text))))
-  
+
   (setq org-ellipsis (if (and (display-graphic-p) (char-displayable-p ?⏷)) "\t⏷" nil)
 	org-startup-indented t
 	org-hide-emphasis-markers t
@@ -84,7 +93,7 @@ prepended to the element after the #+HEADER: tag."
 	org-priority-faces '((?A . error)
                              (?B . warning)
                              (?C . success)))
-  
+
   (with-eval-after-load 'counsel
     (bind-key [remap org-set-tags-command] #'counsel-org-tag org-mode-map))
   ;; 让 org 支持中文的格式标记
@@ -107,13 +116,17 @@ prepended to the element after the #+HEADER: tag."
                     '("⯀" "⯀" "⯀" "⯀")
                   '("HIGH" "MEDIUM" "LOW" "OPTIONAL"))))
 
-  ;; 在 org-mode 中流畅地翻阅图片  
+  ;; 在 org-mode 中流畅地翻阅图片
   (use-package iscroll
     ;;
-    :load-path "~/.emacs.d/iscroll"
+    :load-path "iscroll"
     :hook
     (org-mode . iscroll-mode)
     )
+
+  (use-package valign
+    :hook
+    (org-mode . valign-mode))
 
     ;; org habit
   (use-package org-tempo)
@@ -163,23 +176,28 @@ prepended to the element after the #+HEADER: tag."
 	(setq end (save-excursion (org-end-of-subtree t t))))
       (org-end-of-subtree)))
 
+  (defun lxs/create-hugo-file (path)
+    (let ( (filename (format-time-string "%Y-%m-%d-%H-%M")) )
+      (find-file (expand-file-name (format "%s.org" filename) path))
+    ))
+
   (setq org-capture-templates
 	`(("i" "task" entry (file ,(concat lxs/org-agenda-directory "inbox.org"))
            "* TODO %?\nCaptured %<%Y-%m-%d %H:%M>")
 	  ("p" "capture paper" entry (file ,(concat lxs/org-agenda-directory "inbox.org"))
 	   "* TODO [[%:link][%:description]]\n\n %i" :immediate-finish t)
-          ("n" "note" entry (file ,(concat lxs/home-dir "Documents/" "org/" "notes.org"))
+          ("n" "note" entry (file ,(concat lxs-home-dir "Documents/" "org/" "notes.org"))
            "* %^{heading}\n%?")
 	  ("c" "web bookmarks" entry (file ,(concat lxs/org-agenda-directory "webclips.org"))
 	   "* [[%:link][%:description]]\n " :prepend t :empty-lines-after 1 :immediate-finish t)
-	  ("j" "journal" entry (file+datetree ,(concat lxs/home-dir "Documents/" "org/" "journal.org")) 
+	  ("j" "journal" entry (file+datetree ,(concat lxs-home-dir "Documents/" "org/" "journal.org"))
 	   "* %U - %^{heading}\n  %?")
 	  ("b" "billing" plain
-           (file+function ,(concat lxs/home-dir "Documents/" "org/" "billing.org") find-month-tree)
+           (file+function ,(concat lxs-home-dir "Documents/" "org/" "billing.org") find-month-tree)
            " | %U | %^{类别|吃饭|日用|其他} | %^{描述} | %^{金额} |" :kill-buffer t)
-	  ("s" "code snippet" entry (file ,(concat lxs/home-dir "Documents/" "org/" "snippet.org"))
+	  ("s" "code snippet" entry (file ,(concat lxs-home-dir "Documents/" "org/" "snippet.org"))
 	   "* %<%Y-%m-%d> - %^{title}\t%^g\n#+BEGIN_SRC %^{language}\n%^C%?\n#+END_SRC")
-	  ("h" "hugo blog file" entry (file lxs/creat-hugo-file) "* ")
+	  ("h" "hugo blog file" entry (file (lambda () (lxs/create-hugo-file (concat lxs-home-dir "Documents/" "org/" "HugoBlogs/"))) ) "* ")
 	  ))
 
   ;; 为 org 的 header 的 created 和 last_modified 两个属性设置自动检测时间戳
@@ -247,9 +265,8 @@ it can be passed in POS."
 					 (alert-toast-notify '(:title "pomodoro" :message "A long break done, ready a new pomodoro !!!" :data (:long t)))
                 )))
   :config
-  (with-eval-after-load 'org-pomodoro
-    (require 'alert-toast)
-    )
+  (use-package alert-toast
+    :load-path "alert-toast")
   (setq org-pomodoro-keep-killed-pomodoro-time t)
   (setq org-pomodoro-length 25)
   ;; (setq org-pomodoro-manual-break t)
@@ -262,99 +279,103 @@ it can be passed in POS."
   :defer t
   :bind
   (:map org-agenda-mode-map
-	("i" . org-agenda-clock-in)
-	("r" . lxs/org-process-inbox)
-	("R" . org-agenda-refile)
-	("c" . lxs/org-inbox-capture))
+   ("i" . org-agenda-clock-in)
+   ("r" . lxs/org-process-inbox)
+   ("R" . org-agenda-refile)
+   ("c" . lxs/org-inbox-capture))
   :hook
   (after-init . org-agenda-mode)
   :config
   ;; 一些基础配置
   (setq org-agenda-files (directory-files-recursively lxs/org-agenda-directory "\\.org$"))
-  (add-to-list 'org-agenda-files (concat lxs/home-dir "Documents/" "org/" "org-roam-files/" "paper_index.org"))
+  (add-to-list 'org-agenda-files (concat lxs-home-dir "Documents/" "org/" "org-roam-files/" "paper_index.org"))
   (setq org-agenda-archives-mode t)
   ;; org-todo-list config
   (setq org-agenda-todo-list-sublevels nil)
 
   ;; 设置 TODO state and faces
   (setq org-todo-keywords
-	'((sequence "TODO(t)" "NEXT(n)" "|" "DONE(d)")
+	    '((sequence "TODO(t)" "NEXT(n)" "|" "DONE(d)")
           (sequence "WAITING(w@/!)" "HOLD(h@/!)" "|" "CANCELLED(c@/!)")))
 
 
   (setq org-todo-keyword-faces
-	(quote (("TODO" :foreground "red" :weight bold)
-		("NEXT" :inherit warning)
-		("DONE" :foreground "forest green" :weight bold)
-		("WAITING" :foreground "orange" :weight bold)
-		("HOLD" :foreground "magenta" :weight bold)
-		("CANCELLED" :foreground "forest green" :weight bold)
-		("REPEAT" :foreground "red" :weight bold)
-		)))
-   
+	    (quote (("TODO" :foreground "red" :weight bold)
+		        ("NEXT" :inherit warning)
+		        ("DONE" :foreground "forest green" :weight bold)
+		        ("WAITING" :foreground "orange" :weight bold)
+		        ("HOLD" :foreground "magenta" :weight bold)
+		        ("CANCELLED" :foreground "forest green" :weight bold)
+		        ("REPEAT" :foreground "red" :weight bold)
+		        )))
+
   ;; 设置 agenda 显示位置
-  (setq org-agenda-window-setup 'current-window)
+  ;; (setq org-agenda-window-setup 'current-window)
+  ;; 设置 agenda 打开在行首而不是在最末尾
+  ;; ref: https://www.reddit.com/r/orgmode/comments/j59h02/org_agenda_cursor_starts_at_bottom/
+  ;; (add-hook 'org-agenda-finalize-hook #'org-agenda-find-same-or-today-or-agenda 90) ;; 这个 hook 会引发一些问题
+  (add-hook 'org-agenda-finalize-hook (lambda () (goto-char (point-min))) 90)
   ;; 在 agenda 中按 Tab 打开 headline 在 底部弹出
   (define-advice org-agenda-goto (:around (orig-fn &rest args) "new-frame")
-  (let ((display-buffer-overriding-action '(display-buffer-at-bottom)))
-    (apply orig-fn args)))
-  
+    (let ((display-buffer-overriding-action '(display-buffer-at-bottom)))
+      (apply orig-fn args)))
+
   ;; agenda view
   (defun lxs/org-agenda-prefix-string ()
     (let ((path (org-format-outline-path (org-get-outline-path))))
       (if (> (length path) 0)
-	  (concat "[" path "]") "")
+	      (concat "[" path "]") "")
       ))
   (setq org-agenda-prefix-format '((agenda . " %i %-12:c%?-12t% s")
-				   (todo . " %i %-12:c %(lxs/org-agenda-prefix-string)")
-				   (tags . " %i %-12:c")
-				   (search . " %i %-12:c")))
+				                   (todo . " %i %-12:c %(lxs/org-agenda-prefix-string)")
+				                   (tags . " %i %-12:c")
+				                   (search . " %i %-12:c")))
   (setq lxs/org-agenda-todo-view
-	`(" " "Agenda"
+	    `(" " "Agenda"
           ((agenda ""
                    ((org-agenda-span 'day)
                     (org-deadline-warning-days 14)))
            (todo "TODO"
-		 ((org-agenda-overriding-header "To Refile")
+		         ((org-agenda-overriding-header "To Refile")
                   (org-agenda-files '(,(concat lxs/org-agenda-directory "inbox.org")))))
            (todo "NEXT|HOLD"
-		 ((org-agenda-overriding-header "In Progress")
+		         ((org-agenda-overriding-header "In Progress")
                   (org-agenda-files '(,(concat lxs/org-agenda-directory "someday.org")
                                       ,(concat lxs/org-agenda-directory "projects.org")
                                       ,(concat lxs/org-agenda-directory "next.org")
                                       ,(concat lxs/org-agenda-directory "learning.org")
-				      ,(concat lxs/home-dir "Documents/" "org/" "org-roam-files/" "paper_index.org")))
+				                      ,(concat lxs-home-dir "Documents/" "org/" "org-roam-files/" "paper_index.org")))
                   ))
            (todo "TODO"
-		 ((org-agenda-overriding-header "Projects")
+		         ((org-agenda-overriding-header "Projects")
                   (org-agenda-files '(,(concat lxs/org-agenda-directory "projects.org")
-				      ,(concat lxs/org-agenda-directory "learning.org")
-				      ,(concat lxs/home-dir "Documents/" "org/" "org-roam-files/" "paper_index.org")))
+				                      ,(concat lxs/org-agenda-directory "learning.org")
+				                      ,(concat lxs-home-dir "Documents/" "org/" "org-roam-files/" "paper_index.org")))
                   ))
            (todo "TODO"
-		 ((org-agenda-overriding-header "One-off Tasks")
+		         ((org-agenda-overriding-header "One-off Tasks")
                   (org-agenda-files '(,(concat lxs/org-agenda-directory "next.org")
-				      ,(concat lxs/org-agenda-directory "someday.org")))
+				                      ,(concat lxs/org-agenda-directory "someday.org")))
                   (org-agenda-skip-function '(org-agenda-skip-entry-if 'deadline 'scheduled))))
-	   (todo "TODO|NEXT"
-		 ((org-agenda-overriding-header "Reading")
-		  (org-agenda-files '(,(concat lxs/org-agenda-directory "reading.org")))
-		  ))
-	   (todo "TODO"
-		 ((org-agenda-overriding-header "Blogs")
-		  (org-agenda-files '(,(concat lxs/home-dir "Documents/" "org/" "HugoBlogs/" "short-notes.org")))))
-	   (todo "WAITING"
-		 ((org-agenda-overriding-header "Waiting List")
-		  (org-agenda-files '(,(concat lxs/org-agenda-directory "next.org")
-				      ,(concat lxs/org-agenda-directory "someday.org")
-				      ,(concat lxs/org-agenda-directory "projects.org")
-				      ,(concat lxs/org-agenda-directory "learning.org")))))
+	       (todo "TODO|NEXT"
+		         ((org-agenda-overriding-header "Reading")
+		          (org-agenda-files '(,(concat lxs/org-agenda-directory "reading.org")))
+		          ))
+	       (todo "TODO"
+		         ((org-agenda-overriding-header "Blogs")
+		          (org-agenda-files '(,(concat lxs-home-dir "Documents/" "org/" "HugoBlogs/" "short-notes.org")))))
+	       (todo "WAITING"
+		         ((org-agenda-overriding-header "Waiting List")
+		          (org-agenda-files '(,(concat lxs/org-agenda-directory "next.org")
+				                      ,(concat lxs/org-agenda-directory "someday.org")
+				                      ,(concat lxs/org-agenda-directory "projects.org")
+				                      ,(concat lxs/org-agenda-directory "learning.org")))))
            nil)))
 
 
   (add-to-list 'org-agenda-custom-commands
                `("r" "Reading" todo ""
-		 ((org-agenda-files '(,(concat lxs/org-agenda-directory "reading.org"))))))
+		         ((org-agenda-files '(,(concat lxs/org-agenda-directory "reading.org"))))))
   (add-to-list 'org-agenda-custom-commands `,lxs/org-agenda-todo-view)
 
   ;; 快速切换到 agenda view
@@ -364,23 +385,23 @@ it can be passed in POS."
   (bind-key "<f5>" 'lxs/switch-to-agenda)
   ;; 设置默认的 tag
   (setq org-tag-alist (quote (("@home" . ?h)
-                            ("@school" . ?s)
-                            (:newline)
-                            ("WAITING" . ?w)
-                            ("HOLD" . ?H)
-                            ("CANCELLED" . ?c))))
+                              ("@school" . ?s)
+                              (:newline)
+                              ("WAITING" . ?w)
+                              ("HOLD" . ?H)
+                              ("CANCELLED" . ?c))))
 
   ;; 设置 refile 的目标文件夹 all file from inbox.org to these
   (setq org-refile-use-outline-path 'file
-	org-outline-path-complete-in-steps nil)
+	    org-outline-path-complete-in-steps nil)
   (setq org-refile-allow-creating-parent-nodes 'confirm)
   (setq org-refile-targets '(("next.org" :level . 1)
                              ("someday.org" :level . 1)
                              ("reading.org" :level . 1)
                              ("projects.org" :maxlevel . 2)
-			     ("learning.org" :level . 1)))
+			                 ("learning.org" :level . 1)))
 
-  
+
   ;; 在任务 clock in 后，将其从 TODO 状态切换到 NEXT 状态
   (defun lxs/set-todo-state-next ()
     "Visit each parent task and change NEXT states to TODO"
@@ -421,26 +442,26 @@ it can be passed in POS."
      (org-agenda-refile nil nil t)))
 
   (defvar lxs/org-agenda-bulk-process-key ?f
-  "Default key for bulk processing inbox items.")
+    "Default key for bulk processing inbox items.")
 
   (defun lxs/bulk-process-entries ()
     (if (not (null org-agenda-bulk-marked-entries))
-	(let ((entries (reverse org-agenda-bulk-marked-entries))
+	    (let ((entries (reverse org-agenda-bulk-marked-entries))
               (processed 0)
               (skipped 0))
           (dolist (e entries)
             (let ((pos (text-property-any (point-min) (point-max) 'org-hd-marker e)))
               (if (not pos)
                   (progn (message "Skipping removed entry at %s" e)
-			 (cl-incf skipped))
-		(goto-char pos)
-		(let (org-loop-over-headlines-in-active-region) (funcall 'lxs/org-agenda-process-inbox-item))
-		;; `post-command-hook' is not run yet.  We make sure any
-		;; pending log note is processed.
-		(when (or (memq 'org-add-log-note (default-value 'post-command-hook))
+			             (cl-incf skipped))
+		        (goto-char pos)
+		        (let (org-loop-over-headlines-in-active-region) (funcall 'lxs/org-agenda-process-inbox-item))
+		        ;; `post-command-hook' is not run yet.  We make sure any
+		        ;; pending log note is processed.
+		        (when (or (memq 'org-add-log-note (default-value 'post-command-hook))
                           (memq 'org-add-log-note post-command-hook))
                   (org-add-log-note))
-		(cl-incf processed))))
+		        (cl-incf processed))))
           (org-agenda-redo)
           (unless org-agenda-persistent-marks (org-agenda-bulk-unmark-all))
           (message "Acted on %d entries%s%s"
@@ -463,27 +484,27 @@ it can be passed in POS."
     (setq lxs/org-current-effort effort)
     (org-agenda-check-no-diary)
     (let* ((hdmarker (or (org-get-at-bol 'org-hd-marker)
-			 (org-agenda-error)))
+			             (org-agenda-error)))
            (buffer (marker-buffer hdmarker))
            (pos (marker-position hdmarker))
            (inhibit-read-only t)
            newhead)
       (org-with-remote-undo buffer
-	(with-current-buffer buffer
+	    (with-current-buffer buffer
           (widen)
           (goto-char pos)
           (org-show-context 'agenda)
           (funcall-interactively 'org-set-effort nil lxs/org-current-effort)
           (end-of-line 1)
           (setq newhead (org-get-heading)))
-	(org-agenda-change-all-lines newhead hdmarker))))
+	    (org-agenda-change-all-lines newhead hdmarker))))
 
-  
+
   (defun lxs/org-inbox-capture ()
     (interactive)
     "Capture a task in agenda mode."
     (org-capture nil "i"))  ;; 存疑，似乎没有用到过
-  
+
   ;; archive done and cancelled tasks
   (defun org-archive-done-tasks ()
     (interactive)
@@ -500,7 +521,7 @@ it can be passed in POS."
        (org-archive-subtree)
        (setq org-map-continue-from (outline-previous-heading)))
      "/CANCELLED"'agenda))
-  
+
   )
 
 (use-package ox-latex
@@ -534,7 +555,7 @@ it can be passed in POS."
 \\usepackage{parskip}     % blank lines between paragraphs
 \\usepackage{color}       % background of inline code
 \\usepackage{xcolor}
-\\usepackage{lscape}      % scaling and rotating of tables and images 
+\\usepackage{lscape}      % scaling and rotating of tables and images
 \\usepackage{adjustbox}
 
 [NO-DEFAULT-PACKAGES]
@@ -543,7 +564,7 @@ it can be passed in POS."
 \\geometry{a4paper,scale=0.8}            % page margins
 \\XeTeXlinebreaklocale \"zh\"            % break line with \"zh\" mode
 \\XeTeXlinebreakskip = 0pt plus 1pt
-\\linespread{1.36}                       % line spread 
+\\linespread{1.36}                       % line spread
 \\setlength{\\parindent}{0cm}            % indent
 \\definecolor{light-gray}{gray}{0.89}
 \\renewcommand{\\texttt}[1]{{\\colorbox{light-gray}{\\small\\menlo #1}}}
@@ -563,15 +584,15 @@ it can be passed in POS."
 
 (use-package ox-hugo
   :ensure t
-  :defer t
   :after ox)
 
 (use-package org-roam
   :ensure t
+  :defer t
   :hook
   (after-init . org-roam-mode)
   :custom
-  (org-roam-directory (concat lxs/home-dir "Documents/" "org/" "org-roam-files"))
+  (org-roam-directory (concat lxs-home-dir "Documents/" "org/" "org-roam-files"))
       :bind (:map org-roam-mode-map
               (("C-c n l" . org-roam)
                ("C-c n f" . org-roam-find-file)
@@ -585,6 +606,7 @@ it can be passed in POS."
               (("C-c n i" . org-roam-insert))
               (("C-c n I" . org-roam-insert-immediate)))
       :config
+      (setq org-roam-graph-exclude-matcher '("private" "daily"))  ;; 在 graph 中排除一些笔记
       (setq org-roam-verbose nil)
       (setq org-roam-capture-templates
         '(("d" "default" plain (function org-roam--capture-get-point)
@@ -598,7 +620,7 @@ it can be passed in POS."
            :head "#+TITLE: ${title}\n"
            :unnarrowed t)
 	  ("s" "code snippet" plain (function org-roam--capture-get-point)
-	   "* code\n#+BEGIN_SRC %^{language}\n%^C%?\n#+END_SRC\n* description\n"
+	   "* description\n* code\n#+BEGIN_SRC %^{language}\n%^C%?\n#+END_SRC\n* note\n* ref\n"
 	   :file-name "snippet-${slug}"
 	   :head "#+TITLE: ${title}\n#+CREATED: %U\n#+LAST_MODIFIED: %U\n#+roam_tags: \"code snippet\"\n#+AUTHOR: Li Xunsong\n")))
       (setq org-roam-ref-capture-templates
@@ -652,6 +674,8 @@ it can be passed in POS."
 (use-package org-roam-server
   :defer t
   :ensure t
+  :hook
+  (after-init . org-roam-server-mode)
   :config
   (use-package org-roam-protocol)
   (setq org-roam-server-host "127.0.0.1"
@@ -669,13 +693,15 @@ it can be passed in POS."
 (use-package org-ref
   :ensure t
   :after org
+  :init
+  ;; (setq org-ref-bibtex-hydra-key-binding "\C-cj")
   :config
   (setq reftex-default-bibliography '("/mnt/c/Users/lixun/Documents/bibliography/library.bib"))
   (use-package helm-bibtex
     :ensure t
     :after org-ref
   :config
-  (setq bibtex-completion-bibliography (concat lxs/home-dir "Documents/" "bibliography/" "library.bib")))
+  (setq bibtex-completion-bibliography (concat lxs-home-dir "Documents/" "bibliography/" "library.bib")))
   ;; see org-ref for use of these variables
   (setq org-ref-bibliography-notes "/mnt/c/Users/lixun/Documents/org/paper-reading.org"
 	org-ref-default-bibliography '("/mnt/c/Users/lixun/Documents/bibliography/library.bib")
@@ -695,7 +721,7 @@ it can be passed in POS."
   (setq orb-templates
       '(("r" "ref" plain (function org-roam-capture--get-point) ""
          :file-name "${citekey}"
-         :head "#+TITLE: ${title}\n#+ROAM_KEY: ${ref}\n#+ROAM_TAGS: \n#+ROAM_ALIAS: \n#+AUTHOR: Li Xunsong\n#+CREATED: %U\n#+LAST_MODIFIED: %U\n#+STARTUP: inlineimages latexpreview hideblocks\n\n* Motivation\n\n* Method\n\n* Comment\n\n* Ref\n" 
+         :head "#+TITLE: ${title}\n#+ROAM_KEY: ${ref}\n#+ROAM_TAGS: \n#+ROAM_ALIAS: \n#+AUTHOR: Li Xunsong\n#+CREATED: %U\n#+LAST_MODIFIED: %U\n#+STARTUP: inlineimages latexpreview hideblocks\n\n* Motivation\n\n* Method\n\n* Comment\n\n* Ref\n"
          :unnarrowed t))))
 
 
@@ -721,7 +747,3 @@ it can be passed in POS."
 (server-start)
 
 (provide 'init-new-org)
-
-
-
-

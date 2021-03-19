@@ -1,17 +1,18 @@
-;; nox, a lightweight 
+;; nox, a lightweight lsp client
+;; TODO: 修改路径硬编码
 (use-package nox
-  :load-path "~/.emacs.d/nox/"
+  :load-path "nox/"
   :init
   ;; (defvar lsp-python "/usr/bin/python3.8")
   ;; 对于 nox+mspyls, 需要指定 python 解释器的路径， vitural envs 似乎不能够起到作用
   (defvar lsp-python "/home/lixunsong/anaconda3/envs/py-emacs/bin/python3.7")
   (defvar lsp-search-paths [])
-  :hook
-  (after-init . nox)
+  ;; :hook
+  ;; (after-init . nox)
   ;; 不能在这里设置按键绑定，这里设置会导致 nox 延迟加载，而实际上 nox 之后被不会加载
   ;; 因为 hook 里面没有添加启动 nox 的函数，不知道添加过后还会不会出现这个情况
   :config
-  ;; add hooks TODO: why :hook failed?
+  ;; add hooks 
    (dolist (hook (list
                  'js-mode-hook
                  'rust-mode-hook
@@ -46,8 +47,10 @@
      (:InterpreterPath ,lsp-python))
      :searchPaths ,lsp-search-paths))
   (add-to-list 'nox-server-programs
-             `(python-mode nox-mspyls 
-                           "~/.emacs.d/nox/mspyls/Microsoft.Python.LanguageServer"))
+             '(python-mode nox-mspyls 
+                           ;; "~/.emacs.d/nox/mspyls/Microsoft.Python.LanguageServer"
+			    "~/.emacs.default/nox/mspyls/Microsoft.Python.LanguageServer"
+			   ))
   ;; pyls configuration is simple~
   ;; (add-to-list 'nox-server-programs '(python-mode . ("python-language-server" "pyls")))
   (define-key nox-mode-map (kbd "C-.")  'nox-show-doc)
@@ -80,14 +83,15 @@
 (use-package helm-dash
   :ensure t
   :bind
-  (:map prog-mode-map ("M-[" . dash-at-point))
+  (:map prog-mode-map ("M-[" . helm-dash-at-point))
   :config
   (setq helm-dash-common-docsets '("Python 3" "PyTorch"))
   (setq helm-dash-browser-func 'eww)  
   )
 
-(use-package format-all
-  :hook
-  (prog-mode . format-all-mode))
+;; (use-package smartparens-config
+;;   :hook (prog-mode . smartparens-mode))
+
+(add-hook 'prog-mode-hook (lambda () (setq which-function-mode t)))
 
 (provide 'init-prog)

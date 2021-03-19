@@ -1,4 +1,4 @@
-;; ibuffer 的性能在 buffer 数目很多的时候不太行
+(require 'init-funcs)
 
 (use-package ibuffer
   :ensure nil
@@ -21,11 +21,7 @@
           (counsel-find-file default-directory)))
       (advice-add #'ibuffer-find-file :override #'my-ibuffer-find-file))))
 
-(defun icons-displayable-p ()
-  "Return non-nil if `all-the-icons' is displayable."
-  (and
-   (display-graphic-p)
-       (require 'all-the-icons nil t)))
+
 
 ;; (add-hook 'ibuffer-hook
 ;;     (lambda ()

@@ -9,10 +9,10 @@
   )
 (require 'org-protocol)
 (require 'find-lisp)
-(setq lxs/org-agenda-directory (concat lxs/home-dir "Documents/org/gtd/"))
+(setq lxs/org-agenda-directory (concat lxs-home-dir "Documents/org/gtd/"))
 (setq org-agenda-files
       (find-lisp-find-files lxs/org-agenda-directory "\.org$"))
-(add-to-list 'org-agenda-files (concat lxs/home-dir "Documents/" "org/" "org-roam-files/" "paper_index.org"))
+(add-to-list 'org-agenda-files (concat lxs-home-dir "Documents/" "org/" "org-roam-files/" "paper_index.org"))
 
 (setq org-agenda-archives-mode t)
 
@@ -50,16 +50,16 @@
          "* TODO %?\nCaptured %<%Y-%m-%d %H:%M>")
 	("p" "capture paper" entry (file ,(concat lxs/org-agenda-directory "inbox.org"))
 	 "* TODO [[%:link][%:description]]\n\n %i" :immediate-finish t)
-        ("n" "note" entry (file ,(concat lxs/home-dir "Documents/" "org/" "notes.org"))
+        ("n" "note" entry (file ,(concat lxs-home-dir "Documents/" "org/" "notes.org"))
          "* %^{heading}\n%?")
       ("c" "web bookmarks" entry (file ,(concat lxs/org-agenda-directory "webclips.org"))
        "* [[%:link][%:description]]\n " :prepend t :empty-lines-after 1 :immediate-finish t)
-      ("j" "journal" entry (file+datetree ,(concat lxs/home-dir "Documents/" "org/" "journal.org")) 
+      ("j" "journal" entry (file+datetree ,(concat lxs-home-dir "Documents/" "org/" "journal.org")) 
        "* %U - %^{heading}\n  %?")
       ("b" "billing" plain
-               (file+function ,(concat lxs/home-dir "Documents/" "org/" "billing.org") find-month-tree)
+               (file+function ,(concat lxs-home-dir "Documents/" "org/" "billing.org") find-month-tree)
                " | %U | %^{类别|吃饭|日用|其他} | %^{描述} | %^{金额} |" :kill-buffer t)
-      ("s" "code snippet" entry (file ,(concat lxs/home-dir "Documents/" "org/" "snippet.org"))
+      ("s" "code snippet" entry (file ,(concat lxs-home-dir "Documents/" "org/" "snippet.org"))
        "* %<%Y-%m-%d> - %^{title}\t%^g\n#+BEGIN_SRC %^{language}\n%^C%?\n#+END_SRC")
       ("h" "hugo blog file" entry (file lxs/creat-hugo-file) "* ")
 ))
@@ -89,13 +89,13 @@
                                     ,(concat lxs/org-agenda-directory "projects.org")
                                     ,(concat lxs/org-agenda-directory "next.org")
                                     ,(concat lxs/org-agenda-directory "learning.org")
-				    ,(concat lxs/home-dir "Documents/" "org/" "org-roam-files/" "paper_index.org")))
+				    ,(concat lxs-home-dir "Documents/" "org/" "org-roam-files/" "paper_index.org")))
                 ))
          (todo "TODO"
                ((org-agenda-overriding-header "Projects")
                 (org-agenda-files '(,(concat lxs/org-agenda-directory "projects.org")
 				    ,(concat lxs/org-agenda-directory "learning.org")
-				  ,(concat lxs/home-dir "Documents/" "org/" "org-roam-files/" "paper_index.org")))
+				  ,(concat lxs-home-dir "Documents/" "org/" "org-roam-files/" "paper_index.org")))
                 ))
          (todo "TODO"
                ((org-agenda-overriding-header "One-off Tasks")
@@ -108,7 +108,7 @@
 		))
 	 (todo "TODO"
 	       ((org-agenda-overriding-header "Blogs")
-		(org-agenda-files '(,(concat lxs/home-dir "Documents/" "org/" "HugoBlogs/" "short-notes.org")))))
+		(org-agenda-files '(,(concat lxs-home-dir "Documents/" "org/" "HugoBlogs/" "short-notes.org")))))
 	 (todo "WAITING"
 	       ((org-agenda-overriding-header "Waiting List")
 		(org-agenda-files '(,(concat lxs/org-agenda-directory "next.org")
@@ -332,7 +332,9 @@
 ;; (setq org-image-actual-width (/ (display-pixel-width) 3))
 
 
-(require 'alert-toast)
+(use-package alert-toast
+  :load-path "~/.emacs.d/alert-toast/"
+  )
 (use-package org-pomodoro
   :ensure t
   :hook
@@ -597,7 +599,7 @@ it can be passed in POS."
 (use-package helm-bibtex
   :ensure t
   :config
-  (setq bibtex-completion-bibliography (concat lxs/home-dir "Documents/" "bibliography/" "library.bib")))
+  (setq bibtex-completion-bibliography (concat lxs-home-dir "Documents/" "bibliography/" "library.bib")))
 
 (use-package org-roam-bibtex
   :ensure t
