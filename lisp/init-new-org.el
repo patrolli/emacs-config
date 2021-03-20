@@ -593,22 +593,26 @@ it can be passed in POS."
   (after-init . org-roam-mode)
   :custom
   (org-roam-directory (concat lxs-home-dir "Documents/" "org/" "org-roam-files"))
-      :bind (:map org-roam-mode-map
-              (("C-c n l" . org-roam)
-               ("C-c n f" . org-roam-find-file)
-               ("C-c n g" . org-roam-graph)
-	       ("C-c n b" . org-roam-switch-to-buffer)
-	       ("C-c n t" . org-roam-tag-add)
-	       ("C-c n j" . org-roam-dailies-capture-today)
-	       ("C-c n a" . org-roam-dailies-today)
-	       ("C-c n y" . org-roam-dailies-yesterday))
-              :map org-mode-map
-              (("C-c n i" . org-roam-insert))
-              (("C-c n I" . org-roam-insert-immediate)))
-      :config
-      (setq org-roam-graph-exclude-matcher '("private" "daily"))  ;; 在 graph 中排除一些笔记
-      (setq org-roam-verbose nil)
-      (setq org-roam-capture-templates
+  :bind (("C-c n" . org-roam-hydra/body))
+  :pretty-hydra
+  ((:title (pretty-hydra-title "Org roam menu" 'faicon "book"  :height 1.1 :v-adjust -0.1):color blue :quit-key "q")
+   ("Basic"
+    (("f" org-roam-find-file "find file")
+     ("b" org-roam-switch-to-buffer "switch buffer")
+     ("i" org-roam-insert "insert")
+     ("I" org-roam-inert-immediate "insert immediate")
+     ("t" org-roam-tag-add "add tag"))
+    "Dailies"
+    (("j a" org-roam-dailies-capture-today "capture today daily")
+     ("j y" org-roam-dailies-capture-yesterday "capture yesterday daily")
+     ("a" org-roam-dailies-today "show today daily")
+     ("y" org-roam-dailies-yesterday "show yesterday daily"))
+   ))
+
+  :config
+  (setq org-roam-graph-exclude-matcher '("private" "daily"))  ;; 在 graph 中排除一些笔记
+  (setq org-roam-verbose nil)
+  (setq org-roam-capture-templates
         '(("d" "default" plain (function org-roam--capture-get-point)
            "%?"
            :file-name "${slug}"
