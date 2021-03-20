@@ -107,6 +107,7 @@ decrease this. If you experience stuttering, increase this.")
 
 (require 'init-prog)
 (require 'init-highlight)
+(require 'init-vcs)
 
 
 (require 'init-new-org)

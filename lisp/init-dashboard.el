@@ -14,7 +14,8 @@
    (dashboard-set-navigator t)
    (dashboard-center-content t))
   :init  
-  (setq dashboard-show-shortcuts nil
+  (setq dashboard-startup-banner (or lxs-logo 'official)
+	dashboard-show-shortcuts nil
 	dashboard-set-navigator t
 	dashboard-navigator-buttons
 	`(((,(when (icons-displayable-p)

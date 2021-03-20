@@ -93,5 +93,6 @@
 ;;   :hook (prog-mode . smartparens-mode))
 
 (add-hook 'prog-mode-hook (lambda () (setq which-function-mode t)))
+(add-hook 'prog-mode-hook 'show-paren-mode)
 
 (provide 'init-prog)

@@ -9,12 +9,82 @@
   :hook ((after-init . persp-mode)
          (persp-mode . persp-load-frame)
          (kill-emacs . persp-save-frame))
-  :init (setq persp-keymap-prefix (kbd "C-x p")
+  :init (setq persp-keymap-prefix (kbd "C-c C-x s")
               persp-nil-name "default"
               persp-set-last-persp-for-new-frames nil
               persp-kill-foreign-buffer-behaviour 'kill
               persp-auto-resume-time 0)
+  :bind
+  (("C-x p" . hydra-persp/body))
   :config
+  (defun hydra-perse-names ()
+  (let ((names (persp-names-current-frame-fast-ordered))
+        (current-name (safe-persp-name (get-current-persp)))
+        (parts '())
+        (count 1))
+    (dolist (name names (s-join " | " (nreverse parts)))
+      (cond ((eq name current-name)
+             (push (format "[%d:%s]" count name) parts))
+            (t
+             (push (format "%d:%s" count name) parts)))
+      (cl-incf count))))
+  
+  (defun my/persp-switch-to-n (n)
+    (let ((names (persp-names-current-frame-fast-ordered))
+        (count 1))
+    (dolist (name names)
+      (when (= count n)
+        (persp-switch name))
+      (cl-incf count))))
+  (defun my/persp-switch-to-1 () (interactive) (my/persp-switch-to-n 1))
+  (defun my/persp-switch-to-2 () (interactive) (my/persp-switch-to-n 2))
+  (defun my/persp-switch-to-3 () (interactive) (my/persp-switch-to-n 3))
+  (defun my/persp-switch-to-4 () (interactive) (my/persp-switch-to-n 4))
+  (defun my/persp-switch-to-5 () (interactive) (my/persp-switch-to-n 5))
+  (defun my/persp-switch-to-6 () (interactive) (my/persp-switch-to-n 6))
+  (defun my/persp-switch-to-7 () (interactive) (my/persp-switch-to-n 7))
+  (defun my/persp-switch-to-8 () (interactive) (my/persp-switch-to-n 8))
+  (defun my/persp-switch-to-9 () (interactive) (my/persp-switch-to-n 9))
+  (defun my/persp-switch-to-10 () (interactive) (my/persp-switch-to-n 10))
+
+  (defun my/pick-layout ()
+  "Switch to a new or existing layout."
+  (interactive)
+  (let* ((names (persp-names))
+         (name (completing-read "Switch to layout: " names))
+         (exists (persp-with-name-exists-p name)))
+    (persp-switch name)
+    (unless exists
+      (switch-to-buffer "*scratch*"))))
+  
+  (defhydra hydra-persp (:hint nil)
+"
+Layouts %s(hydra-perse-names)
+
+^Navigation^      ^Selection^       ^Actions^        ^Buffers^
+^-^---------------^-^---------------^-^--------------^-^------------
+_n_: next         _l_: choose      _d_: delete      _a_: add buffer
+_p_: previous     _L_: predefined  _r_: rename      _k_: kill buffer
+"
+  ("q" nil)
+  ("a" persp-add-buffer :exit t)
+  ("k" persp-kill-buffer :exit t)
+  ("d" persp-kill)
+  ("l" my/pick-layout :exit t)
+  ("L" my/pick-predefined-layout :exit t)
+  ("r" persp-rename :exit t)
+  ("n" persp-next)
+  ("p" persp-prev)
+  ("1" my/persp-switch-to-1 :exit t)
+  ("2" my/persp-switch-to-2 :exit t)
+  ("3" my/persp-switch-to-3 :exit t)
+  ("4" my/persp-switch-to-4 :exit t)
+  ("5" my/persp-switch-to-5 :exit t)
+  ("6" my/persp-switch-to-6 :exit t)
+  ("7" my/persp-switch-to-7 :exit t)
+  ("8" my/persp-switch-to-8 :exit t)
+  ("9" my/persp-switch-to-9 :exit t)
+  ("0" my/persp-switch-to-10 :exit t))
   ;; Save and load frame parameters (size & position)
   (defvar persp-frame-file (expand-file-name "persp-frame" persp-save-dir)
     "File of saving frame parameters.")

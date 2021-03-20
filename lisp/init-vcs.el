@@ -32,21 +32,25 @@
     (setq magit-bury-buffer-function #'my-magit-kill-buffers))
 
   ;; Access Git forges from Magit
-  (when (executable-find "cc")
-    (use-package forge
-      :demand
-      :init (setq forge-topic-list-columns
-                  '(("#" 5 forge-topic-list-sort-by-number (:right-align t) number nil)
-                    ("Title" 60 t nil title  nil)
-                    ("State" 6 t nil state nil)
-                    ("Updated" 10 t nil updated nil)))))
+  ;; (when (executable-find "cc")
+  ;;   (use-package forge
+  ;;     :demand
+  ;;     :init (setq forge-topic-list-columns
+  ;;                 '(("#" 5 forge-topic-list-sort-by-number (:right-align t) number nil)
+  ;;                   ("Title" 60 t nil title  nil)
+  ;;                   ("State" 6 t nil state nil)
+  ;;                   ("Updated" 10 t nil updated nil)))))
 
   ;; Show TODOs in magit
   (when emacs/>=25.2p
     (use-package magit-todos
       :init
       (setq magit-todos-nice (if (executable-find "nice") t nil))
-      (magit-todos-mode 1))))
+      :config
+      (with-eval-after-load 'magit
+	 (magit-todos-mode 1))
+      ))
+  )
 
 ;; Walk through git revisions of a file
 (use-package git-timemachine

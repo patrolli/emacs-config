@@ -9,4 +9,17 @@
   (setq go-translate-buffer-follow-p t)
   )
 
+;; Persistent the scratch buffer
+;; FIXME: scrach buffer 打开总是 org-agenda mode
+(use-package persistent-scratch
+  :diminish
+  :bind (:map persistent-scratch-mode-map
+         ([remap kill-buffer] . (lambda (&rest _)
+                                  (interactive)
+                                  (user-error "Scrach buffer cannot be killed")))
+         ([remap revert-buffer] . persistent-scratch-restore)
+         ([remap revert-this-buffer] . persistent-scratch-restore))
+  :hook ((after-init . persistent-scratch-autosave-mode)
+         (lisp-interaction-mode . persistent-scratch-mode)))
+
 (provide 'init-utils)

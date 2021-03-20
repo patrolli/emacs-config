@@ -77,4 +77,24 @@
                 avy-background t
                 avy-style 'pre))
 
+;; Flexible text folding
+(use-package origami
+  :pretty-hydra
+  ((:title (pretty-hydra-title "Origami" 'octicon "fold" :height 1.1 :v-adjust -0.05)
+    :color amaranth :quit-key "q")
+   ("Node"
+    ((":" origami-recursively-toggle-node "toggle recursively")
+     ("a" origami-toggle-all-nodes "toggle all")
+     ("t" origami-toggle-node "toggle current")
+     ("o" origami-show-only-node "only show current"))
+    "Actions"
+    (("u" origami-undo "undo")
+     ("d" origami-redo "redo")
+     ("r" origami-reset "reset"))))
+  :bind (:map origami-mode-map
+         ("C-`" . origami-hydra/body))
+  :hook (prog-mode . origami-mode)
+  :init (setq origami-show-fold-header t)
+  :config (face-spec-reset-face 'origami-fold-header-face))
+
 (provide 'init-edit)
