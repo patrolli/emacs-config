@@ -128,8 +128,18 @@ prepended to the element after the #+HEADER: tag."
     :hook
     (org-mode . valign-mode))
 
+  (use-package org-appear
+    :hook
+    (org-mode . org-appear-mode)
+    :config
+    (;; (setq org-appear-autolinks t)
+     ))
+  
     ;; org habit
   (use-package org-tempo)
+  (use-package org-habit)
+  (add-to-list 'org-modules 'org-tempo)
+  (add-to-list 'org-modules 'org-habit)
   (setq org-habit-show-all-today t)
   (setq org-habit-graph-column 40)
   (setq org-habit-preceding-days 21)
@@ -603,10 +613,11 @@ it can be passed in POS."
      ("I" org-roam-inert-immediate "insert immediate")
      ("t" org-roam-tag-add "add tag"))
     "Dailies"
-    (("j a" org-roam-dailies-capture-today "capture today daily")
-     ("j y" org-roam-dailies-capture-yesterday "capture yesterday daily")
-     ("a" org-roam-dailies-today "show today daily")
-     ("y" org-roam-dailies-yesterday "show yesterday daily"))
+    (("j " org-roam-dailies-capture-today "capture today daily")
+     ("y " org-roam-dailies-capture-yesterday "capture yesterday daily")
+     ("s a" org-roam-dailies-today "show today daily")
+     ("s y" org-roam-dailies-yesterday "show yesterday daily")
+     ("s f" org-roam-dailies-find "find dailies"))
    ))
 
   :config

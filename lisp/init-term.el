@@ -32,4 +32,22 @@
                     (t '("terminal" "*terminal*"
                          (lambda () (term shell-pop-term-shell)))))))
 
+;; HACK: 直接用 vterm-toggle 似乎有一些兼容性的问题，但用了它的两个函数来切换 vterm buffer
+(use-package vterm-toggle
+  :config
+  (setq vterm-toggle-fullscreen-p nil)
+  (add-to-list 'display-buffer-alist
+             '((lambda(bufname _) (with-current-buffer bufname (equal major-mode 'vterm-mode)))
+                (display-buffer-reuse-window display-buffer-at-bottom)
+                ;;(display-buffer-reuse-window display-buffer-in-direction)
+                ;;display-buffer-in-direction/direction/dedicated is added in emacs27
+                ;;(direction . bottom)
+                ;;(dedicated . t) ;dedicated is supported in emacs27
+                (reusable-frames . visible)
+                (window-height . 0.3)))
+					;Switch to next vterm buffer
+  (define-key vterm-mode-map (kbd "M-n")   'vterm-toggle-forward)
+					;Switch to previous vterm buffer
+  (define-key vterm-mode-map (kbd "M-p")   'vterm-toggle-backward))
+
 (provide 'init-term)
