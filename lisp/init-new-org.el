@@ -15,7 +15,8 @@
                   (interactive)
                   (if (or (region-active-p) (looking-back "^\s*" 1))
                       (org-hydra/body)
-                    (self-insert-command 1))))))
+                    (self-insert-command 1))))
+  ("C-c m" . hydra-org-movement/body)))
   :init
   (setq lxs/org-agenda-directory (concat lxs-home-dir "Documents/org/gtd/"))
   :hook
@@ -90,6 +91,7 @@ prepended to the element after the #+HEADER: tag."
 	org-startup-indented t
 	org-hide-emphasis-markers t
 	org-catch-invisible-edits 'smart
+	org-tags-column -180
 	org-priority-faces '((?A . error)
                              (?B . warning)
                              (?C . success)))
@@ -115,6 +117,15 @@ prepended to the element after the #+HEADER: tag."
                 (if (and (display-graphic-p) (char-displayable-p ?⯀))
                     '("⯀" "⯀" "⯀" "⯀")
                   '("HIGH" "MEDIUM" "LOW" "OPTIONAL"))))
+
+  (defhydra hydra-org-movement (:color red :columns 3)
+    "Org Mode Movements"
+    ("n" outline-next-visible-heading "next heading")
+    ("p" outline-previous-visible-heading "prev heading")
+    ("N" org-forward-heading-same-level "next heading at same level")
+    ("P" org-backward-heading-same-level "prev heading at same level")
+    ("u" outline-up-heading "up heading")
+    ("g" org-goto "goto" :exit t))
 
   ;; 在 org-mode 中流畅地翻阅图片
   (use-package iscroll
@@ -595,6 +606,14 @@ it can be passed in POS."
 (use-package ox-hugo
   :ensure t
   :after ox)
+
+(use-package easy-hugo
+:init
+(setq easy-hugo-basedir (concat lxs-home-dir "Documents/" "xssq-blog/"))
+(setq easy-hugo-url "https://patrolli.github.io/xssq/")
+(setq easy-hugo-root "/docs")
+(setq easy-hugo-postdir "content/posts")
+(setq easy-hugo-previewtime "300"))
 
 (use-package org-roam
   :ensure t

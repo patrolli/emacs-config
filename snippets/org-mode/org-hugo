@@ -3,13 +3,10 @@
 # key: h
 # --
 #+HUGO_BASE_DIR: /mnt/c/Users/lixun/Documents/xssq-blog
-#+TITLE: $1
-#+DATE: `(format-time-string "%Y-%m-%d")`
 #+HUGO_AUTO_SET_LASTMOD: t
 #+HUGO_TAGS: $2
 #+HUGO_CATEGORIES: $3
 #+HUGO_DRAFT: false
-#+AUTHOR: patrolli
 #+CREATER: Emacs 26.3 (orgmode 9.4.4 + ox-hugo)
 
 $0
