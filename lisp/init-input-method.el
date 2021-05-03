@@ -55,7 +55,8 @@
    ("<tab>" . 'rime-inline-ascii)
    :map rime-mode-map
    ("C-`" . 'rime-send-keybinding)    ;; <---- 
-   ("M-j" . 'rime-force-enable))
+   ;; ("M-j" . 'rime-force-enable)
+   )
   :config
   (setq default-input-method "rime"
 	rime-show-candidate 'posframe);;
@@ -71,6 +72,7 @@
 	  rime-predicate-in-code-string-p
 	  rime-predicate-punctuation-line-begin-p
 	  ;; rime-predicate-space-after-ascii-p
+	  rime-predicate-ace-window-p
           rime-predicate-current-uppercase-letter-p
 	  ;; rime-predicate-helm-mode-p
           ))
@@ -80,7 +82,8 @@
             :foreground-color "#dcdccc"
             :font "WenQuanYi Micro Hei Mono-14"
             :internal-border-width 10))
-  (add-hook 'find-file-hook #'toggle-input-method) 
+  ;; (add-hook 'find-file-hook #'toggle-input-method) 
   )
+
 
 (provide 'init-input-method)

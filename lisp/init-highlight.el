@@ -1,18 +1,27 @@
 ;; highlight todo related keywords 
 (use-package hl-todo
   :ensure t
+  :custom
+  (hl-todo-keyword-faces '(("TODO"   . "#FF0000")
+			   ("FIXME"  . "#FF0000")
+			   ("DEBUG"  . "#A020F0")
+			   ("GOTCHA" . "#FF4500")
+			   ("STUB"   . "#1E90FF")
+			   ("NOTE" . "#b1951d")
+			   ("QUES" . "DarkMagenta")))
   :config
   (add-hook 'prog-mode-hook 'hl-todo-mode)
-  (setq hl-todo-keyword-faces
-      '(("TODO"   . "#FF0000")
-        ("FIXME"  . "#FF0000")
-        ("DEBUG"  . "#A020F0")
-        ("GOTCHA" . "#FF4500")
-        ("STUB"   . "#1E90FF")
-	("NOTE" . "#b1951d")))
+  ;; (setq hl-todo-keyword-faces
+      ;; '(("TODO"   . "#FF0000")
+        ;; ("FIXME"  . "#FF0000")
+        ;; ("DEBUG"  . "#A020F0")
+        ;; ("GOTCHA" . "#FF4500")
+        ;; ("STUB"   . "#1E90FF")
+	;; ("NOTE" . "#b1951d")
+	;; ("QUES" . "DarkMagenta")))	
   (define-key hl-todo-mode-map (kbd "C-c b") 'hl-todo-previous)
   (define-key hl-todo-mode-map (kbd "C-c f") 'hl-todo-next)
-  (define-key hl-todo-mode-map (kbd "C-c o") 'hl-todo-occur))
+  (define-key hl-todo-mode-map (kbd "C-c o") 'hl-todo-occur)) 
 
 ;; Highlight uncommitted changes using VC
 (use-package diff-hl

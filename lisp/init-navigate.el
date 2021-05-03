@@ -19,7 +19,7 @@
      ("P" pop-global-mark "all buffer mark")
      ("m l" counsel-mark-ring "show local marks"))
     "hl-todo"
-    (("f n" hl-todo-nexe "next TODO")
+    (("f n" hl-todo-next "next TODO")
      ("f p" hl-todo-previous "previous TODO")
      ("f o" hl-todo-occur "show all TODOs")
      ("f i" hl-todo-insert "insert TODO")

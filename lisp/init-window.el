@@ -91,6 +91,8 @@
          ("C-c w" . ace-window-hydra/body))
   :hook (emacs-startup . ace-window-display-mode)
   :config
+  (setq aw-keys '(?a ?s ?d ?f ?j ?k ?l)
+	aw-dispatch-always t)
   (defun toggle-window-split ()
     (interactive)
     (if (= (count-windows) 2)
@@ -232,6 +234,8 @@
           (("*Paradox Report*" "*package update results*") :size 0.2 :align 'below :autoclose t)
           ("*Package-Lint*" :size 0.4 :align 'below :autoclose t)
           ("*How Do You*" :select t :size 0.5 :align 'below :autoclose t)
+	  ("*color-rg*" :select t :size 20 :align 'below)
+	  ("*Go Translate*" :select t :size 20 :align 'below)
 
           (("*Org Agenda*" " *Agenda Commands*" " *Org todo*" "*Org Dashboard*" "*Org Select*") :select t :size 0.1 :align 'below :autoclose t)
           (("\\*Capture\\*" "^CAPTURE-.*\\.org*" "*Org Note*") :regexp t :select t :size 0.3 :align 'below :autoclose t)

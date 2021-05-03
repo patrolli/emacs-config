@@ -30,3 +30,6 @@ pyim-dict
 forge-database.sqlite
 .persistent-scratch
 newsticker/
+.persistent-scratch-backup/
+eaf
+.mc-lists.el

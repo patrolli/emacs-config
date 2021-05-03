@@ -13,6 +13,14 @@
 (define-key key-translation-map (kbd "C-M-h") (kbd "M-DEL"))
 (global-set-key (kbd "<f1>") 'help-command)
 
+(setq backup-directory-alist
+      `((".*" . ,temporary-file-directory)))
+(setq auto-save-file-name-transforms
+      `((".*" ,temporary-file-directory t)))
+
+;; disable bell warning
+(setq ring-bell-function 'ignore)
+
 (use-package posframe
   :defer t
   :ensure t)
@@ -29,13 +37,15 @@
    )
   )
 
-(use-package openwith
-  :hook
-  (after-init-hook . openwith-mode)
-  :config
-  (openwith-mode t)
-  (setq openwith-associations '(("\\.pdf\\'" " okular" (file))))
-  )
+(use-package thing-edit
+  :load-path "site-lisp/thing-edit/")
+;; (use-package openwith
+;;   :hook
+;;   (after-init-hook . openwith-mode)
+;;   :config
+;;   (openwith-mode t)
+;;   (setq openwith-associations '(("\\.pdf\\'" " okular" (file))))
+;;   )
 
 ;; 自动保存文件
 (use-package auto-save
@@ -46,13 +56,45 @@
   (setq auto-save-idle 2)
   )
 
-;; (use-package which-key
-;;   :defer t
-;;   :disabled t
-;;   :diminish
-;;   :ensure t
-;;   :config
-;;   (which-key-mode)
-;;   )
+;; 检测文件是否已经被导出 hugo
+(defun lxs-org-is-hugo-file-p (fPath)
+  "Predict if the org file has been converted into hugo"
+  (with-temp-buffer
+    (let ((keyline "#+HUGO_DRAFT: false\n"))
+	  (insert-file-contents fPath)
+	  (and (search-forward keyline nil t) t)
+	  )
+    ))
+(defun lxs-list-org-in-directory (dPath)
+  "list org files under a directory path"
+  (directory-files-recursively dPath "\.org$")
+  )
+(defun my--export-to-hugo (dPath)
+  "Convert org files under a directory path into hugo .md files"
+  (mapc
+   (lambda (file-name)
+     (progn
+       (if (lxs-org-is-hugo-file-p file-name)		
+	   (with-current-buffer (find-file-noselect file-name)
+	     (org-hugo-export-wim-to-md)
+	     ))
+       ))
+   (lxs-list-org-in-directory dPath)
+   )
+  (message "export to hugo md file end!"))
+(defun my--choose-directory ()
+  "Return a directory chosen by the user.  The user will be prompted
+to choose a directory"
+  (let* ((ivy-read-prompt "Choose directory: ")
+         (counsel--find-file-predicate #'file-directory-p)
+         (selected-directory
+          (ivy-read
+           ivy-read-prompt
+           :matcher #'counsel--find-file-matcher)))
+    selected-directory))
+(defun lxs-export-org-to-hugo ()
+  (interactive)
+  (let ((directory (my--choose-directory)))
+    (my--export-to-hugo directory)))
 
 (provide 'init-basic)

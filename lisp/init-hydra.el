@@ -2,6 +2,7 @@
 
 (use-package pretty-hydra
   :bind ("<f6>" . toggles-hydra/body)
+  :ensure t
   :init
   (cl-defun pretty-hydra-title (title &optional icon-type icon-name
                                       &key face height v-adjust)
@@ -77,7 +78,7 @@
 
      Find File            Search/Tags          Buffers                Cache
 ------------------------------------------------------------------------------------------
- _.f_: file            _a_: ag                _i_: Ibuffer           _c_: cache clear
+ _j_: file            _a_: ag                _i_: Ibuffer           _c_: cache clear 
  _ff_: file dwim       _g_: color-rg          _b_: switch to buffer  _x_: remove known project
  _fd_: file curr dir   _o_: multi-occur      _.k_: Kill all buffers  _X_: cleanup non-existing
   _r_: recent file                                               ^^^^_z_: cache current
@@ -88,7 +89,7 @@
   ("b"   projectile-switch-to-buffer)
   ("c"   projectile-invalidate-cache)
   ("d"   projectile-find-dir)
-  (".f" projectile-find-file)
+  ("j" projectile-find-file)
   ("ff"  projectile-find-file-dwim)
   ("fd"  projectile-find-file-in-directory)
   ;; ("g"   ggtags-update-tags)
@@ -108,7 +109,7 @@
   ("X"   projectile-cleanup-known-projects)
   ("z"   projectile-cache-current-file)
   ("`"   hydra-projectile-other-window/body "other window")
-  ("q"   nil "cancel" :color blue))
+  ("q"   hydra-pop "cancel" :color blue))
 
 (defun lxs/color-rg-search-specify-project ()
   (interactive)
@@ -132,15 +133,410 @@
   (let ((filename (or name (format "%s:%s" (buffer-name) (line-number-at-pos)))))
     (bookmark-set filename)))
 
-(defhydra hydra-bookmarks (:color blue)
-  "bookmarks"
-  ("q" nil "quit")
-  ("a" hydra--set-bookmark "here")
-  ("n" (lambda () (interactive) (hydra--set-bookmark (read-from-minibuffer "Name:"))) "named")
-  ("l" counsel-bookmark "list"))
+(defhydra hydra-bookmarks (:color teal :hint none)
+  "
+Bookmarks (_q_uit)
+^bookmarks^         ^bm bookmark^    ^hl todo^
+^--------^-------   ^-----^------
+_a_dd bookmark      _j_ next bm      _h_ next TODO
+_n_ame bookmark     _k_ prev bm      _g_ prev TODO
+_l_ist bookmark     _s_ toggle bm    sh_o_w TODO
+^^                  _f_ show bm      _i_nsert TODO
+"
+  ;; bookmarks
+  ("q" hydra-pop )
+  ("a" hydra--set-bookmark )
+  ("n" (lambda () (interactive) (hydra--set-bookmark (read-from-minibuffer "Name:"))) )
+  ("l" counsel-bookmark )
+  ;; bm bookmark
+  ("j" bm-next :exit nil)
+  ("k" bm-previous :exit nil)
+  ("s" bm-toggle :exit nil)
+  ("f" counsel-bm :exit nil)
+  ;; hl-todo
+  ("h" hl-todo-next :color red)
+  ("g" hl-todo-previous :color red)	
+  ("o" hl-todo-occur)
+  ("i" hl-todo-insert)
+  )			
 
+;; (setq hydra-mode-line-format 'after)
+;; (defun hydra-refresh-mode-line (&optional state)
+;;   "Refresh mode line tag."
+;;   (when (listp mode-line-format)
+;;     (setq hydra-mode-line-tag (propertize state
+;; 					  'face 'eyebrowse-mode-line-active
+;; 					  'mouse-face 'mode-line-highlight)) ;; 自己定义的 hydra mode-line 样式
+;;     ;; refresh mode line data structure
+;;     ;; first remove hydra from mode-line
+;;     (setq mode-line-format (delq 'hydra-mode-line-tag mode-line-format)) ;; 先去掉 hydra-mode-line
+;;     (let ((mlpos mode-line-format)
+;;           pred which where)
+;;       ;; determine before/after which symbol the tag should be placed
+;;       (cond
+;;        ((eq hydra-mode-line-format 'before)
+;;         (setq where 'after which 'mode-line-position))
+;;        ((eq hydra-mode-line-format 'after)
+;;         (setq where 'after which 'mode-line-modes))
+;;        ((consp hydra-mode-line-format)
+;;         (setq where (car hydra-mode-line-format)
+;;               which (cdr hydra-mode-line-format))))
+;;       ;; find the cons-cell of the symbol before/after which the tag
+;;       ;; should be placed
+;;       (while (and mlpos
+;;                   (let ((sym (or (car-safe (car mlpos)) (car mlpos))))
+;;                     (not (eq which sym))))
+;;         (setq pred mlpos
+;;               mlpos (cdr mlpos)))
+;;       ;; put hydra tag at the right position in the mode line
+;;       (cond
+;;        ((not mlpos)) ;; position not found, so do not add the tag
+;;        ((eq where 'before)
+;;         (if pred
+;;             (setcdr pred (cons 'hydra-mode-line-tag mlpos))
+;;           (setq mode-line-format
+;;                 (cons 'hydra-mode-line-tag mode-line-format))))
+;;        ((eq where 'after)
+;;         (setcdr mlpos (cons 'hydra-mode-line-tag (cdr mlpos)))))
+;;       (force-mode-line-update))))
+
+(defun hydra-indicator-f (&optional state bcolor)
+  (cond 
+	((string-equal bcolor "red") (propertize state
+		 'face '((:background "red") (:foregrond "black"));; 'eyebrowse-mode-line-active 
+		 'mouse-face 'mode-line-highlight))
+	((string-equal bcolor "green") (propertize state
+		 'face '((:background "green") (:foregrond "black"));; 'eyebrowse-mode-line-active 
+		 'mouse-face 'mode-line-highlight))
+	((string-equal bcolor "blue") (propertize state
+		 'face '((:background "blue") (:foregrond "white"));; 'eyebrowse-mode-line-active 
+		 'mouse-face 'mode-line-highlight))
+	)
+    )
+
+(defun hydra-refresh-mode-line (&optional state bcolor)
+  (setq hydra-indicator (hydra-indicator-f state bcolor))
+  (add-to-list 'mode-line-misc-info '((:eval hydra-indicator)))
+  )
+
+(setq hydra-indicator (hydra-indicator-f "N" "blue"))
+
+(defun avy-goto-word-1-backward-in-line (char &optional arg)
+  (interactive (list (read-char "char: " t)
+                     current-prefix-arg))
+  (avy-goto-word-1 char arg (point-at-bol) (point) nil))
+
+(defun avy-goto-word-1-forward-in-line (char &optional arg)
+  (interactive (list (read-char "char: " t)
+                     current-prefix-arg))
+  (avy-goto-word-1 char arg (point) (point-at-eol) nil))
+
+(defun view-jump-brace ()
+  "Jump to correspondence parenthesis"
+  (interactive)
+  (let ((c (following-char))
+        (p (preceding-char)))
+    (if (eq (char-syntax c) 40) (forward-list)
+      (if (eq (char-syntax p) 41) (backward-list)
+        (backward-up-list)))))
+
+(setq cursor-in-non-selected-windows nil)
+
+(defvar hydra-stack nil)
+
+(defun hydra-push (expr)
+  (push `(lambda () ,expr) hydra-stack))
+
+(defun hydra-pop ()
+  (interactive)
+  (let ((x (pop hydra-stack)))
+    (when x
+      (funcall x))))
+
+(defun ded/org-show-next-heading-tidily ()
+  "Show next entry, keeping other entries closed."
+  (if (save-excursion (end-of-line) (outline-invisible-p))
+      (progn (org-show-entry) (show-children))
+    (outline-next-heading)
+    (unless (and (bolp) (org-on-heading-p))
+      (org-up-heading-safe)
+      (hide-subtree)
+      (error "Boundary reached"))
+    (org-overview)
+    (org-reveal t)
+    (org-show-entry)
+    (recenter-top-bottom)
+    (show-children)
+    (recenter-top-bottom)))
+
+(defun ded/org-show-previous-heading-tidily ()
+  "Show previous entry, keeping other entries closed."
+  (let ((pos (point)))
+    (outline-previous-heading)
+    (unless (and (< (point) pos) (bolp) (org-on-heading-p))
+      (goto-char pos)
+      (hide-subtree)
+      (error "Boundary reached"))
+    (org-overview)
+    (org-reveal t)
+    (org-show-entry)
+    (recenter-top-bottom)
+    (show-children)
+    (recenter-top-bottom)))
+
+(defun next-user-buffer ()
+  "Switch to the next user buffer.
+“user buffer” is determined by `xah-user-buffer-q'.
+URL `http://ergoemacs.org/emacs/elisp_next_prev_user_buffer.html'
+Version 2016-06-19"
+  (interactive)
+  (next-buffer)
+  (let ((i 0))
+    (while (< i 20)
+      (if (not (xah-user-buffer-q))
+          (progn (next-buffer)
+                 (setq i (1+ i)))
+        (progn (setq i 100))))))
+
+(defun previous-user-buffer ()
+  "Switch to the previous user buffer.
+“user buffer” is determined by `xah-user-buffer-q'.
+URL `http://ergoemacs.org/emacs/elisp_next_prev_user_buffer.html'
+Version 2016-06-19"
+  (interactive)
+  (previous-buffer)
+  (let ((i 0))
+    (while (< i 20)
+      (if (not (xah-user-buffer-q))
+          (progn (previous-buffer)
+                 (setq i (1+ i)))
+        (progn (setq i 100))))))
+
+(defun hydra-normal-state-cursor()
+  (setq-default cursor-type 'box)
+  (set-cursor-color "green"))
+
+(defun hydra-insert-state-cursor()
+  (setq-default cursor-type 'bar)
+  (set-cursor-color "red"))
+
+(defun xah-user-buffer-q ()
+  "Return t if current buffer is a user buffer, else nil.
+Typically, if buffer name starts with *, it's not considered a user buffer.
+This function is used by buffer switching command and close buffer command, so that next buffer shown is a user buffer.
+You can override this function to get your idea of “user buffer”.
+version 2016-06-18"
+  (interactive)
+  (if (string-equal "*" (substring (buffer-name) 0 1))
+      nil
+    (if (string-equal major-mode "dired-mode")
+        nil
+      t
+      )))
+
+  (defun gcm-scroll-down ()
+      (interactive)
+      (scroll-up 1))
+(defun gcm-scroll-up ()
+      (interactive)
+      (scroll-down 1))
+(defun joe-scroll-other-window()
+  (interactive)
+  (scroll-other-window 1))
+(defun joe-scroll-other-window-down ()
+  (interactive)
+  (scroll-other-window-down 1))
+(defhydra hydra-window-size (:color red)
+        "Windows size"
+        ("h" shrink-window-horizontally "shrink horizontal")
+        ("j" shrink-window "shrink vertical")
+        ("k" enlarge-window "enlarge vertical")
+        ("l" enlarge-window-horizontally "enlarge horizontal")
+	("q" hydra-pop "exit"))
+(defhydra hydra-window-frame (:color red)
+        "Frame"
+        ("f" make-frame "new frame")
+        ("x" delete-frame "delete frame")
+	("q" hydra-pop "exit"))
+(defhydra hydra-window-scroll (:color red)
+        "Scroll other window"
+        ("n" joe-scroll-other-window "scroll")
+        ("p" joe-scroll-other-window-down "scroll down")
+	("q" hydra-pop "exit"))
+
+(defhydra hydra-reading
+  (:pre (progn (setq hydra-is-helpful nil)(overwrite-mode -1) (hydra-refresh-mode-line "[N]" "green" ) (hydra-normal-state-cursor) 
+	       )
+   :before-exit (progn (setq hydra-is-helpful t) (hydra-refresh-mode-line "[I]" "red")
+		       (hydra-insert-state-cursor)
+			    )
+	:foreign-keys run
+	:color amaranth
+	:hint nil)
+  ""
+  ("!" shell-pop)
+  ("-" er/contract-region)
+  ("=" er/expand-region)
+  ("%" view-jump-brace)
+  ;; ("/" (progn (toggle-org-hydra) (hydra-push '(hydra-reading/body))) :color teal)
+
+  ;; org relevant
+  ("/r" org-roam-hydra/body (progn
+	  (org-roam-hydra/body)
+	  (hydra-push '(hydra-reading/body))	  
+	  ) :color blue)
+  ("/c" org-capture)
+  
+  ;; ("." (progn (call-interactively 'avy-goto-char-timer)))
+  (":" (progn (call-interactively 'eval-expression)))
+  ;; ace-window
+  (".." ace-window) ;; 为 ace-window 增加一个 rime 的断言
+  (".x" ace-delete-window)
+  (".c" ace-swap-window)
+  (".v" split-window-below)
+  (".b" balance-windows)
+  (".n" aw-flip-window)
+  (".m" delete-other-windows)
+  (".h" split-window-right)
+  (".u" winner-undo)
+  (".o" (progn
+	  (hydra-window-scroll/body)
+	  (hydra-push '(hydra-reading/body))	  
+	  ) :color blue)
+  (".r" winner-redo)
+  (".w" (progn
+	  (hydra-window-size/body)
+	  (hydra-push '(hydra-reading/body))	  
+	  ) :color blue)
+  (".;" (progn
+	  (hydra-window-frame/body)
+	  (hydra-push '(hydra-reading/body))	  
+	  ) :color blue)
+  (".f" toggle-frame-fullscreen)
+  
+  (";f" (progn
+	  (hydra-persp/body)
+	  (hydra-push '(hydra-reading/body)))
+   :color blue)
+  (";j" (progn
+	  (hydra-projectile/body)
+	  (hydra-push '(hydra-reading/body))) :color blue)
+  (";a" color-rg-search-project)
+  (";q" color-rg-search-input-in-current-file)
+  (";o" lxs/search-org)
+  (";e" eval-buffer)
+  (";s" eval-last-sexp)
+  (";b" kill-buffer)
+  (";x" persp-remove-buffer)
+  (";i" (progn
+	  (hydra-bookmarks/body)
+	  (hydra-push '(hydra-reading/body))	  
+	  ) :color blue)
+  (";d" dired-jump)
+  ;; (";j" persp-prev)
+  (",t" treemacs :color blue)
+  (",j" xah-pop-local-mark-ring)
+  (",a" lxs/switch-to-agenda)
+  (",cj" org-roam-dailies-capture-today)
+  (",m" pop-global-mark)
+  ("C-c C-]" helm-bibtex :color blue)
+  ("C-c a" modi/switch-to-scratch-and-back :color blue)
+  ("C-c z" (call-interactively 'helm-org-dwim))
+  ("C-M-S-i" (if org-src-mode (org-edit-src-exit) (call-interactively 'narrow-or-widen-dwim)) :color blue)
+  ("<mouse-1>" mouse-set-point :color blue)
+  ;; ("<mouse-2>" helm-for-files)
+  ;; ("<mouse-3>" kill-this-buffer)
+  ("<mouse-3>" counsel-find-file)
+  ("<" beginning-of-buffer)
+  (">" end-of-buffer)
+  ("@" avy-goto-line)
+  ("A" (progn (beginning-of-line) (indent-according-to-mode)) :color blue)
+  ("D" kill-line :color blue)
+  ("E" end-of-line :color blue)
+  ("F" (progn (call-interactively 'avy-goto-word-1-backward-in-line)))
+  ;; ("H" (progn (ov-highlight/body) (hydra-push '(hydra-reading/body))) :color teal)
+  ("I" (progn (forward-char 1)) :color blue)
+  ("J" (progn (end-of-line) (newline-and-indent)) :color blue)
+  ("K" (progn (beginning-of-line) (open-line 1) (indent-according-to-mode)) :color blue)
+  ("N" next-user-buffer)
+  ("P" previous-user-buffer)
+  ("S" swiper-all)
+  ("B" ibuffer)
+  ("S-SPC" gcm-scroll-up)
+  ("SPC" gcm-scroll-down)
+  ("T" org-babel-tangle)
+  ("V" (and (ignore-errors (other-window-for-scrolling) (scroll-other-window-down))))
+  ("W" backward-word)
+  ("X" (progn (kill-line 0)))
+  ("Y" duplicate-line-or-region :color blue)
+  ("[" beginning-of-defun)	     
+  ("]" end-of-defun)
+  ("a" (progn (beginning-of-line) (indent-according-to-mode)))
+  ("b" ;; (progn (ibuffer) (swiper))
+   (ivy-switch-buffer)
+   )
+  ;; ("c" (progn (overwrite-mode) (hydra-refresh-mode-line "[C]" "blue")) :color blue)
+  ("dd" kill-whole-line)		
+  ("dw" kill-word)
+  ("df" zap-to-char :color blue)
+  ("de" kill-line :color blue)
+  ("da" (progn (kill-line 0) (indent-according-to-mode)) :color blue)
+  ;; ("dp" duplicate-line-or-region :color blue)
+  ("dc" thing-cut-comment)
+  ("ds" thing-cut-sexp)
+  ("dj" thing-cut-symbol)
+  ("e" end-of-line)
+  ("f" (progn (call-interactively 'avy-goto-word-1-forward-in-line)))
+  ("g" google-this)
+  ("G" go-translate)
+  ("h" backward-char)
+  ("i" nil)
+  ("j" next-line)
+  
+  ("k" previous-line)
+  ("l" forward-char)
+  ("ma" magit-log-all :color blue)
+  ("mc" magit-stage-all-and-commit :color blue)
+  ("mg" magit-status :color blue)
+  ("md" magit-diff :color blue)
+  ("ml" magit-log-current :color blue)
+  ("mt" git-timemachine :color blue)
+  ("mw" mark-word)
+  ("ms" mark-sexp)
+  ("mp" mark-paragraph)
+  ("mm" set-mark-command)
+  ("M-;" comment-line)
+  ("zk" helpful-key)
+  ("zv" counsel-describe-variable)
+  ("zf" counsel-describe-function)
+  ("zg" keyboard-quit)
+  ("zd" helpful-at-point)
+  ("n" (progn (ded/org-show-next-heading-tidily)))
+  ;; ("o" ace-link) ;; future use for org-mode hydra
+  ("o" ace-window)
+  ("p" (progn (ded/org-show-previous-heading-tidily)))
+  ("r" undo-tree-redo)
+  ("s" swiper)
+  ("t" other-window)
+  ("T" (other-window -1))
+  ("cc" avy-goto-char)
+  ("cj" avy-goto-char-2)
+  ("cl" avy-goto-line)
+  ("u" undo)
+  ("v" (save-excursion (and (ignore-errors (other-window-for-scrolling)) (scroll-other-window))))
+  ("w" forward-word)
+  ("x" delete-char)
+  ("y" yank)
+  ("<escape>" nil)
+  ("M-j" nil))
+
+(bind-key "<escape>" 'hydra-reading/body)
+(bind-key "M-j" 'hydra-reading/body)
+
+;; (add-hook 'find-file-hook '(lambda () (progn (hydra-pop) (hydra-reading/body))))
 
 (provide 'init-hydra)
+
 
 
 

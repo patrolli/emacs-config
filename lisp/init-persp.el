@@ -17,6 +17,37 @@
   :bind
   (("C-x p" . hydra-persp/body))
   :config
+
+  (defun my/persp-next ()
+  "Switch to next perspective (to the right)."
+  (interactive)
+  (let* ((persp-list (persp-names-current-frame-fast-ordered))
+         (persp-list-length (length persp-list))
+         (only-perspective? (equal persp-list-length 1))
+         (pos (cl-position (safe-persp-name (get-current-persp)) persp-list :test 'equal)))
+    (cond
+     ((null pos) nil)
+     (only-perspective? nil)
+     ((= pos (1- persp-list-length))
+      (if persp-switch-wrap (persp-switch (nth 0 persp-list))))
+     (t (persp-switch (nth (1+ pos) persp-list))))))
+
+  (defun my/persp-prev ()
+  "Switch to previous perspective (to the left)."
+  (interactive)
+  (let* ((persp-list (persp-names-current-frame-fast-ordered))
+         (persp-list-length (length persp-list))
+         (only-perspective? (equal persp-list-length 1))
+         (pos (cl-position (safe-persp-name (get-current-persp)) persp-list :test 'equal)))
+    (cond
+     ((null pos) nil)
+     (only-perspective? nil)
+     ((= pos 0)
+      (if persp-switch-wrap
+          (persp-switch (nth (1- persp-list-length) persp-list))))
+     (t (persp-switch (nth (1- pos) persp-list))))))
+(persp-names-current-frame-fast-ordered)
+  
   (defun hydra-perse-names ()
   (let ((names (persp-names-current-frame-fast-ordered))
         (current-name (safe-persp-name (get-current-persp)))
@@ -57,34 +88,36 @@
     (unless exists
       (switch-to-buffer "*scratch*"))))
   
-  (defhydra hydra-persp (:hint nil)
+  (defhydra hydra-persp (:hint nil :color red)
 "
 Layouts %s(hydra-perse-names)
 
 ^Navigation^      ^Selection^       ^Actions^        ^Buffers^
 ^-^---------------^-^---------------^-^--------------^-^------------
 _n_: next         _l_: choose      _d_: delete      _a_: add buffer
-_p_: previous     _L_: predefined  _r_: rename      _k_: kill buffer
+_p_: previous     _L_: predefined  _r_: rename      _k_: remove buffer
+^^                ^^               ^^               _K_: kill buffer
 "
-  ("q" nil)
+  ("q" hydra-pop "quit")
   ("a" persp-add-buffer :exit t)
-  ("k" persp-kill-buffer :exit t)
+  ("k" persp-remove-buffer :exit t)
+  ("K" persp-kill-buffer :exit t)
   ("d" persp-kill)
   ("l" my/pick-layout :exit t)
   ("L" my/pick-predefined-layout :exit t)
   ("r" persp-rename :exit t)
-  ("n" persp-next)
-  ("p" persp-prev)
-  ("1" my/persp-switch-to-1 :exit t)
-  ("2" my/persp-switch-to-2 :exit t)
-  ("3" my/persp-switch-to-3 :exit t)
-  ("4" my/persp-switch-to-4 :exit t)
-  ("5" my/persp-switch-to-5 :exit t)
-  ("6" my/persp-switch-to-6 :exit t)
-  ("7" my/persp-switch-to-7 :exit t)
-  ("8" my/persp-switch-to-8 :exit t)
-  ("9" my/persp-switch-to-9 :exit t)
-  ("0" my/persp-switch-to-10 :exit t))
+  ("n" my/persp-next)
+  ("p" my/persp-prev)
+  ("1" my/persp-switch-to-1 )
+  ("2" my/persp-switch-to-2 )
+  ("3" my/persp-switch-to-3 )
+  ("4" my/persp-switch-to-4 )
+  ("5" my/persp-switch-to-5 )
+  ("6" my/persp-switch-to-6 )
+  ("7" my/persp-switch-to-7 )
+  ("8" my/persp-switch-to-8 )
+  ("9" my/persp-switch-to-9 )
+  ("0" my/persp-switch-to-10))
   ;; Save and load frame parameters (size & position)
   (defvar persp-frame-file (expand-file-name "persp-frame" persp-save-dir)
     "File of saving frame parameters.")
@@ -163,11 +196,24 @@ _p_: previous     _L_: predefined  _r_: rename      _k_: kill buffer
                        (eq (buffer-local-value 'major-mode b) 'erc-mode)
                        (eq (buffer-local-value 'major-mode b) 'rcirc-mode)
                        (eq (buffer-local-value 'major-mode b) 'nov-mode)
-                       (eq (buffer-local-value 'major-mode b) 'vterm-mode)))))
+                       (eq (buffer-local-value 'major-mode b) 'vterm-mode)
+		       ))))
 
   ;; Don't save persp configs in `recentf'
   (with-eval-after-load 'recentf
     (push persp-save-dir recentf-exclude))
+
+  ;; TODO: 针对单一模式的 buffer, 自动将其归入到一个 persp 中
+  ;; (with-eval-after-load "persp-mode-autoload"
+  ;;     (with-eval-after-load "vterm"
+  ;;       (persp-def-auto-persp "vterm"
+  ;;         :parameters '((dont-save-to-file . t))
+  ;;         :mode 'vterm-mode
+  ;;         :dyn-env '(after-switch-to-buffer-functions ;; prevent recursion
+  ;;                    (persp-add-buffer-on-find-file nil)
+  ;;                    persp-add-buffer-on-after-change-major-mode)
+  ;;         :hooks '(after-switch-to-buffer-functions)
+  ;;         :switch 'window)))
 
   ;; Ivy Integraticon
   (with-eval-after-load 'ivy

@@ -20,7 +20,8 @@
   :init
   (setq lxs/org-agenda-directory (concat lxs-home-dir "Documents/org/gtd/"))
   :hook
-  ((org-mode . toggle-truncate-lines)
+  (((org-babel-after-execute org-mode) . org-redisplay-inline-images)
+   (org-mode . toggle-truncate-lines)
    (org-mode . org-hide-block-all)
    (org-mode . org-overview)
    (org-mode . turn-on-org-cdlatex)
@@ -220,6 +221,25 @@ prepended to the element after the #+HEADER: tag."
 	   "* %<%Y-%m-%d> - %^{title}\t%^g\n#+BEGIN_SRC %^{language}\n%^C%?\n#+END_SRC")
 	  ("h" "hugo blog file" entry (file (lambda () (lxs/create-hugo-file (concat lxs-home-dir "Documents/" "org/" "HugoBlogs/"))) ) "* ")
 	  ))
+
+  (defun lxs/org-find-project-idea-datetree ()
+  ;; (interactive)
+  (let* ((project (completing-read "Choose a project" '("compaction")))
+	(m (org-find-olp (cons (org-capture-expand-file (concat lxs-home-dir "Documents/" "org/" "org-roam-files/" project ".org")) '("Idea")))))
+    (set-buffer (marker-buffer m))
+   ;; (org-capture-put-target-region-and-position)
+   (widen)
+   (goto-char m)
+   (set-marker m nil)
+   ;; (org-capture-put-target-region-and-position)
+   (org-datetree-find-date-create (calendar-gregorian-from-absolute (org-today)) (when '("Idea") 'subtree-at-point))
+   )
+  )
+
+(add-to-list 'org-capture-templates `("w" "Project"))
+;; (add-to-list 'org-capture-templates `("l" "lxs test" entry (function lxs/org-find-project-journal-datetree) "* %U - %^{heading}\n  %?"))
+(add-to-list 'org-capture-templates `("wj" "project joural" entry (function lxs/org-find-project-journal-datetree) "* %U - %^{heading}\n  %?"))
+(add-to-list 'org-capture-templates `("wi" "project idea" entry (function lxs/org-find-project-idea-datetree)	"* %U - %^{heading}\n  %?"))
 
   ;; 为 org 的 header 的 created 和 last_modified 两个属性设置自动检测时间戳
   (defun zp/org-find-time-file-property (property &optional anywhere)
@@ -457,7 +477,7 @@ it can be passed in POS."
   (defun lxs/org-agenda-process-inbox-item ()
     "Process a single item in the org-agenda."
     (org-with-wide-buffer
-     (org-agenda-set-tags)
+     ;; (org-agenda-set-tags)
      (org-agenda-priority)
      (call-interactively 'lxs/my-org-agenda-set-effort)
      (org-agenda-refile nil nil t)))
@@ -612,7 +632,7 @@ it can be passed in POS."
 (setq easy-hugo-basedir (concat lxs-home-dir "Documents/" "xssq-blog/"))
 (setq easy-hugo-url "https://patrolli.github.io/xssq/")
 (setq easy-hugo-root "/docs")
-(setq easy-hugo-postdir "content/posts")
+(setq easy-hugo-postdir "content/post")
 (setq easy-hugo-previewtime "300"))
 
 (use-package org-roam
@@ -624,7 +644,8 @@ it can be passed in POS."
   (org-roam-directory (concat lxs-home-dir "Documents/" "org/" "org-roam-files"))
   :bind (("C-c n" . org-roam-hydra/body))
   :pretty-hydra
-  ((:title (pretty-hydra-title "Org roam menu" 'faicon "book"  :height 1.1 :v-adjust -0.1):color blue :quit-key "q")
+  ((:title (pretty-hydra-title "Org roam menu" 'faicon "book"  :height 1.1 :v-adjust -0.1)
+    :color blue)
    ("Basic"
     (("f" org-roam-find-file "find file")
      ("b" org-roam-switch-to-buffer "switch buffer")
@@ -637,7 +658,10 @@ it can be passed in POS."
      ("s a" org-roam-dailies-today "show today daily")
      ("s y" org-roam-dailies-yesterday "show yesterday daily")
      ("s f" org-roam-dailies-find "find dailies"))
-   ))
+    "Others"
+    (("v t" org-tags-view "filt buffer tags")
+     ("q" hydra-pop "exit")
+   )))
 
   :config
   (setq org-roam-graph-exclude-matcher '("private" "daily"))  ;; 在 graph 中排除一些笔记
@@ -646,7 +670,7 @@ it can be passed in POS."
         '(("d" "default" plain (function org-roam--capture-get-point)
            "%?"
            :file-name "${slug}"
-           :head "#+TITLE: ${title}\n#+CREATED: %U\n#+LAST_MODIFIED: %U\n#+roam_alias: \n#+roam_tags:\n#+STARTUP: inlineimages latexpreview\n#+AUTHOR:Li Xunsong\n"
+           :head "#+TITLE: ${title}\n#+DATE: %<%Y-%m-%d>\n#+CREATED: %U\n#+LAST_MODIFIED: %U\n#+roam_alias: \n#+roam_tags:\n#+STARTUP: inlineimages latexpreview\n#+AUTHOR:Li Xunsong\n"
            :unnarrowed t)
           ("p" "private" plain (function org-roam--capture-get-point)
            "%?"
@@ -755,7 +779,7 @@ it can be passed in POS."
   (setq orb-templates
       '(("r" "ref" plain (function org-roam-capture--get-point) ""
          :file-name "${citekey}"
-         :head "#+TITLE: ${title}\n#+ROAM_KEY: ${ref}\n#+ROAM_TAGS: \n#+ROAM_ALIAS: \n#+AUTHOR: Li Xunsong\n#+CREATED: %U\n#+LAST_MODIFIED: %U\n#+STARTUP: inlineimages latexpreview hideblocks\n\n* Motivation\n\n* Method\n\n* Comment\n\n* Ref\n"
+         :head "#+TITLE: ${title}\n#+ROAM_KEY: ${ref}\n#+ROAM_TAGS: \n#+ROAM_ALIAS: \n#+AUTHOR: Li Xunsong\n#+DATE: %<%Y-%m-%d>\n#+CREATED: %U\n#+LAST_MODIFIED: %U\n#+STARTUP: inlineimages latexpreview hideblocks\n\n* Motivation\n\n* Method\n\n* Comment\n\n* Ref\n"
          :unnarrowed t))))
 
 
@@ -777,6 +801,22 @@ it can be passed in POS."
     (shell-command (format "pandoc %s -o %s --reference-doc=%s" (buffer-file-name) docx-file template-file))
     (message "Convert finish: %s" docx-file)))
 
+;; Babel
+(setq org-confirm-babel-evaluate nil
+      org-src-fontify-natively t
+      org-src-tab-acts-natively t)
+(defvar load-language-list '((emacs-lisp . t)
+			     (perl . t)
+			     (python . t)
+			     (ruby . t)
+			     (js . t)
+			     (css . t)
+			     (sass . t)
+			     (C . t)
+			     (plantuml . t)))
+
+(org-babel-do-load-languages 'org-babel-load-languages
+			     load-language-list)
 
 (server-start)
 

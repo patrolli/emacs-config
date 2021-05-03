@@ -1,25 +1,38 @@
 
 (use-package bm
   :ensure t
-  :defer t
   :demand t
   :init
   (setq bm-restore-repository-on-load t)
-  :hook
-  ((after-save-hook . bm-buffer-save)
-   (kill-buffer-hook . bm-buffer-save)
-   (kill-emacs-hook . (lambda nil
-                               (bm-buffer-save-all)
-                               (bm-repository-save)))
-   (find-file-hooks . bm-buffer-restore)
-   (after-revert-hook . bm-buffer-restore)
-   (vc-before-checkin-hook bm-buffer-save))
+  ;; :hook
+  ;; ((after-save-hook . bm-buffer-save)
+  ;;  (kill-buffer-hook . bm-buffer-save)
+  ;;  (kill-emacs-hook . (lambda nil
+  ;;                              (bm-buffer-save-all)
+  ;;                              (bm-repository-save)))
+  ;;  (find-file-hooks . bm-buffer-restore)
+  ;;  (after-revert-hook . bm-buffer-restore)
+  ;;  (vc-before-checkin-hook bm-buffer-save))
   :config
   (setq bm-cycle-all-buffers t)
   ;; where to store persistant files
   (setq bm-repository-file (concat user-emacs-directory "bm-repository"))
   ;; save bookmarks
   (setq-default bm-buffer-persistence t)
+  
+  (add-hook 'after-init-hook 'bm-repository-load)
+  (add-hook 'kill-emacs-hook #'(lambda nil
+                                          (bm-buffer-save-all)
+                                          (bm-repository-save)))
+  (add-hook 'kill-buffer-hook #'bm-buffer-save)
+  (add-hook 'kill-emacs-hook #'(lambda nil
+                                          (bm-buffer-save-all)
+                                          (bm-repository-save)))
+  (add-hook 'after-save-hook #'bm-buffer-save)
+  (add-hook 'find-file-hooks   #'bm-buffer-restore)
+  (add-hook 'after-revert-hook #'bm-buffer-restore)
+
+
   
   (defun bm-counsel-get-list (bookmark-overlays)
   (-map (lambda (bm)
@@ -87,9 +100,3 @@ It has the ability to preview the bookmarks like `swiper-all'."
   )
 
 (provide 'init-bookmark)
-
-
-
-
-
-

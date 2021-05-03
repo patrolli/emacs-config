@@ -7,3 +7,9 @@
 [submodule "color-rg"]
 	path = color-rg
 	url = https://github.com/manateelazycat/color-rg.git
+[submodule "site-lisp/emacs-application-framework"]
+	path = site-lisp/emacs-application-framework
+	url = https://github.com/manateelazycat/emacs-application-framework.git
+[submodule "site-lisp/thing-edit"]
+	path = site-lisp/thing-edit
+	url = git@github.com:manateelazycat/thing-edit.git
