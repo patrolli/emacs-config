@@ -39,13 +39,14 @@
 
 (use-package thing-edit
   :load-path "site-lisp/thing-edit/")
-;; (use-package openwith
-;;   :hook
-;;   (after-init-hook . openwith-mode)
-;;   :config
-;;   (openwith-mode t)
-;;   (setq openwith-associations '(("\\.pdf\\'" " okular" (file))))
-;;   )
+
+(use-package openwith
+  ;; :hook
+  ;; (after-init-hook . openwith-mode)
+  :config
+  ;; (openwith-mode t)
+  (setq openwith-associations '(("\\.pdf\\'" " okular" (file))))
+  )
 
 ;; 自动保存文件
 (use-package auto-save

@@ -4,6 +4,9 @@
 
 (use-package company
   :init (global-company-mode)
+  :custom
+  (company-idle-delay 0)
+  (company-minimum-prefix-length 2)
   :bind
   (:map company-active-map
 	("M-n" . nil)
@@ -16,7 +19,6 @@
   ;; :hook (after-init . global-company-mode)
   :config
   (setq
-   company-idle-delay 0
    company-global-modes '(not erc-mode message-mode help-mode
                               gud-mode eshell-mode shell-mode org-mode)
    company-backends '((company-capf :with company-yasnippet)
@@ -129,7 +131,8 @@
       :hook (company-mode . company-box-mode)
       :init (setq company-box-enable-icon t
                   company-box-backends-colors nil
-                  company-box-doc-delay 0.3)
+                  company-box-doc-delay 0.3
+		  company-box-doc-enable nil)
       :config
       (with-no-warnings
         ;; Prettify icons

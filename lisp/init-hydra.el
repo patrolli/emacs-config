@@ -147,7 +147,7 @@ _l_ist bookmark     _s_ toggle bm    sh_o_w TODO
   ("q" hydra-pop )
   ("a" hydra--set-bookmark )
   ("n" (lambda () (interactive) (hydra--set-bookmark (read-from-minibuffer "Name:"))) )
-  ("l" counsel-bookmark )
+  ("l" my-bookmark-bmenu-list)
   ;; bm bookmark
   ("j" bm-next :exit nil)
   ("k" bm-previous :exit nil)
@@ -428,10 +428,15 @@ version 2016-06-18"
   (";s" eval-last-sexp)
   (";b" kill-buffer)
   (";x" persp-remove-buffer)
+
+  ;; bookmark
   (";i" (progn
 	  (hydra-bookmarks/body)
 	  (hydra-push '(hydra-reading/body))	  
 	  ) :color blue)
+  ("zj" my-bookmark-bmenu-list)
+  ("zh" (lambda () (interactive) (hydra--set-bookmark (read-from-minibuffer "Name:"))))
+  
   (";d" dired-jump)
   ;; (";j" persp-prev)
   (",t" treemacs :color blue)
@@ -464,7 +469,7 @@ version 2016-06-18"
   ("B" ibuffer)
   ("S-SPC" gcm-scroll-up)
   ("SPC" gcm-scroll-down)
-  ("T" org-babel-tangle)
+  ;; ("T" org-babel-tangle)
   ("V" (and (ignore-errors (other-window-for-scrolling) (scroll-other-window-down))))
   ("W" backward-word)
   ("X" (progn (kill-line 0)))
@@ -523,7 +528,8 @@ version 2016-06-18"
   ("cj" avy-goto-char-2)
   ("cl" avy-goto-line)
   ("u" undo)
-  ("v" (save-excursion (and (ignore-errors (other-window-for-scrolling)) (scroll-other-window))))
+  ;; ("v" (save-excursion (and (ignore-errors (other-window-for-scrolling)) (scroll-other-window))))
+  ("v" counsel-find-file)
   ("w" forward-word)
   ("x" delete-char)
   ("y" yank)
@@ -531,7 +537,7 @@ version 2016-06-18"
   ("M-j" nil))
 
 (bind-key "<escape>" 'hydra-reading/body)
-(bind-key "M-j" 'hydra-reading/body)
+(bind-key "M-j" 'hydra-reading/body)	
 
 ;; (add-hook 'find-file-hook '(lambda () (progn (hydra-pop) (hydra-reading/body))))
 

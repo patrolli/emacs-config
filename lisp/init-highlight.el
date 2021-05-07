@@ -140,4 +140,13 @@
                   (remove-text-properties next pos '(display nil face nil) str))))))
         (advice-add #'ivy-cleanup-string :after #'my-ivy-cleanup-indentation)))))
 
+;; advanced systax highting
+(use-package tree-sitter
+  :config
+  :hook
+  ((python-mode c++-mode c-mode) . tree-sitter-hl-mode))
+
+(use-package tree-sitter-langs
+  :after tree-sitter)
+
 (provide 'init-highlight)

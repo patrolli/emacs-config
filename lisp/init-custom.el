@@ -15,6 +15,11 @@ If Non-nil, save and restore the frame's geometry."
   :group 'lxs
   :type 'boolean)
 
+(defcustom lxs-proxy "127.0.0.1:7078"
+  "Set network proxy"
+  :group 'lxs
+  :type 'string)
+
 (defcustom lxs-logo (expand-file-name "logo.png" user-emacs-directory)
   "Set Centaur logo. nil means official logo."
   :group 'lxs

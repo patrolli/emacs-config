@@ -58,7 +58,7 @@
         (message "Restoring session...")
         (quit-window t)
         (condition-case-unless-debug err
-            (persp-load-state-from-file fname)
+            (persp-load-state-from-file fname) 
           (error "Error: Unable to restore session -- %s" err))
         (message "Restoring session...done")))
 

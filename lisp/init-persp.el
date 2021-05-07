@@ -77,7 +77,7 @@
   (defun my/persp-switch-to-8 () (interactive) (my/persp-switch-to-n 8))
   (defun my/persp-switch-to-9 () (interactive) (my/persp-switch-to-n 9))
   (defun my/persp-switch-to-10 () (interactive) (my/persp-switch-to-n 10))
-
+  
   (defun my/pick-layout ()
   "Switch to a new or existing layout."
   (interactive)
@@ -247,7 +247,7 @@ _p_: previous     _L_: predefined  _r_: rename      _k_: remove buffer
             (if persp-mode-projectile-bridge-mode
                 (persp-mode-projectile-bridge-find-perspectives-for-all-buffers)
               (persp-mode-projectile-bridge-kill-perspectives)))))
-  :init (setq persp-mode-projectile-bridge-persp-name-prefix "[p]")
+  :init (setq persp-mode-projectile-bridge-persp-name-prefix "<p>")
   :config
   (with-no-warnings
     ;; HACK: Allow saving to files

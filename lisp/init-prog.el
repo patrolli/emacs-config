@@ -48,14 +48,15 @@
     (:properties
      (:InterpreterPath ,lsp-python))
      :searchPaths ,lsp-search-paths))
-  (add-to-list 'nox-server-programs
-             '(python-mode nox-mspyls 
-                           ;; "~/.emacs.d/nox/mspyls/Microsoft.Python.LanguageServer"
-			    "~/.emacs.default/nox/mspyls/Microsoft.Python.LanguageServer"
-			   ))
+  ;; (add-to-list 'nox-server-programs
+  ;;            '(python-mode nox-mspyls 
+  ;;                          ;; "~/.emacs.d/nox/mspyls/Microsoft.Python.LanguageServer"
+  ;; 			    "~/.emacs.default/nox/mspyls/Microsoft.Python.LanguageServer"
+  ;; 			   ))
+  
   ;; ;; pyls configuration is simple~
   ;; ;; (add-to-list 'nox-server-programs '(python-mode . ("python-language-server" "pyls")))
-   ;; (add-to-list 'nox-server-programs '((python-mode) "pyright-langserver" "--stdio"))
+  (add-to-list 'nox-server-programs '((python-mode) "pyright-langserver" "--stdio"))
   (define-key nox-mode-map (kbd "C-.")  'nox-show-doc)
   )
 
@@ -72,9 +73,9 @@
           (read-only-mode)))
     (funcall func item action)
     ))
-
-(advice-add 'xref-pop-to-location :around #'xref--pop-to-location@around)
-
+;; (projectile-project-root "/mnt/c/Users/lixun/Documents/python_work/CompAction/code/data_utils/data_loader_frames.py")
+;; (advice-add 'xref-pop-to-location :around #'xref--pop-to-location@around)
+;; (advice-remove #'xref--pop-to-location@around 'xref-pop-to-location)
 (setq python-shell-interpreter "/home/lixunsong/anaconda3/envs/py-emacs/bin/python3.7")
 ;; python
 (use-package pyvenv
@@ -87,6 +88,7 @@
 
 (use-package helm-dash
   :ensure t
+  :disabled t
   :bind
   (:map prog-mode-map ("M-[" . helm-dash-at-point))
   :config

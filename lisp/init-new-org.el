@@ -17,6 +17,17 @@
                       (org-hydra/body)
                     (self-insert-command 1))))
   ("C-c m" . hydra-org-movement/body)))
+  :custom
+  (org-src-block-faces 'nil)
+  (org-file-apps
+   '((auto-mode . emacs)
+     (directory . emacs)
+     ("\\.mm\\'" . default)
+     ("\\.x?html?\\'" . default)
+     ("\\.pdf\\'" . default)))
+  (org-format-latex-options
+   '(:foreground default :background default :scale 1.5 :html-foreground "Black" :html-background "Transparent" :html-scale 1.0 :matchers
+     ("begin" "$1" "$" "$$" "\\(" "\\[")))
   :init
   (setq lxs/org-agenda-directory (concat lxs-home-dir "Documents/org/gtd/"))
   :hook
@@ -625,6 +636,9 @@ it can be passed in POS."
 
 (use-package ox-hugo
   :ensure t
+  :custom
+  (org-hugo-auto-set-lastmode t)
+  (org-hugo-section "post")
   :after ox)
 
 (use-package easy-hugo

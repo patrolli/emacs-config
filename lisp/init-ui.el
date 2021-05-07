@@ -21,7 +21,8 @@
          doom-themes-enable-italic t) ; if nil, italics is universally disabled
        ;; (load-theme 'doom-one t)
        ;; (load-theme 'doom-gruvbox-light)
-       (load-theme 'modus-vivendi)
+       ;; (load-theme 'modus-vivendi)
+       (load-theme 'doom-zenburn t)
        (doom-themes-org-config)
        ;; (doom-themes-neotree-config)
 

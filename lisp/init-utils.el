@@ -13,6 +13,8 @@
 ;; FIXME: scrach buffer 打开总是 org-agenda mode
 (use-package persistent-scratch
   :diminish
+  :custom
+  (persistent-scratch-backup-directory (concat user-emacs-directory ".persistent-scratch-backup"))
   :bind (:map persistent-scratch-mode-map
          ([remap kill-buffer] . (lambda (&rest _)
                                   (interactive)
