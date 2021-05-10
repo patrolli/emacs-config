@@ -1,4 +1,10 @@
 (require 'init-const)
+(require 'init-custom)
+(require 'init-funcs)
+
+;; Personal information
+(setq user-full-name lxs-full-name
+      user-mail-address lxs-mail-address)
 
 (if sys/wslp (setq
       cmdExeBin"/mnt/c/Windows/System32/cmd.exe"
@@ -97,5 +103,21 @@ to choose a directory"
   (interactive)
   (let ((directory (my--choose-directory)))
     (my--export-to-hugo directory)))
+
+;; automatically warp lines
+(setq visual-line-mode t)
+
+(use-package keyfreq
+  :config
+  (setq keyfreq-excluded-commands
+      '(self-insert-command
+        forward-char
+        backward-char
+        previous-line
+        next-line
+	hydra-reading/next-line
+	hydra-reading/previous-line
+	hydra-reading/body
+	org-self-insert-command)))
 
 (provide 'init-basic)

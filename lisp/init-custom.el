@@ -9,6 +9,16 @@
   :group 'lxs
   :type 'string)
 
+(defcustom lxs-full-name "patrolli"
+  "user full name"
+  :group 'lxs
+  :type 'string)
+
+(defcustom lxs-mail-address "lixunsonghcl@126.com"
+  "user email address"
+  :group 'lxs
+  :type 'string)
+
 (defcustom lxs-restore-frame-geometry t
   "Restore the frame's geometry at startup.
 If Non-nil, save and restore the frame's geometry."

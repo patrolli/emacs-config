@@ -1,5 +1,5 @@
 (require 'init-custom)
-(require 'init-basic)
+;; (require 'init-basic)
 
 
 (defun icons-displayable-p ()
@@ -68,5 +68,32 @@
   (if (bound-and-true-p socks-noproxy)
       (proxy-socks-disable)
     (proxy-socks-enable)))
+
+;; 先 list-process 看 jupyter 是否已经运行了
+;; 如果运行了，显示提示符，询问是否删除之前的 jupyter 进程，或者沿用
+;; password 813729
+(defun lxs/open-jupyter-in-chrome ()
+  (interactive)
+  (let ((cmd (format "jupyter-lab --no-browser --port 8888 --notebook-dir %s" default-directory)))
+    (if (get-process "jupyter")
+	(if (y-or-n-p "Existing jupyter lab was found, replace(y) it?")
+	    (progn
+	      (start-process-shell-command "jupyter" nil cmd)
+	      (browse-url "http://localhost:8888"))
+	  (browse-url "http://localhost:8888"))
+      (progn
+	(start-process-shell-command "jupyter" nil cmd)
+	(browse-url "http://localhost:8888")))
+	)
+  )
+
+(defun lxs/kill-jupyter-in-browser ()
+  (interactive)
+  (let ((process (get-process "jupyter")))
+    (if process
+	(progn
+	  (kill-process process)
+	  (message "jupyter is killed!"))
+      (message "no jupyter is running!"))))
 
 (provide 'init-funcs)

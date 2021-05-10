@@ -63,6 +63,12 @@
   :config
   (setq doom-modeline-buffer-modification-icon nil))
 
+
+(setq mode-line-misc-info (delete (assoc 'which-function-mode
+					 mode-line-misc-info) mode-line-misc-info))
+
+(add-hook 'prog-mode-hook '(lambda () (setq header-line-format '(which-func-mode ("" which-func-format " ")))))
+
 ;; all-the-icons
 (use-package all-the-icons
   :ensure t

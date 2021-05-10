@@ -1,4 +1,6 @@
 (require 'init-const)
+(require 'xah-utils)
+(require 'personal)
 
 (use-package pretty-hydra
   :bind ("<f6>" . toggles-hydra/body)
@@ -364,6 +366,45 @@ version 2016-06-18"
         ("p" joe-scroll-other-window-down "scroll down")
 	("q" hydra-pop "exit"))
 
+(defun xah-beginning-of-line-or-block ()
+  "Move cursor to beginning of line or previous paragraph.
+• When called first time, move cursor to beginning of char in current line. (if already, move to beginning of line.)
+• When called again, move cursor backward by jumping over any sequence of whitespaces containing 2 blank lines.
+• if `visual-line-mode' is on, beginning of line means visual line.
+URL `http://ergoemacs.org/emacs/emacs_keybinding_design_beginning-of-line-or-block.html'
+Version 2018-06-04 2021-03-16"
+  (interactive)
+  (let (($p (point)))
+    (if (or (equal (point) (line-beginning-position))
+            (eq last-command this-command))
+        (if (re-search-backward "\n[\t\n ]*\n+" nil "move")
+            (progn
+              (skip-chars-backward "\n\t ")
+              ;; (forward-char )
+              )
+          (goto-char (point-min)))
+      (if visual-line-mode
+          (beginning-of-visual-line)
+        (progn
+          (back-to-indentation)
+          (when (eq $p (point))
+            (beginning-of-line)))))))
+
+(defun xah-end-of-line-or-block ()
+  "Move cursor to end of line or next paragraph.
+• When called first time, move cursor to end of line.
+• When called again, move cursor forward by jumping over any sequence of whitespaces containing 2 blank lines.
+• if `visual-line-mode' is on, end of line means visual line.
+URL `http://ergoemacs.org/emacs/emacs_keybinding_design_beginning-of-line-or-block.html'
+Version 2018-06-04 2021-03-16"
+  (interactive)
+  (if (or (equal (point) (line-end-position))
+          (eq last-command this-command))
+      (re-search-forward "\n[\t\n ]*\n+" nil "move" )
+    (if visual-line-mode
+        (end-of-visual-line)
+      (end-of-line))))
+
 (defhydra hydra-reading
   (:pre (progn (setq hydra-is-helpful nil)(overwrite-mode -1) (hydra-refresh-mode-line "[N]" "green" ) (hydra-normal-state-cursor) 
 	       )
@@ -381,12 +422,12 @@ version 2016-06-18"
   ;; ("/" (progn (toggle-org-hydra) (hydra-push '(hydra-reading/body))) :color teal)
 
   ;; org relevant
-  ("/r" org-roam-hydra/body (progn
+  ("/r"  (progn
 	  (org-roam-hydra/body)
 	  (hydra-push '(hydra-reading/body))	  
 	  ) :color blue)
   ("/c" org-capture)
-  
+   
   ;; ("." (progn (call-interactively 'avy-goto-char-timer)))
   (":" (progn (call-interactively 'eval-expression)))
   ;; ace-window
@@ -406,7 +447,7 @@ version 2016-06-18"
   (".r" winner-redo)
   (".w" (progn
 	  (hydra-window-size/body)
-	  (hydra-push '(hydra-reading/body))	  
+	  (hydra-push '(hydra-re ading/body))	  
 	  ) :color blue)
   (".;" (progn
 	  (hydra-window-frame/body)
@@ -414,10 +455,12 @@ version 2016-06-18"
 	  ) :color blue)
   (".f" toggle-frame-fullscreen)
   
-  (";f" (progn
-	  (hydra-persp/body)
-	  (hydra-push '(hydra-reading/body)))
-   :color blue)
+  ;; (";f" (progn
+  ;; 	  (hydra-persp/body) 
+  ;; 	  (hydra-push '(hydra-reading/body)))
+  ;;  :color blue)
+  ;; (";x" persp-remove-buffer)
+  
   (";j" (progn
 	  (hydra-projectile/body)
 	  (hydra-push '(hydra-reading/body))) :color blue)
@@ -426,14 +469,16 @@ version 2016-06-18"
   (";o" lxs/search-org)
   (";e" eval-buffer)
   (";s" eval-last-sexp)
-  (";b" kill-buffer)
-  (";x" persp-remove-buffer)
-
+  (";b" xah-close-current-buffer)
+  
+  
   ;; bookmark
   (";i" (progn
 	  (hydra-bookmarks/body)
 	  (hydra-push '(hydra-reading/body))	  
 	  ) :color blue)
+  (";y" counsel-yank-pop "show yank history")
+  (";r" counsel-rg)
   ("zj" my-bookmark-bmenu-list)
   ("zh" (lambda () (interactive) (hydra--set-bookmark (read-from-minibuffer "Name:"))))
   
@@ -466,46 +511,50 @@ version 2016-06-18"
   ("N" next-user-buffer)
   ("P" previous-user-buffer)
   ("S" swiper-all)
-  ("B" ibuffer)
-  ("S-SPC" gcm-scroll-up)
-  ("SPC" gcm-scroll-down)
+  ("B" ibuffer) 
+  ("<SPC>j" scroll-down)
+  ("<SPC>k" scroll-up)
+  ("<SPC>o" xah-open-last-closed)
+  ("<SPC>i" xah-open-recently-closed)
+  ("<SPC>s" xah-select-block)
   ;; ("T" org-babel-tangle)
   ("V" (and (ignore-errors (other-window-for-scrolling) (scroll-other-window-down))))
   ("W" backward-word)
   ("X" (progn (kill-line 0)))
   ("Y" duplicate-line-or-region :color blue)
   ("[" beginning-of-defun)	     
-  ("]" end-of-defun)
-  ("a" (progn (beginning-of-line) (indent-according-to-mode)))
+  ("]" end-of-defun) 
+  ;; ("a" (progn (beginning-of-line) (indent-according-to-mode)))
+  ("a" (progn (xah-beginning-of-line-or-block)))
   ("b" ;; (progn (ibuffer) (swiper))
    (ivy-switch-buffer)
    )
   ;; ("c" (progn (overwrite-mode) (hydra-refresh-mode-line "[C]" "blue")) :color blue)
-  ("dd" kill-whole-line)		
-  ("dw" kill-word)
+  ("dd" my-delete-whole-line) ;; delete without yank to kill-ring
+  ("dw" my-delete-word)
   ("df" zap-to-char :color blue)
-  ("de" kill-line :color blue)
+  ("de" my-delete-line :color blue)
   ("da" (progn (kill-line 0) (indent-according-to-mode)) :color blue)
   ;; ("dp" duplicate-line-or-region :color blue)
   ("dc" thing-cut-comment)
   ("ds" thing-cut-sexp)
   ("dj" thing-cut-symbol)
-  ("e" end-of-line)
+  ;; ("e" end-of-line)
+  ("e" xah-end-of-line-or-block)
   ("f" (progn (call-interactively 'avy-goto-word-1-forward-in-line)))
   ("g" google-this)
   ("G" go-translate)
   ("h" backward-char)
   ("i" nil)
   ("j" next-line)
-  
   ("k" previous-line)
   ("l" forward-char)
-  ("ma" magit-log-all :color blue)
-  ("mc" magit-stage-all-and-commit :color blue)
-  ("mg" magit-status :color blue)
-  ("md" magit-diff :color blue)
-  ("ml" magit-log-current :color blue)
-  ("mt" git-timemachine :color blue)
+  ;; ("ma" magit-log-all :color blue)
+  ;; ("mc" magit-stage-all-and-commit :color blue)
+  ;; ("mg" magit-status :color blue)
+  ;; ("md" magit-diff :color blue)
+  ;; ("ml" magit-log-current :color blue)
+  ;; ("mt" git-timemachine :color blue)
   ("mw" mark-word)
   ("ms" mark-sexp)
   ("mp" mark-paragraph)

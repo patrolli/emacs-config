@@ -18,6 +18,7 @@
          ("<backtab>" . company-yasnippet))
   ;; :hook (after-init . global-company-mode)
   :config
+  (setq company-show-numbers t)
   (setq
    company-global-modes '(not erc-mode message-mode help-mode
                               gud-mode eshell-mode shell-mode org-mode)
@@ -66,61 +67,54 @@
   )
 
 (use-package company-tabnine
-  :defer 1
-  :disabled t  ;; 停用 tabnine
+  ;; :disabled nil  ;; 停用 tabnine
   :custom
-  (company-tabnine-max-num-results 9)
+  (company-tabnine-max-num-results 3)
   :bind
   (("M-q" . company-other-backend))
   :hook
-  (lsp-after-open . (lambda ()
+  (nox-managed-mode-hook . (lambda ()
                       (setq company-tabnine-max-num-results 3)
                       (add-to-list 'company-transformers 'company//sort-by-tabnine t)
                       (add-to-list 'company-backends '(company-capf :with company-tabnine :separate))))
   (kill-emacs . company-tabnine-kill-process)
   :config
   ;; Enable TabNine on default
-  (add-to-list 'company-backends #'company-tabnine)
-  (setq company-idle-delay 0.2)
-  (setq company-show-numbers t)
+  ;; (add-to-list 'company-backends #'company-tabnine)
+  (defun company//sort-by-tabnine (candidates)
+  (if (or (functionp company-backend)
+          (not (and (listp company-backend) (memq 'company-tabnine company-backend))))
+      candidates
+    (let ((candidates-table (make-hash-table :test #'equal))
+          candidates-1
+          candidates-2)
+      (dolist (candidate candidates)
+        (if (eq (get-text-property 0 'company-backend candidate)
+                'company-tabnine)
+            (unless (gethash candidate candidates-table)
+              (push candidate candidates-2))
+          (push candidate candidates-1)
+          (puthash candidate t candidates-table)))
+      (setq candidates-1 (nreverse candidates-1))
+      (setq candidates-2 (nreverse candidates-2))
+      (nconc (seq-take candidates-1 2)
+             (seq-take candidates-2 2)
+             (seq-drop candidates-1 2)
+             (seq-drop candidates-2 2)))))
+  (defun lxs/toggle-tabnine ()
+    "temporally close or open tabnine, for saving cpu cost."
+    (interactive)
+    (if company-tabnine--disabled
+	(setq company-tabnine--disabled nil)
+      (setq company-tabnine--disabled t)
+      )
+    )
+
   (add-hook 'nox-managed-mode-hook
-           #'(lambda ()
-               (when (nox-managed-p)
-                 (setq-local company-backends
-                            (append  company-backends '(company-tabnine))))))
-  ;; Integrate company-tabnine with lsp-mode
-;;   (defun company//sort-by-tabnine (candidates)
-;;     (if (or (functionp company-backend)
-;;             (not (and (listp company-backend) (memq 'company-tabnine company-backends))))
-;;         candidates
-;;       (let ((candidates-table (make-hash-table :test #'equal))
-;;             candidates-lsp
-;;             candidates-tabnine)
-;;         (dolist (candidate candidates)
-;;           (if (eq (get-text-property 0 'company-backend candidate)
-;;                   'company-tabnine)
-;;               (unless (gethash candidate candidates-table)
-;;                 (push candidate candidates-tabnine))
-;;             (push candidate candidates-lsp)
-;;             (puthash candidate t candidates-table)))
-;;         (setq candidates-lsp (nreverse candidates-lsp))
-;;         (setq candidates-tabnine (nreverse candidates-tabnine))
-;;         (nconc (seq-take candidates-tabnine 3)
-;;                (seq-take candidates-lsp 6)))))
-;;   (setq company-tabnine--disable-next-transform nil)
-;; (defun my-company--transform-candidates (func &rest args)
-;;   (if (not company-tabnine--disable-next-transform)
-;;       (apply func args)
-;;     (setq company-tabnine--disable-next-transform nil)
-;;     (car args)))
-
-;; (defun my-company-tabnine (func &rest args)
-;;   (when (eq (car args) 'candidates)
-;;     (setq company-tabnine--disable-next-transform t))
-;;   (apply func args))
-
-;; (advice-add #'company--transform-candidates :around #'my-company--transform-candidates)
-;; (advice-add #'company-tabnine :around #'my-company-tabnine)
+	    #'(lambda ()
+                      (setq company-tabnine-max-num-results 3)
+                      (add-to-list 'company-transformers 'company//sort-by-tabnine t)
+                      (add-to-list 'company-backends '(company-capf :with company-tabnine :separate))))
   )
 
   ;; Icons and quickhelp

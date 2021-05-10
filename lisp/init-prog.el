@@ -14,21 +14,22 @@
   ;; :custom
   ;; (nox-python-server "pyright")
   :config
-  ;; add hooks 
-   (dolist (hook (list
-                 'js-mode-hook
-                 'rust-mode-hook
-                 'python-mode-hook
-                 'ruby-mode-hook
-                 'java-mode-hook
-                 'sh-mode-hook
-                 'php-mode-hook
-                 'c-mode-common-hook
-                 'c-mode-hook
-                 'c++-mode-hook
-                 'haskell-mode-hook
-                 ))
-    (add-hook hook '(lambda () (nox-ensure))))
+  ;; add hooks
+  ;; update manually open nox
+  ;; (dolist (hook (list
+  ;;               'js-mode-hook
+  ;;               'rust-mode-hook
+  ;;               'python-mode-hook
+  ;;               'ruby-mode-hook
+  ;;               'java-mode-hook
+  ;;               'sh-mode-hook
+  ;;               'php-mode-hook
+  ;;               'c-mode-common-hook
+  ;;               'c-mode-hook
+  ;;               'c++-mode-hook
+  ;;               'haskell-mode-hook
+  ;;               ))
+  ;;  (add-hook hook '(lambda () (nox-ensure))))
   ;; cpp 
    (add-to-list 'nox-server-programs '(c++-mode . ("clangd")))
    (add-to-list 'nox-server-programs '(c-mode . ("clangd")))

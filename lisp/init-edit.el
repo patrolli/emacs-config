@@ -11,11 +11,11 @@
   (add-function :before-until electric-pair-inhibit-predicate
 		(lambda (c) (eq c ?<))))
 
-;; expand-region 选择一块区域
-(use-package expand-region
-  :bind
-  ("C-=" . 'er/expand-region)
-  ("C--" . 'er/contract-region))
+;; ;; expand-region 选择一块区域
+;; (use-package expand-region
+;;   :bind
+;;   ("C-=" . 'er/expand-region)
+;;   ("C--" . 'er/contract-region))
 
 ;; Treat undo history as a tree
 (use-package undo-tree
@@ -96,5 +96,99 @@
   :hook (prog-mode . origami-mode)
   :init (setq origami-show-fold-header t)
   :config (face-spec-reset-face 'origami-fold-header-face))
+
+;; display ^L as a line to split file into blocks
+;; navigated by C-x [ and C-x ]
+(use-package page-break-lines
+  :config
+  (global-page-break-lines-mode)
+  )
+
+
+
+;; auto-insert file headers
+;; https://honmaple.me/articles/2018/01/emacs%E8%87%AA%E5%8A%A8%E6%B7%BB%E5%8A%A0%E6%96%87%E4%BB%B6%E5%A4%B4.html
+(defun maple--insert-string()
+  (concat
+   (make-string 80 ?*)
+   "\n"
+   "Copyright © " (substring (current-time-string) -4) " " (user-full-name) "\n"
+   "File Name: " (file-name-nondirectory buffer-file-name) "\n"
+   "Author: " (user-full-name)"\n"
+   "Email: " user-mail-address "\n"
+   "Created: " (format-time-string "%Y-%m-%d %T (%Z)" (current-time)) "\n"
+   "Last Update: \n"
+   "         By: \n"
+   "Description: \n"
+   (make-string 80 ?*)))
+
+(defun maple-insert-string(&optional prefix)
+  (replace-regexp-in-string
+   "^" (or prefix comment-start)
+   (maple--insert-string)))
+
+(setq auto-insert-alist
+      '(((ruby-mode . "Ruby program") nil
+         "#!/usr/bin/env ruby\n"
+         "# -*- encoding: utf-8 -*-\n"
+         (maple-insert-string) "\n")
+        ((python-mode . "Python program") nil
+         ;; "#!/usr/bin/env python\n"
+         ;; "# -*- coding: utf-8 -*-\n"
+         (maple-insert-string) "\n")
+        ((c-mode . "C program") nil
+         "/*"
+         (string-trim-left (maple-insert-string " ")) "*/\n"
+         "#include<stdio.h>\n"
+         "#include<string.h>\n")
+        ((sh-mode . "Shell script") nil
+         "#!/bin/bash\n"
+         (maple-insert-string) "\n")
+        ((go-mode . "Go program") nil
+         "/*"
+         (string-trim-left (maple-insert-string " ")) "*/\n")))
+
+;; https://honmaple.me/articles/2018/01/emacs%E8%87%AA%E5%8A%A8%E6%9B%B4%E6%96%B0%E6%96%87%E4%BB%B6%E5%A4%B4.html
+(setq time-stamp-active t)
+(setq time-stamp-line-limit 11)
+(setq time-stamp-start "[lL]ast[ -][uU]pdate[ \t]*:?")
+(setq time-stamp-end "\n")
+(setq time-stamp-format " %#A %Y-%02m-%02d %02H:%02M:%02S (%Z)")
+(add-hook 'before-save-hook 'time-stamp)
+
+(defun maple/header-update-action(name)
+  "A."
+  (let ((beg (match-beginning 2))
+        (end (match-end 2)))
+    (when (not (string= name (string-trim-left (match-string 2))))
+      (goto-char beg)
+      (delete-region beg end)
+      (insert " " name))))
+
+(defun maple/header-update(regex default line-limit)
+  "B."
+  (interactive)
+  (save-excursion
+    (goto-char (point-min))
+    (let ((lines 0))
+      (while (< lines line-limit)
+        (when (and (looking-at regex))
+          (maple/header-update-action default))
+        (setq lines (1+ lines))
+        (forward-line 1)))))
+(defmacro maple/header-update-engine (name regex default &optional line-limit)
+  "C."
+  `(defun ,(intern (format "maple/header-update-%s" name)) ()
+     ,(format "Update %s with regex." name)
+     (interactive)
+     (maple/header-update ,regex ,default ,(or line-limit 7))))
+
+(maple/header-update-engine "filename"
+                            ".*\\(File Name:\\)\\(.*\\)"
+                            (file-name-nondirectory (buffer-file-name)) 7)
+
+(maple/header-update-engine "email"
+                            ".*\\(Email:\\)\\(.*\\)"
+                            "youemail@gmail.com" 7)
 
 (provide 'init-edit)
