@@ -105,9 +105,13 @@ to choose a directory"
     (my--export-to-hugo directory)))
 
 ;; automatically warp lines
-(setq visual-line-mode t)
+(add-hook 'org-mode-hook '(lambda () (setq visual-line-mode t)))
+(add-hook 'prog-mode-hook '(lambda () (setq visual-line-mode t)))
 
 (use-package keyfreq
+  :hook
+  (after-init . keyfreq-mode)
+  (after-init . keyfreq-autosave-mode)
   :config
   (setq keyfreq-excluded-commands
       '(self-insert-command
@@ -117,6 +121,8 @@ to choose a directory"
         next-line
 	hydra-reading/next-line
 	hydra-reading/previous-line
+	hydra-reading/forward-char
+	hydra-reading/backward-char
 	hydra-reading/body
 	org-self-insert-command)))
 

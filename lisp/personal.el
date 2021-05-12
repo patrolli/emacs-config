@@ -162,56 +162,24 @@
     ))
 
 
-;; org capture templates for my personal project org files
-(defun lxs/org-find-project-journal-datetree ()
-  ;; (interactive)
-  (let* ((project (completing-read "Choose a project" '("compaction")))
-	(m (org-find-olp (cons (org-capture-expand-file (concat lxs-home-dir "Documents/" "org/" "org-roam-files/" project ".org")) '("Journal")))))
-    (set-buffer (marker-buffer m))
-   ;; (org-capture-put-target-region-and-position)
-   (widen)
-   (goto-char m)
-   (set-marker m nil)
-   ;; (org-capture-put-target-region-and-position)
-   (org-datetree-find-date-create (calendar-gregorian-from-absolute (org-today)) (when '("Journal") 'subtree-at-point))
-   )
-  )
-
-(defun lxs/org-find-project-idea-datetree ()
-  ;; (interactive)
-  (let* ((project (completing-read "Choose a project" '("compaction")))
-	(m (org-find-olp (cons (org-capture-expand-file (concat lxs-home-dir "Documents/" "org/" "org-roam-files/" project ".org")) '("Idea")))))
-    (set-buffer (marker-buffer m))
-   ;; (org-capture-put-target-region-and-position)
-   (widen)
-   (goto-char m)
-   (set-marker m nil)
-   ;; (org-capture-put-target-region-and-position)
-   (org-datetree-find-date-create (calendar-gregorian-from-absolute (org-today)) (when '("Idea") 'subtree-at-point))
-   )
-  )
-
-(add-to-list 'org-capture-templates `("w" "Project"))
-;; (add-to-list 'org-capture-templates `("l" "lxs test" entry (function lxs/org-find-project-journal-datetree) "* %U - %^{heading}\n  %?"))
-(add-to-list 'org-capture-templates `("wj" "project joural" entry (function lxs/org-find-project-journal-datetree) "* %U - %^{heading}\n  %?"))
-(add-to-list 'org-capture-templates `("wi" "project idea" entry (function lxs/org-find-project-idea-datetree)	"* %U - %^{heading}\n  %?"))
-
-
-(use-package coin-ticker
-  ;; 查看我的 shib 涨跌
-  :load-path "site-lisp/"
-  :custom
-  (coin-ticker-count 4723867)
-  :config
-  (coin-ticker-mode 1))
+;; (use-package coin-ticker
+;;   ;; 查看我的 shib 涨跌
+;;   :load-path "site-lisp/"
+;;   :custom
+;;   (coin-ticker-count 4723867)
+;;   :config
+;;   (coin-ticker-mode 1))
 
 
 
 ;; sql query for org-roam files with Project tag
-(setq lxs/org-roam-project (org-roam-db-query
+(with-eval-after-load 'org-roam
+  (setq lxs/org-roam-project (org-roam-db-query
                 [:select file
                  :from tags
                  :where (like tags (quote "%\"Project\"%"))]))
+  )
+
 
 
 ;; eaf configuration, but it will not work perfectly on wsl1

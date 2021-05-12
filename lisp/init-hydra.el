@@ -432,7 +432,8 @@ Version 2018-06-04 2021-03-16"
   (":" (progn (call-interactively 'eval-expression)))
   ;; ace-window
   (".." ace-window) ;; 为 ace-window 增加一个 rime 的断言
-  (".x" ace-delete-window)
+  (".x" delete-window) ;; do not chose when i want to close a window
+  (".X" ace-delete-window)
   (".c" ace-swap-window)
   (".v" split-window-below)
   (".b" balance-windows)
@@ -470,7 +471,7 @@ Version 2018-06-04 2021-03-16"
   (";e" eval-buffer)
   (";s" eval-last-sexp)
   (";b" xah-close-current-buffer)
-  
+  (";k" xah-new-empty-buffer)
   
   ;; bookmark
   (";i" (progn
@@ -490,12 +491,7 @@ Version 2018-06-04 2021-03-16"
   (",cj" org-roam-dailies-capture-today)
   (",m" pop-global-mark)
   ("C-c C-]" helm-bibtex :color blue)
-  ("C-c a" modi/switch-to-scratch-and-back :color blue)
-  ("C-c z" (call-interactively 'helm-org-dwim))
-  ("C-M-S-i" (if org-src-mode (org-edit-src-exit) (call-interactively 'narrow-or-widen-dwim)) :color blue)
   ("<mouse-1>" mouse-set-point :color blue)
-  ;; ("<mouse-2>" helm-for-files)
-  ;; ("<mouse-3>" kill-this-buffer)
   ("<mouse-3>" counsel-find-file)
   ("<" beginning-of-buffer)
   (">" end-of-buffer)
@@ -521,7 +517,6 @@ Version 2018-06-04 2021-03-16"
   ("V" (and (ignore-errors (other-window-for-scrolling) (scroll-other-window-down))))
   ("W" backward-word)
   ("X" (progn (kill-line 0)))
-  ("Y" duplicate-line-or-region :color blue)
   ("[" beginning-of-defun)	     
   ("]" end-of-defun) 
   ;; ("a" (progn (beginning-of-line) (indent-according-to-mode)))

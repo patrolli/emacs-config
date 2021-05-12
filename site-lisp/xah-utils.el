@@ -95,17 +95,6 @@ Version 2018-08-30"
           (vconcat (make-list 70 (make-glyph-code ?─ 'font-lock-comment-face))))
     (redraw-frame)))
 
-
-;; show abbrev
-;; (clear-abbrev-table global-abbrev-table)
-;; (define-abbrev-table 'global-abbrev-table '(("catface" "😸" )))
-;; (define-abbrev global-abbrev-table "lorg" "mnt/c/Users/lixun/Documents/org/")
-(add-hook
- 'minibuffer-setup-hook
- (lambda ()
-   (abbrev-mode 1)
-   (setq local-abbrev-table global-abbrev-table)))
-
 ;; [[file:/mnt/c/Users/lixun/Documents/org/static/img/capture_2021_05_10_11_59_03.png]]
 
 

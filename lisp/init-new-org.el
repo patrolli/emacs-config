@@ -233,7 +233,21 @@ prepended to the element after the #+HEADER: tag."
 	  ("h" "hugo blog file" entry (file (lambda () (lxs/create-hugo-file (concat lxs-home-dir "Documents/" "org/" "HugoBlogs/"))) ) "* ")
 	  ))
 
-  (defun lxs/org-find-project-idea-datetree ()
+(defun lxs/org-find-project-journal-datetree ()
+  ;; (interactive)
+  (let* ((project (completing-read "Choose a project" '("compaction")))
+	(m (org-find-olp (cons (org-capture-expand-file (concat lxs-home-dir "Documents/" "org/" "org-roam-files/" project ".org")) '("Journal")))))
+    (set-buffer (marker-buffer m))
+   ;; (org-capture-put-target-region-and-position)
+   (widen)
+   (goto-char m)
+   (set-marker m nil)
+   ;; (org-capture-put-target-region-and-position)
+   (org-datetree-find-date-create (calendar-gregorian-from-absolute (org-today)) (when '("Journal") 'subtree-at-point))
+   )
+  )
+
+(defun lxs/org-find-project-idea-datetree ()
   ;; (interactive)
   (let* ((project (completing-read "Choose a project" '("compaction")))
 	(m (org-find-olp (cons (org-capture-expand-file (concat lxs-home-dir "Documents/" "org/" "org-roam-files/" project ".org")) '("Idea")))))
@@ -248,7 +262,6 @@ prepended to the element after the #+HEADER: tag."
   )
 
 (add-to-list 'org-capture-templates `("w" "Project"))
-;; (add-to-list 'org-capture-templates `("l" "lxs test" entry (function lxs/org-find-project-journal-datetree) "* %U - %^{heading}\n  %?"))
 (add-to-list 'org-capture-templates `("wj" "project joural" entry (function lxs/org-find-project-journal-datetree) "* %U - %^{heading}\n  %?"))
 (add-to-list 'org-capture-templates `("wi" "project idea" entry (function lxs/org-find-project-idea-datetree)	"* %U - %^{heading}\n  %?"))
 
