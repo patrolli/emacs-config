@@ -1,4 +1,4 @@
-;; scratch buffer 的代码有用的一定要记得保存，不然就找不回来了
+';; scratch buffer 的代码有用的一定要记得保存，不然就找不回来了
 
 (defun lxs/org-refile-headline-by-tag ()
   (interactive)
@@ -223,8 +223,12 @@
                               (dired-get-file-for-visit)
                             (buffer-file-name)))
                  nil t)))
-         (command (format "%s `wslpath -w %s`" (shell-quote-argument app-name) path)))
+         (command (format "%s `wslpath -w \"%s\"`" (shell-quote-argument app-name) path)))
     (shell-command-to-string command)))
+
+;; (format "%s `wslpath -w %s`" (shell-quote-argument "explorer.exe") (shell-quote-argument (buffer-file-name)))
+
+;; ( shell-command-to-string (format "%s `wslpath -w \"%s\"`" (shell-quote-argument "explorer.exe") "/mnt/c/Users/lixun/Documents/Calibre/Jeffrey E.F.Friedl/Jing Tong Zheng Ze Biao Da Shi _Di 3Ban (80)/Jing Tong Zheng Ze Biao Da Shi _Di 3Ban - Jeffrey E.F.Friedl.epub"))
 
 (wsl--open-with open-in-default-program "explorer.exe" buffer-file-name)
 (wsl--open-with reveal-in-explorer "explorer.exe" default-directory)

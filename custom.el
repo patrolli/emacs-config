@@ -4,10 +4,6 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(TeX-command "tex")
- ;; '(ansi-color-faces-vector
- ;;   [default bold shadow italic underline bold bold-italic bold])
- ;; '(ansi-color-names-vector
- ;;   ["#fafafa" "#e45649" "#50a14f" "#986801" "#4078f2" "#a626a4" "#0184bc" "#383a42"])
  '(hl-sexp-background-color "#efebe9")
  '(vc-annotate-background "#fafafa")
  '(vc-annotate-background-mode nil)
@@ -38,9 +34,7 @@
  '(xterm-color-names
    ["black" "#a60000" "#005e00" "#813e00" "#0031a9" "#721045" "#00538b" "gray65"])
  '(xterm-color-names-bright
-   ["gray35" "#972500" "#315b00" "#70480f" "#2544bb" "#8f0075" "#30517f" "white"])  
-
- )
+   ["gray35" "#972500" "#315b00" "#70480f" "#2544bb" "#8f0075" "#30517f" "white"]))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.

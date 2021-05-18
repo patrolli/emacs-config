@@ -22,6 +22,7 @@
     ("lpw" "/mnt/c/Users/lixun/Documents/python_work/")
     ("ldl" "/mnt/c/Users/lixun/Downloads/")
     ("led" "~/.emacs.default/")
+    ("lcb" "[ ]")
     ))
 
 (add-hook

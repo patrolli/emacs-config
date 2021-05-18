@@ -149,3 +149,5 @@ decrease this. If you experience stuttering, increase this.")
               :slant 'normal
               :size 12.5)))
 
+;; add emacs in frame title for ahk searching the emacs window
+(add-to-list 'frame-title-format "emacs")

@@ -419,7 +419,6 @@ Version 2018-06-04 2021-03-16"
   ("-" er/contract-region)
   ("=" er/expand-region)
   ("%" view-jump-brace)
-  ;; ("/" (progn (toggle-org-hydra) (hydra-push '(hydra-reading/body))) :color teal)
 
   ;; org relevant
   ("/r"  (progn
@@ -448,7 +447,7 @@ Version 2018-06-04 2021-03-16"
   (".r" winner-redo)
   (".w" (progn
 	  (hydra-window-size/body)
-	  (hydra-push '(hydra-re ading/body))	  
+	  (hydra-push '(hydra-reading/body))	  
 	  ) :color blue)
   (".;" (progn
 	  (hydra-window-frame/body)
@@ -456,15 +455,12 @@ Version 2018-06-04 2021-03-16"
 	  ) :color blue)
   (".f" toggle-frame-fullscreen)
   
-  ;; (";f" (progn
-  ;; 	  (hydra-persp/body) 
-  ;; 	  (hydra-push '(hydra-reading/body)))
-  ;;  :color blue)
-  ;; (";x" persp-remove-buffer)
-  
-  (";j" (progn
-	  (hydra-projectile/body)
-	  (hydra-push '(hydra-reading/body))) :color blue)
+  ;; (";j" (progn
+  ;; 	  (hydra-projectile/body)
+  ;; 	  (hydra-push '(hydra-reading/body))) :color blue)
+  (";j" projectile-find-file)
+  ("; M-j" projectile-find-file-other-window)
+  (";f" counsel-file-jump)
   (";a" color-rg-search-project)
   (";q" color-rg-search-input-in-current-file)
   (";o" lxs/search-org)
@@ -480,7 +476,9 @@ Version 2018-06-04 2021-03-16"
 	  ) :color blue)
   (";y" counsel-yank-pop "show yank history")
   (";r" counsel-rg)
-  ("zj" my-bookmark-bmenu-list)
+  ("zl" my-bookmark-bmenu-list)
+  ("zj" xah-open-file-fast)
+  ;; ("zl" counsel-bookmark)
   ("zh" (lambda () (interactive) (hydra--set-bookmark (read-from-minibuffer "Name:"))))
   
   (";d" dired-jump)
@@ -512,7 +510,8 @@ Version 2018-06-04 2021-03-16"
   ("<SPC>k" scroll-up)
   ("<SPC>o" xah-open-last-closed)
   ("<SPC>i" xah-open-recently-closed)
-  ("<SPC>s" xah-select-block)
+  ("<SPC>e" iedit-mode)
+  ("<SPC>b" helm-mini)
   ;; ("T" org-babel-tangle)
   ("V" (and (ignore-errors (other-window-for-scrolling) (scroll-other-window-down))))
   ("W" backward-word)
@@ -544,28 +543,32 @@ Version 2018-06-04 2021-03-16"
   ("j" next-line)
   ("k" previous-line)
   ("l" forward-char)
-  ;; ("ma" magit-log-all :color blue)
-  ;; ("mc" magit-stage-all-and-commit :color blue)
-  ;; ("mg" magit-status :color blue)
-  ;; ("md" magit-diff :color blue)
-  ;; ("ml" magit-log-current :color blue)
-  ;; ("mt" git-timemachine :color blue)
+  ;; fast select
   ("mw" mark-word)
   ("ms" mark-sexp)
   ("mp" mark-paragraph)
+  ("ml" xah-select-line)
   ("mm" set-mark-command)
+  ("mj" er/expand-region)
+  ("mk" er/contract-region)
+  ("me" xah-extend-selection)
+  ("mq" xah-select-text-in-quote)
+  ("mb" xah-select-block)
+  
   ("M-;" comment-line)
   ("zk" helpful-key)
   ("zv" counsel-describe-variable)
   ("zf" counsel-describe-function)
   ("zg" keyboard-quit)
   ("zd" helpful-at-point)
-  ("n" (progn (ded/org-show-next-heading-tidily)))
+  ;; ("n" (progn (ded/org-show-next-heading-tidily)))
+  ("n" narrow-to-region)
+  ("<SPC>n" widen)
   ;; ("o" ace-link) ;; future use for org-mode hydra
   ("o" ace-window)
   ("p" (progn (ded/org-show-previous-heading-tidily)))
   ("r" undo-tree-redo)
-  ("s" swiper)
+  ("s" counsel-grep)
   ("t" other-window)
   ("T" (other-window -1))
   ("cc" avy-goto-char)
@@ -586,7 +589,6 @@ Version 2018-06-04 2021-03-16"
 ;; (add-hook 'find-file-hook '(lambda () (progn (hydra-pop) (hydra-reading/body))))
 
 (provide 'init-hydra)
-
 
 
 

@@ -120,7 +120,7 @@ Version 2016-04-04"
   (interactive)
   (set-mark-command t))
 
-(setq mark-ring-max 6)
+(setq mark-ring-max 3)
 (setq global-mark-ring-max 6)
 
 ;; 使用 color-rg 来对 org 文件进行检索

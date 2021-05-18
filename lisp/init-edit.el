@@ -100,7 +100,7 @@
 ;; display ^L as a line to split file into blocks
 ;; navigated by C-x [ and C-x ]
 (use-package page-break-lines
-  :config
+  :init
   (global-page-break-lines-mode)
   )
 
@@ -190,5 +190,5 @@
 (maple/header-update-engine "email"
                             ".*\\(Email:\\)\\(.*\\)"
                             "youemail@gmail.com" 7)
-
+(add-hook 'before-save-hook 'maple/header-update-filename)
 (provide 'init-edit)

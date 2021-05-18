@@ -105,6 +105,7 @@ to choose a directory"
     (my--export-to-hugo directory)))
 
 ;; automatically warp lines
+(setq word-wrap-by-category t)
 (add-hook 'org-mode-hook '(lambda () (setq visual-line-mode t)))
 (add-hook 'prog-mode-hook '(lambda () (setq visual-line-mode t)))
 
@@ -124,6 +125,17 @@ to choose a directory"
 	hydra-reading/forward-char
 	hydra-reading/backward-char
 	hydra-reading/body
-	org-self-insert-command)))
+	hydra-reading/nil
+	org-self-insert-command
+	mwheel-scroll
+	mouse-set-point
+	mouse-drag-region
+	iscroll-next-line
+	iscroll-previous-line
+	ivy-previous-line
+	ivy-next-line
+	helm-next-line
+	helm-previous-line
+	)))
 
 (provide 'init-basic)

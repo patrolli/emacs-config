@@ -114,6 +114,31 @@ Version 2017-11-01"
     ))
 (setq initial-buffer-choice 'xah-new-empty-buffer)
 
+(defvar lxs-major-mode-to-file-postfix '((emacs-lisp-mode . ".el") (python-mode . ".py") (org-mode . ".org") (lisp-interaction-mode . ".el"))
+  "map major mode to file postfix string"
+  )
+
+(defvar lxs-fast-save-dir "~/Documents/"
+  "defalut directory for save untitled buffer temporary")
+
+(defun lxs/fast-save-untitled-buffer ()
+  "Fast save untitled buffer into a pre-defined directory.
+File name is determined by the date and buffer major mode.
+When the file save name is duplicated, add a number at the
+end make each untitled buffer saved uniquely."
+  (interactive)
+  (let* ((untitled-dir "~/Documents/")
+	 (save-name (concat (format-time-string "%Y-%m-%d") "-" (buffer-name)))
+	 (postfix (cdr (assoc major-mode lxs-major-mode-to-file-postfix))))  
+    (let ((target (concat untitled-dir save-name postfix))
+	  (num 1))
+      (while (f-exists-p target)
+	(setq target (concat untitled-dir save-name "-" (number-to-string num) postfix))
+	(setq num (1+ num)))
+      (write-file target)
+      )
+))
+
 (defvar xah-recently-closed-buffers nil "alist of recently closed buffers. Each element is (buffer name, file path). The max number to track is controlled by the variable `xah-recently-closed-buffers-max'.")
 
 (defcustom xah-recently-closed-buffers-max 40 "The maximum length for `xah-recently-closed-buffers'."
@@ -157,7 +182,7 @@ Version 2018-06-11"
                 (cons (cons (buffer-name) (buffer-file-name)) xah-recently-closed-buffers))
           (when (> (length xah-recently-closed-buffers) xah-recently-closed-buffers-max)
             (setq xah-recently-closed-buffers (butlast xah-recently-closed-buffers 1))))
-        (kill-buffer (current-buffer))))))
+        (kill-buffer-and-window )))))
 
 (defun xah-open-last-closed ()
   "Open the last closed file.
@@ -245,5 +270,201 @@ Version 2019-12-26 2021-04-04"
       (push-mark (point) t t)
       (re-search-forward "\n[ \t]*\n" nil "move"))))
 
+
+
+(defvar xah-run-current-file-before-hook nil "Hook for `xah-run-current-file'. Before the file is run.")
+
+(defvar xah-run-current-file-after-hook nil "Hook for `xah-run-current-file'. After the file is run.")
+
+(defvar xah-run-current-file-map nil "A association list that maps file extension to program path, used by `xah-run-current-file'. First element is file suffix, second is program name or path. You can add items to it.")
+(setq
+ xah-run-current-file-map
+ '(
+   ("pl" . "perl")
+   ("py" . "python")
+   ("py3" . "python3")
+   ("rb" . "ruby")
+   ("sh" . "bash")
+   ("clj" . "java -cp ~/apps/clojure-1.6.0/clojure-1.6.0.jar clojure.main")
+   ("tex" . "pdflatex")
+   ("latex" . "pdflatex")
+   ))
+
+(defun xah-run-current-file ()
+  "Execute the current file.
+For example, if the current buffer is x.py, then it'll call 「python x.py」 in a shell.
+Output is printed to buffer “*xah-run output*”.
+File suffix is used to determine which program to run, set in the variable `xah-run-current-file-map'.
+If the file is modified or not saved, save it automatically before run.
+URL `http://ergoemacs.org/emacs/elisp_run_current_file.html'
+Version 2020-09-24 2021-01-21"
+  (interactive)
+  (let (
+        ($outBuffer "*xah-run output*")
+        (resize-mini-windows nil)
+        ($suffixMap xah-run-current-file-map )
+        $fname
+        $fSuffix
+        $progName
+        $cmdStr)
+    (when (not (buffer-file-name)) (save-buffer))
+    (when (buffer-modified-p) (save-buffer))
+    (setq $fname (buffer-file-name))
+    (setq $fSuffix (file-name-extension $fname))
+    (setq $progName (cdr (assoc $fSuffix $suffixMap)))
+    (setq $cmdStr (concat $progName " "   $fname  " &"))
+    (run-hooks 'xah-run-current-file-before-hook)
+    (cond
+     ((string-equal $fSuffix "el")
+      (load $fname))
+     (t (if $progName
+            (progn
+              (message "Running")
+              (shell-command $cmdStr $outBuffer )
+	      )
+          (error "No recognized program file suffix for this file."))))
+    (run-hooks 'xah-run-current-file-after-hook)))
+
+(defun xah-select-line ()
+  "Select current line. If region is active, extend selection downward by line.
+If `visual-line-mode' is on, consider line as visual line.
+URL `http://ergoemacs.org/emacs/modernization_mark-word.html'
+Version 2017-11-01 2021-03-19"
+  (interactive)
+  (if (region-active-p)
+      (if visual-line-mode
+          (let (($p1 (point)))
+                (end-of-visual-line 1)
+                (when (eq $p1 (point))
+                  (end-of-visual-line 2)))
+        (progn
+          (forward-line 1)
+          (end-of-line)))
+    (if visual-line-mode
+        (progn (beginning-of-visual-line)
+               (set-mark (point))
+               (end-of-visual-line))
+      (progn
+        (end-of-line)
+        (set-mark (line-beginning-position))))))
+
+(defun xah-extend-selection ()
+  "Select the current word, bracket/quote expression, or expand selection.
+Subsequent calls expands the selection.
+when there's no selection,
+• if cursor is on a any type of bracket (including parenthesis, quotation mark), select whole bracketed thing including bracket
+• else, select current word.
+when there's a selection, the selection extension behavior is still experimental. But when cursor is on a any type of bracket (parenthesis, quote), it extends selection to outer bracket.
+URL `http://ergoemacs.org/emacs/modernization_mark-word.html'
+Version 2020-02-04"
+  (interactive)
+  (if (region-active-p)
+      (progn
+        (let (($rb (region-beginning)) ($re (region-end)))
+          (goto-char $rb)
+          (cond
+           ((looking-at "\\s(")
+            (if (eq (nth 0 (syntax-ppss)) 0)
+                (progn
+                  ;; (message "left bracket, depth 0.")
+                  (end-of-line) ; select current line
+                  (set-mark (line-beginning-position)))
+              (progn
+                ;; (message "left bracket, depth not 0")
+                (up-list -1 t t)
+                (mark-sexp))))
+           ((eq $rb (line-beginning-position))
+            (progn
+              (goto-char $rb)
+              (let (($firstLineEndPos (line-end-position)))
+                (cond
+                 ((eq $re $firstLineEndPos)
+                  (progn
+                    ;; (message "exactly 1 line. extend to next whole line." )
+                    (forward-line 1)
+                    (end-of-line)))
+                 ((< $re $firstLineEndPos)
+                  (progn
+                    ;; (message "less than 1 line. complete the line." )
+                    (end-of-line)))
+                 ((> $re $firstLineEndPos)
+                  (progn
+                    ;; (message "beginning of line, but end is greater than 1st end of line" )
+                    (goto-char $re)
+                    (if (eq (point) (line-end-position))
+                        (progn
+                          ;; (message "exactly multiple lines" )
+                          (forward-line 1)
+                          (end-of-line))
+                      (progn
+                        ;; (message "multiple lines but end is not eol. make it so" )
+                        (goto-char $re)
+                        (end-of-line)))))
+                 (t (error "logic error 42946" ))))))
+           ((and (> (point) (line-beginning-position)) (<= (point) (line-end-position)))
+            (progn
+              ;; (message "less than 1 line" )
+              (end-of-line) ; select current line
+              (set-mark (line-beginning-position))))
+           (t
+            ;; (message "last resort" )
+            nil))))
+    (progn
+      (cond
+       ((looking-at "\\s(")
+        ;; (message "left bracket")
+        (mark-sexp)) ; left bracket
+       ((looking-at "\\s)")
+        ;; (message "right bracket")
+        (backward-up-list) (mark-sexp))
+       ((looking-at "\\s\"")
+        ;; (message "string quote")
+        (mark-sexp)) ; string quote
+       ;; ((and (eq (point) (line-beginning-position)) (not (looking-at "\n")))
+       ;;  (message "beginning of line and not empty")
+       ;;  (end-of-line)
+       ;;  (set-mark (line-beginning-position)))
+       ((or (looking-back "\\s_" 1) (looking-back "\\sw" 1))
+        ;; (message "left is word or symbol")
+        (skip-syntax-backward "_w" )
+        ;; (re-search-backward "^\\(\\sw\\|\\s_\\)" nil t)
+        (push-mark)
+        (skip-syntax-forward "_w")
+        (setq mark-active t)
+        ;; (exchange-point-and-mark)
+        )
+       ((and (looking-at "\\s ") (looking-back "\\s " 1))
+        ;; (message "left and right both space" )
+        (skip-chars-backward "\\s " ) (set-mark (point))
+        (skip-chars-forward "\\s "))
+       ((and (looking-at "\n") (looking-back "\n" 1))
+        ;; (message "left and right both newline")
+        (skip-chars-forward "\n")
+        (set-mark (point))
+        (re-search-forward "\n[ \t]*\n")) ; between blank lines, select next text block
+       (t
+        ;; (message "just mark sexp" )
+        (mark-sexp)
+        (exchange-point-and-mark))
+       ;;
+       ))))
+
+(defun xah-select-text-in-quote ()
+  "Select text between the nearest left and right delimiters.
+Delimiters here includes the following chars: \"`<>(){}[]“”‘’‹›«»「」『』【】〖〗《》〈〉〔〕（）
+This command select between any bracket chars, does not consider nesting. For example, if text is
+ (a(b)c▮)
+ the selected char is “c”, not “a(b)c”.
+URL `http://ergoemacs.org/emacs/modernization_mark-word.html'
+Version 2020-11-24"
+  (interactive)
+  (let (
+        ($skipChars "^\"`<>(){}[]“”‘’‹›«»「」『』【】〖〗《》〈〉〔〕（）〘〙")
+        $p1
+        )
+    (skip-chars-backward $skipChars)
+    (setq $p1 (point))
+    (skip-chars-forward $skipChars)
+    (set-mark $p1)))
 
 (provide 'xah-utils)

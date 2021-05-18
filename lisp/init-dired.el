@@ -8,7 +8,7 @@
   (define-key dired-mode-map (kbd "C-c C-o") 'xah-open-in-xternal-app-from-wsl))
 ;; 打开当前目录的dired mode，快捷键C－c C－j
 (require 'dired-x)
-(setq dired-dwin-target 1)
+(setq dired-dwim-target 1)
 
 ;; Colourful dired
 (use-package diredfl

@@ -32,7 +32,6 @@
     (interactive)
     (company-cancel)
     (call-interactively 'company-yasnippet))
-  :config
   ;; `yasnippet' integration
   (with-no-warnings
     (with-eval-after-load 'yasnippet
@@ -67,23 +66,23 @@
   )
 
 (use-package company-tabnine
-  ;; :disabled nil  ;; 停用 tabnine
   :custom
-  (company-tabnine-max-num-results 3)
+  ((company-tabnine-max-num-results 3))
   :bind
-  (("M-q" . company-other-backend))
+  ("M-q" . company-other-backend)
   :hook
-  (nox-managed-mode-hook . (lambda ()
+  ((nox-managed-mode . (lambda ()
                       (setq company-tabnine-max-num-results 3)
                       (add-to-list 'company-transformers 'company//sort-by-tabnine t)
                       (add-to-list 'company-backends '(company-capf :with company-tabnine :separate))))
-  (after-init-hook company-tabnine) ;; activate tabnine server when emacs start
+  (after-init . (lambda () (call-interactively 'company-tabnine))) ;; activate tabnine server when emacs start
   (kill-emacs . company-tabnine-kill-process)
-  :config
+  )
+  :init
   ;; Enable TabNine on default
   ;; (add-to-list 'company-backends #'company-tabnine)
   (defun company//sort-by-tabnine (candidates)
-  (if (or (functionp company-backend)
+    (if (or (functionp company-backend)
           (not (and (listp company-backend) (memq 'company-tabnine company-backend))))
       candidates
     (let ((candidates-table (make-hash-table :test #'equal))
@@ -106,21 +105,17 @@
     "temporally close or open tabnine, for saving cpu cost."
     (interactive)
     (if company-tabnine--disabled
-	(setq company-tabnine--disabled nil)
+	(progn (setq company-tabnine--disabled nil)
+	       (message "tabnine enabled"))
       (setq company-tabnine--disabled t)
+      (message "tabnine disabled!")
       )
     )
-
-  (add-hook 'nox-managed-mode-hook
-	    #'(lambda ()
-                      (setq company-tabnine-max-num-results 3)
-                      (add-to-list 'company-transformers 'company//sort-by-tabnine t)
-                      (add-to-list 'company-backends '(company-capf :with company-tabnine :separate))))
   )
 
   ;; Icons and quickhelp
-  (when emacs/>=26p
-    (use-package company-box
+(when emacs/>=26p
+  (use-package company-box
       :diminish
       :defines company-box-icons-all-the-icons
       :hook (company-mode . company-box-mode)
