@@ -33,3 +33,4 @@ newsticker/
 .persistent-scratch-backup/
 eaf
 .mc-lists.el
+eln-cache/

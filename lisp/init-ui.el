@@ -9,7 +9,7 @@
 
 (scroll-bar-mode -1)
 (global-linum-mode -1)
-(setq initial-frame-alist (quote ((fullscreen . fullboth))))
+;; (setq initial-frame-alist (quote ((fullscreen . fullboth))))
 (global-hl-line-mode 1)
 ;; (setq inhibit-splash-screen t)
 ;; open emacs default full-screen

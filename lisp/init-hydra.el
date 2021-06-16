@@ -426,6 +426,9 @@ Version 2018-06-04 2021-03-16"
 	  (hydra-push '(hydra-reading/body))	  
 	  ) :color blue)
   ("/c" org-capture)
+  ("<SPC>'" (progn (if (org-src-edit-buffer-p)
+		       (org-edit-src-exit)
+		   (org-edit-special))))
    
   ;; ("." (progn (call-interactively 'avy-goto-char-timer)))
   (":" (progn (call-interactively 'eval-expression)))
@@ -581,7 +584,8 @@ Version 2018-06-04 2021-03-16"
   ("x" delete-char)
   ("y" yank)
   ("<escape>" nil)
-  ("M-j" nil))
+  ("M-j" nil)
+  ("M-k" toggle-input-method))
 
 (bind-key "<escape>" 'hydra-reading/body)
 (bind-key "M-j" 'hydra-reading/body)	

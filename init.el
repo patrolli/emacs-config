@@ -135,10 +135,16 @@ decrease this. If you experience stuttering, increase this.")
 ;;                   :size 12.5))
 (set-face-attribute
  'default nil
- :font (font-spec :name "-BE5N-Iosevka-extralight-normal-expanded-*-16-*-*-*-*-0-iso10646-1"
+ :font (font-spec :name "-UKWN-Iosevka-normal-normal-normal-*-16-*-*-*-d-0-iso10646-1"
                   :weight 'normal
                   :slant 'normal
                   :size 13.5))
+;; (set-face-attribute
+;;  'default nil
+;;  :font (font-spec :name "Iosevka"
+;;                   :weight 'normal
+;;                   :slant 'normal
+;;                   :size 14.5))
 
 (dolist (charset '(kana han symbol cjk-misc bopomofo))
   (set-fontset-font

@@ -13,3 +13,6 @@
 [submodule "site-lisp/thing-edit"]
 	path = site-lisp/thing-edit
 	url = git@github.com:manateelazycat/thing-edit.git
+[submodule "site-lisp/awesome-tab"]
+	path = site-lisp/awesome-tab
+	url = https://github.com/manateelazycat/awesome-tab.git

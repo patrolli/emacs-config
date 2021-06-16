@@ -66,16 +66,17 @@
   )
 
 (use-package company-tabnine
+  :ensure t
   :custom
   ((company-tabnine-max-num-results 3))
-  :bind
-  ("M-q" . company-other-backend)
+  ;; :bind
+  ;; ("M-q" . company-other-backend)
   :hook
   ((nox-managed-mode . (lambda ()
                       (setq company-tabnine-max-num-results 3)
                       (add-to-list 'company-transformers 'company//sort-by-tabnine t)
                       (add-to-list 'company-backends '(company-capf :with company-tabnine :separate))))
-  (after-init . (lambda () (call-interactively 'company-tabnine))) ;; activate tabnine server when emacs start
+  ;; (after-init . (lambda () (call-interactively 'company-tabnine))) ;; activate tabnine server when emacs start
   (kill-emacs . company-tabnine-kill-process)
   )
   :init
@@ -116,6 +117,7 @@
   ;; Icons and quickhelp
 (when emacs/>=26p
   (use-package company-box
+      :ensure t
       :diminish
       :defines company-box-icons-all-the-icons
       :hook (company-mode . company-box-mode)

@@ -1,7 +1,7 @@
 ;; nox, a lightweight lsp client
 ;; TODO: 修改路径硬编码
 (use-package nox
-  :load-path "nox/"
+  :load-path "site-lisp/nox/"
   :init
   ;; (defvar lsp-python "/usr/bin/python3.8")
   ;; 对于 nox+mspyls, 需要指定 python 解释器的路径， vitural envs 似乎不能够起到作用

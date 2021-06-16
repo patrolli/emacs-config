@@ -159,8 +159,10 @@ prepended to the element after the #+HEADER: tag."
      ))
   
     ;; org habit
-  (use-package org-tempo)
-  (use-package org-habit)
+  (use-package org-tempo
+    :ensure nil)
+  (use-package org-habit
+    :ensure nil)
   (add-to-list 'org-modules 'org-tempo)
   (add-to-list 'org-modules 'org-habit)
   (setq org-habit-show-all-today t)
@@ -169,6 +171,7 @@ prepended to the element after the #+HEADER: tag."
   (setq org-habit-following-days 1)
   ;; org-protocol 设置
   (use-package org-protocol
+    :ensure nil
     :config
     (setq org-protocol-default-template-key nil)
     (add-to-list 'org-modules 'org-protocol))
@@ -340,6 +343,7 @@ it can be passed in POS."
 
 ;; org agenda and gtd setting
 (use-package org-agenda
+  :ensure nil
   :init
   :defer t
   :bind
