@@ -32,7 +32,7 @@
   (setq lxs/org-agenda-directory (concat lxs-home-dir "Documents/org/gtd/"))
   :hook
   (((org-babel-after-execute org-mode) . org-redisplay-inline-images)
-   (org-mode . toggle-truncate-lines)
+   ;; (org-mode . toggle-truncate-lines)
    (org-mode . org-hide-block-all)
    (org-mode . org-overview)
    (org-mode . turn-on-org-cdlatex)
@@ -180,7 +180,7 @@ prepended to the element after the #+HEADER: tag."
   '(org-clock-into-drawer "CLOCKING")
 
   ;; 设置 org-mode 显示图片大小
-  (setq org-image-actual-width t)
+  (setq org-image-actual-width '(400))
 
   (setq org-support-shift-select t)
 

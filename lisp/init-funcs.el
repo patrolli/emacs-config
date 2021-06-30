@@ -74,7 +74,7 @@
 ;; password 813729
 (defun lxs/open-jupyter-in-chrome ()
   (interactive)
-  (let ((cmd (format "jupyter-lab --no-browser --port 8888 --notebook-dir %s" default-directory)))
+  (let ((cmd (format "jupyter-lab --no-browser --port 8888 --notebook-dir %s" gnus-home-directory)))
     (if (get-process "jupyter")
 	(if (y-or-n-p "Existing jupyter lab was found, replace(y) it?")
 	    (progn

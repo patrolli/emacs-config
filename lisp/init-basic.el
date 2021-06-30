@@ -138,4 +138,10 @@ to choose a directory"
 	helm-previous-line
 	)))
 
+(use-package awesome-tab
+  :load-path "site-lisp/awesome-tab"
+  :config
+  (setq awesome-tab-height 120)
+  (awesome-tab-mode))
+
 (provide 'init-basic)

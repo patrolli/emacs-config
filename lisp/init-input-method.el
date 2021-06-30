@@ -16,7 +16,8 @@
   :config
   (setq default-input-method "rime"
 	rime-show-candidate 'posframe)
-  (setq rime-user-data-dir "~/.config/fcitx/rime")
+  ;; (setq rime-librime-root "~/.emacs.d/librime/dist")
+  (setq rime-user-data-dir "~/.emacs.d/rime/")
   (setq rime-disable-predicates
         '(rime-predicate-evil-mode-p
           rime-predicate-after-alphabet-char-p
@@ -38,7 +39,7 @@
             :foreground-color "#dcdccc"
             ;; :font "WenQuanYi Micro Hei Mono-14"
             :internal-border-width 10))
-  ;; (add-hook 'find-file-hook #'toggle-input-method) 
+  ;; (add-hook 'find-file-hook #'toggle-input-method
   )
 (global-set-key (kbd "M-k") 'toggle-input-method) 
 (provide 'init-input-method)

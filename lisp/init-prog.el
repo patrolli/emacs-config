@@ -74,10 +74,13 @@
           (read-only-mode)))
     (funcall func item action)
     ))
-;; (projectile-project-root "/mnt/c/Users/lixun/Documents/python_work/CompAction/code/data_utils/data_loader_frames.py")
-;; (advice-add 'xref-pop-to-location :around #'xref--pop-to-location@around)
-;; (advice-remove #'xref--pop-to-location@around 'xref-pop-to-location)
-(setq python-shell-interpreter "/home/lixunsong/anaconda3/envs/py-emacs/bin/python3.7")
+
+(use-package citre
+       :diminish
+       :functions projectile-project-root
+       :hook (prog-mode . citre-auto-enable-citre-mode))
+
+(setq python-shell-interpreter "/home/lixunsong/anaconda3/bin/python3.8")
 ;; python
 (use-package pyvenv
   :ensure t

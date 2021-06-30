@@ -182,7 +182,9 @@ Version 2018-06-11"
                 (cons (cons (buffer-name) (buffer-file-name)) xah-recently-closed-buffers))
           (when (> (length xah-recently-closed-buffers) xah-recently-closed-buffers-max)
             (setq xah-recently-closed-buffers (butlast xah-recently-closed-buffers 1))))
-        (kill-buffer-and-window )))))
+        ;; (kill-buffer-and-window )
+	(kill-buffer)
+	))))
 
 (defun xah-open-last-closed ()
   "Open the last closed file.
