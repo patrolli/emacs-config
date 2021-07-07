@@ -14,6 +14,29 @@
 ;; (setq inhibit-splash-screen t)
 ;; open emacs default full-screen
 
+;; randomly pick my favourite themes
+;; ref: https://github.com/redguardtoo/emacs.d/blob/5c0f5702eebc430363d05e058077f65c4d6c2a2d/lisp/init-theme.el#L10
+(defvar my-favourite-color-themes '(doom-gruvbox doom-one-light doom-zenburn)
+  "A set of themes randomly picked when eamcs starts up")
+
+(defun random-choice (items)
+  (let* ((size (length items))
+	 (index (random size)))
+    (nth index items)))
+
+(defun my-pick-random-theme (themes)
+  (my-ensure 'counsel)
+  (let* ((available-themes (mapcar 'symbol-name themes))
+	 (theme (nth (random (length available-themes)) available-themes)))
+    (counsel-load-theme-action theme)
+    (message "Color theme [%s] loaded" theme)))
+
+(defun lxs/pick-my-favorite-themes ()
+  (interactive)
+  (my-pick-random-theme (or my-favourite-color-themes
+			    (custom-available-themes)))
+  )
+
 (use-package doom-themes
        :ensure t
        :config
@@ -22,7 +45,8 @@
        ;; (load-theme 'doom-one t)
        ;; (load-theme 'doom-gruvbox-light)
        ;; (load-theme 'modus-vivendi)
-       (load-theme 'doom-zenburn t)
+       ;; (load-theme 'doom-zenburn t)
+       (call-interactively 'lxs/pick-my-favorite-themes)
        (doom-themes-org-config)
        ;; (doom-themes-neotree-config)
 
@@ -34,27 +58,6 @@
         `(org-latex-and-related ((t (:foreground ,(doom-color 'green))))))
        (setq org-highlight-latex-and-related '(latex script entities)))
      )
-
-
-;; (setq leuven-scale-outline-headlines nil)
-;; (setq leuven-scale-org-agenda-structure nil)
-;;(load-theme 'material-light t)
-
-;; (use-package spaceline
-;;   :ensure t
-;;   :init
-;;   (setq powerline-default-separator 'slant)
-;;   :config
-;;   (use-package persp-mode :ensure)
-;;   (use-package projectile :ensure)
-;;   (require 'spaceline-config)
-;;   (require 'spaceline-segments)
-;;   (spaceline-helm-mode 1)
-;;   (spaceline-spacemacs-theme)
-;;   (spaceline-toggle-minor-modes-off)
-;;   (spaceline-toggle-buffer-size-off)
-;;   (spaceline-toggle-persp-name-on)
-;;   (spaceline-toggle-projectile-root-on))
 
 ;; use doom-modeline instead of spaceline
 (use-package doom-modeline

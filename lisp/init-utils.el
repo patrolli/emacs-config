@@ -14,6 +14,7 @@
 ;; FIXME: scrach buffer 打开总是 org-agenda mode
 (use-package persistent-scratch
   :diminish
+  :disabled t
   :custom
   (persistent-scratch-backup-directory (concat user-emacs-directory ".persistent-scratch-backup"))
   :bind (:map persistent-scratch-mode-map
@@ -24,5 +25,12 @@
          ([remap revert-this-buffer] . persistent-scratch-restore))
   :hook ((after-init . persistent-scratch-autosave-mode)
          (lisp-interaction-mode . persistent-scratch-mode)))
+
+(defun my-ensure (feature)
+  "Make sure FEATURE is required."
+  (unless (featurep feature)
+    (condition-case nil
+        (require feature)
+      (error nil))))
 
 (provide 'init-utils)

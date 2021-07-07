@@ -1,4 +1,4 @@
-';; scratch buffer 的代码有用的一定要记得保存，不然就找不回来了
+;; scratch buffer 的代码有用的一定要记得保存，不然就找不回来了
 
 (defun lxs/org-refile-headline-by-tag ()
   (interactive)
@@ -97,15 +97,7 @@
   )
 
 
-;; randomly pick a theme
-(defun random-choice (items)
-  (let* ((size (length items))
-	 (index (random size)))
-    (nth index items)))
 
-(defun lxs/pick-random-theme ()
-  (interactive)
-  (load-theme (random-choice (custom-available-themes))))
 
 ;; (use-package which-function-mode
 ;;   :hook ((prog-mode . which-function-mode)
@@ -280,7 +272,12 @@ This command does not push text to `kill-ring'."
   (interactive "p")
   (my-delete-word (- arg)))
 
-
-;;  to test 
+(defun my-counsel-grep-or-swiper (&optional initial-input)
+  (interactive)
+  (if (not buffer-file-name)
+      (swiper initial-input)
+    (counsel-grep initial-input)
+    )
+  )
 
 (provide 'personal)

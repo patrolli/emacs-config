@@ -23,6 +23,7 @@
     ("ldl" "/mnt/c/Users/lixun/Downloads/")
     ("led" "~/.emacs.default/")
     ("lcb" "[ ]")
+    ("limg" "#+ATTR_HTML: :width 800px\n#+ATTR_ORG: :width 800px")
     ))
 
 (add-hook

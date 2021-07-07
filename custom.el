@@ -5,8 +5,8 @@
  ;; If there is more than one, they won't work right.
  '(TeX-command "tex")
  '(hl-sexp-background-color "#efebe9")
- '(org-agenda-files
-   '("/mnt/c/Users/lixun/Documents/org/org-roam-files/paper_index.org" "/mnt/c/Users/lixun/Documents/org/gtd/billing.org" "/mnt/c/Users/lixun/Documents/org/gtd/inbox.org" "/mnt/c/Users/lixun/Documents/org/gtd/journal.org" "/mnt/c/Users/lixun/Documents/org/gtd/learning.org" "/mnt/c/Users/lixun/Documents/org/gtd/next.org" "/mnt/c/Users/lixun/Documents/org/gtd/notes.org" "/mnt/c/Users/lixun/Documents/org/gtd/paper-notes-archive.org" "/mnt/c/Users/lixun/Documents/org/gtd/projects.org" "/mnt/c/Users/lixun/Documents/org/gtd/reading.org" "/mnt/c/Users/lixun/Documents/org/gtd/repeater.org" "/mnt/c/Users/lixun/Documents/org/gtd/someday.org" "/mnt/c/Users/lixun/Documents/org/gtd/time-tracking.org" "/mnt/c/Users/lixun/Documents/org/gtd/webclips.org"))
+ ;; '(org-agenda-files
+ ;;   '("/mnt/c/Users/lixun/Documents/org/org-roam-files/paper_index.org" "/mnt/c/Users/lixun/Documents/org/gtd/billing.org" "/mnt/c/Users/lixun/Documents/org/gtd/inbox.org" "/mnt/c/Users/lixun/Documents/org/gtd/journal.org" "/mnt/c/Users/lixun/Documents/org/gtd/learning.org" "/mnt/c/Users/lixun/Documents/org/gtd/next.org" "/mnt/c/Users/lixun/Documents/org/gtd/notes.org" "/mnt/c/Users/lixun/Documents/org/gtd/paper-notes-archive.org" "/mnt/c/Users/lixun/Documents/org/gtd/projects.org" "/mnt/c/Users/lixun/Documents/org/gtd/reading.org" "/mnt/c/Users/lixun/Documents/org/gtd/repeater.org" "/mnt/c/Users/lixun/Documents/org/gtd/someday.org" "/mnt/c/Users/lixun/Documents/org/gtd/time-tracking.org" "/mnt/c/Users/lixun/Documents/org/gtd/webclips.org"))
  '(vc-annotate-background "#fafafa")
  '(vc-annotate-background-mode nil)
  '(vc-annotate-color-map

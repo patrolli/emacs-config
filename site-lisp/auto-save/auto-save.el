@@ -7,7 +7,7 @@
 ;; Copyright (C) 2013 ~ 2014, Andy Stewart, all rights reserved.
 ;; Created: 2013-12-31 00:32:00
 ;; Version: 0.6
-;; Last-Updated: 2018-12-20 12:10:44
+;; Last-Update  MONDAY 2021-07-05 11:46:55 (CST)
 ;;           By: Andy Stewart
 ;; URL:
 ;; Keywords: autosave
@@ -196,14 +196,14 @@ Cancel any previous timer."
 (defun auto-save-enable ()
   (interactive)
   (auto-save-set-timer)
-  (add-hook 'before-save-hook 'auto-save-delete-trailing-whitespace-except-current-line)
+  ;; (add-hook 'before-save-hook 'auto-save-delete-trailing-whitespace-except-current-line)
   (add-hook 'before-save-hook 'font-lock-flush)
   )
 
 (defun auto-save-disable ()
   (interactive)
   (auto-save-cancel-timer)
-  (remove-hook 'before-save-hook 'auto-save-delete-trailing-whitespace-except-current-line)
+  ;; (remove-hook 'before-save-hook 'auto-save-delete-trailing-whitespace-except-current-line)
   (remove-hook 'before-save-hook 'font-lock-flush)
   )
 

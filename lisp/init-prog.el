@@ -1,7 +1,7 @@
 ;; nox, a lightweight lsp client
-;; TODO: 修改路径硬编码
 (use-package nox
   :load-path "site-lisp/nox/"
+  ;; :disabled t
   :init
   ;; (defvar lsp-python "/usr/bin/python3.8")
   ;; 对于 nox+mspyls, 需要指定 python 解释器的路径， vitural envs 似乎不能够起到作用
@@ -14,22 +14,7 @@
   ;; :custom
   ;; (nox-python-server "pyright")
   :config
-  ;; add hooks
-  ;; update manually open nox
-  ;; (dolist (hook (list
-  ;;               'js-mode-hook
-  ;;               'rust-mode-hook
-  ;;               'python-mode-hook
-  ;;               'ruby-mode-hook
-  ;;               'java-mode-hook
-  ;;               'sh-mode-hook
-  ;;               'php-mode-hook
-  ;;               'c-mode-common-hook
-  ;;               'c-mode-hook
-  ;;               'c++-mode-hook
-  ;;               'haskell-mode-hook
-  ;;               ))
-  ;;  (add-hook hook '(lambda () (nox-ensure))))
+
   ;; cpp 
    (add-to-list 'nox-server-programs '(c++-mode . ("clangd")))
    (add-to-list 'nox-server-programs '(c-mode . ("clangd")))
@@ -49,14 +34,6 @@
     (:properties
      (:InterpreterPath ,lsp-python))
      :searchPaths ,lsp-search-paths))
-  ;; (add-to-list 'nox-server-programs
-  ;;            '(python-mode nox-mspyls 
-  ;;                          ;; "~/.emacs.d/nox/mspyls/Microsoft.Python.LanguageServer"
-  ;; 			    "~/.emacs.default/nox/mspyls/Microsoft.Python.LanguageServer"
-  ;; 			   ))
-  
-  ;; ;; pyls configuration is simple~
-  ;; ;; (add-to-list 'nox-server-programs '(python-mode . ("python-language-server" "pyls")))
   (add-to-list 'nox-server-programs '((python-mode) "pyright-langserver" "--stdio"))
   (define-key nox-mode-map (kbd "C-.")  'nox-show-doc)
   )
@@ -76,9 +53,13 @@
     ))
 
 (use-package citre
-       :diminish
-       :functions projectile-project-root
-       :hook (prog-mode . citre-auto-enable-citre-mode))
+  :diminish
+  :hook (prog-mode . citre-auto-enable-citre-mode)
+  :init
+  (defun lxs/generate-ctags-for-python-project ()
+    (interactive)
+    (shell-command "ctags --languages=python --kinds-all='*' --fields='*' --extras='*' -R"))
+  )
 
 (setq python-shell-interpreter "/home/lixunsong/anaconda3/bin/python3.8")
 ;; python
@@ -104,6 +85,7 @@
 ;;   :hook (prog-mode . smartparens-mode))
 
 ;; (add-hook 'prog-mode-hook (lambda () (setq which-function-mode t)))
+;; 
 (add-hook 'prog-mode-hook 'show-paren-mode)
 
 (provide 'init-prog)

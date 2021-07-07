@@ -1,0 +1,9 @@
+# -*- mode: snippet -*-
+# name: sel-wait-element
+# key: selwait
+# Author: Li Xunsong
+# Email: lixunsonghcl@126.com
+# --
+
+WebDriverWait(driver, DRIVER_WAIT_TIME).until(
+                    EC.presence_of_element_located((By.XPATH, "${1:element}")))

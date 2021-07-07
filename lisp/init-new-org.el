@@ -30,12 +30,16 @@
      ("begin" "$1" "$" "$$" "\\(" "\\[")))
   :init
   (setq lxs/org-agenda-directory (concat lxs-home-dir "Documents/org/gtd/"))
+  ;; 这个 hook 似乎必须设置到 init 里面才能生效
+  (add-hook 'org-mode-hook #'visual-line-mode)
   :hook
   (((org-babel-after-execute org-mode) . org-redisplay-inline-images)
-   ;; (org-mode . toggle-truncate-lines)
    (org-mode . org-hide-block-all)
    (org-mode . org-overview)
-   (org-mode . turn-on-org-cdlatex)
+   ;; (org-mode . toggle-word-wrap)
+   ;; (org-mode . turn-on-org-cdlatex)
+   ;; (org-mode . (lambda () (setq truncate-lines t)))
+   ;; (org-mode . visual-line-mode)
    (org-mode . (lambda ()
                        "Beautify org symbols."
                        (setq prettify-symbols-alist lxs-prettify-org-symbols-alist)
@@ -314,8 +318,13 @@ it can be passed in POS."
     (when (derived-mode-p 'org-mode)
       (zp/org-set-time-file-property "LAST_MODIFIED")))
   (add-hook 'before-save-hook #'zp/org-set-last-modified)
- )
+  )
 
+(defun lxs/org-show-recent-inserted-img ()
+  (when (derived-mode-p 'org-mode)
+    (call-interactively 'org-toggle-inline-images)
+    (call-interactively 'org-toggle-inline-images)))
+;; (add-hook 'before-save-hook #'lxs/org-show-recent-inserted-img)
 ;; save
 (use-package org-pomodoro
   :after org-agenda
@@ -345,6 +354,7 @@ it can be passed in POS."
 (use-package org-agenda
   :ensure nil
   :init
+  (setq org-agenda-files (directory-files-recursively lxs/org-agenda-directory "\\.org$"))
   :defer t
   :bind
   (:map org-agenda-mode-map
@@ -356,7 +366,7 @@ it can be passed in POS."
   (after-init . org-agenda-mode)
   :config
   ;; 一些基础配置
-  (setq org-agenda-files (directory-files-recursively lxs/org-agenda-directory "\\.org$"))
+  ;; (setq org-agenda-files (directory-files-recursively lxs/org-agenda-directory "\\.org$"))
   (add-to-list 'org-agenda-files (concat lxs-home-dir "Documents/" "org/" "org-roam-files/" "paper_index.org"))
   (setq org-agenda-archives-mode t)
   ;; org-todo-list config

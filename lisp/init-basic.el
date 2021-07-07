@@ -47,8 +47,8 @@
   :load-path "site-lisp/thing-edit/")
 
 (use-package openwith
-  ;; :hook
-  ;; (after-init-hook . openwith-mode)
+  :hook
+  (after-init-hook . openwith-mode)
   :config
   ;; (openwith-mode t)
   (setq openwith-associations '(("\\.pdf\\'" " okular" (file))))
@@ -143,5 +143,8 @@ to choose a directory"
   :config
   (setq awesome-tab-height 120)
   (awesome-tab-mode))
+
+;; (setq global-visual-line-mode t)
+;; (setq truncate-lines nil)
 
 (provide 'init-basic)

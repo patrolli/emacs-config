@@ -1,6 +1,5 @@
 elpa
 auto-save-list
-pyim
 .lsp-session-v1
 .cache/
 .org-id-locations
@@ -25,8 +24,6 @@ persp-confs/
 nox/
 valign/
 cnfonts/
-personal_pyim_dict
-pyim-dict
 forge-database.sqlite
 .persistent-scratch
 newsticker/
@@ -34,3 +31,5 @@ newsticker/
 eaf
 .mc-lists.el
 eln-cache/
+rime/
+librime/

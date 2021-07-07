@@ -1,0 +1,8 @@
+# -*- mode: snippet -*-
+# name: sel-execute-script
+# key: selexe
+# Author: Li Xunsong
+# Email: lixunsonghcl@126.com
+# --
+
+driver.execute_script("arguments[0].click();", ${1:element})

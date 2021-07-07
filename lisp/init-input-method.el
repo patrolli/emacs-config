@@ -2,8 +2,10 @@
 (require 'init-custom)
 (require 'init-funcs)
 
-(use-package rime
+;; 由于 rime 不能记忆用户自造词，所以切换回了 pyim
+(use-package rime  
   :defer t
+  :disabled t
   :custom
   (default-input-method "rime")
   :bind
@@ -41,5 +43,35 @@
             :internal-border-width 10))
   ;; (add-hook 'find-file-hook #'toggle-input-method
   )
-(global-set-key (kbd "M-k") 'toggle-input-method) 
+
+(use-package pyim
+  :init
+  (setq default-input-method "pyim")
+  (setq pyim-indicator #'ignore)
+  :bind
+  ("M-k" . pyim-convert-string-at-point)
+  :config
+  ;; (global-set-key (kbd "M-k") 'pyim-convert-string-at-point)
+  (pyim-default-scheme 'xiaohe-shuangpin)
+  (if (posframe-workable-p)
+    (setq pyim-page-tooltip 'posframe)
+  (setq pyim-page-tooltip 'popup))
+  (setq pyim-page-length 5)
+  (setq-default pyim-english-input-switch-functions
+              '(pyim-probe-dynamic-english
+                pyim-probe-isearch-mode
+                pyim-probe-program-mode
+                pyim-probe-org-structure-template))
+
+  (setq-default pyim-punctuation-half-width-functions
+              '(pyim-probe-punctuation-line-beginning
+                pyim-probe-punctuation-after-punctuation))
+  (setq pyim-dicts
+	'((:name "sougou_base" :file "~/.emacs.d/pyim/sougou_base.pyim"))
+	pyim-enable-shortcode nil)
+  (pyim-indicator-stop-daemon)
+  
+  )
+
+;; (global-set-key (kbd "M-k") 'toggle-input-method) 
 (provide 'init-input-method)

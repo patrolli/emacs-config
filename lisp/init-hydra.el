@@ -80,7 +80,7 @@
 
      Find File            Search/Tags          Buffers                Cache
 ------------------------------------------------------------------------------------------
- _j_: file            _a_: ag                _i_: Ibuffer           _c_: cache clear 
+ _j_: file            _a_: ag                _i_: Ibuffer           _c_: cache clear
  _ff_: file dwim       _g_: color-rg          _b_: switch to buffer  _x_: remove known project
  _fd_: file curr dir   _o_: multi-occur      _.k_: Kill all buffers  _X_: cleanup non-existing
   _r_: recent file                                               ^^^^_z_: cache current
@@ -157,10 +157,10 @@ _l_ist bookmark     _s_ toggle bm    sh_o_w TODO
   ("f" counsel-bm :exit nil)
   ;; hl-todo
   ("h" hl-todo-next :color red)
-  ("g" hl-todo-previous :color red)	
+  ("g" hl-todo-previous :color red)
   ("o" hl-todo-occur)
   ("i" hl-todo-insert)
-  )			
+  )
 
 ;; (setq hydra-mode-line-format 'after)
 ;; (defun hydra-refresh-mode-line (&optional state)
@@ -203,15 +203,15 @@ _l_ist bookmark     _s_ toggle bm    sh_o_w TODO
 ;;       (force-mode-line-update))))
 
 (defun hydra-indicator-f (&optional state bcolor)
-  (cond 
+  (cond
 	((string-equal bcolor "red") (propertize state
-		 'face '((:background "red") (:foregrond "black"));; 'eyebrowse-mode-line-active 
+		 'face '((:background "red") (:foregrond "black"));; 'eyebrowse-mode-line-active
 		 'mouse-face 'mode-line-highlight))
 	((string-equal bcolor "green") (propertize state
-		 'face '((:background "green") (:foregrond "black"));; 'eyebrowse-mode-line-active 
+		 'face '((:background "green") (:foregrond "black"));; 'eyebrowse-mode-line-active
 		 'mouse-face 'mode-line-highlight))
 	((string-equal bcolor "blue") (propertize state
-		 'face '((:background "blue") (:foregrond "white"));; 'eyebrowse-mode-line-active 
+		 'face '((:background "blue") (:foregrond "white"));; 'eyebrowse-mode-line-active
 		 'mouse-face 'mode-line-highlight))
 	)
     )
@@ -406,7 +406,7 @@ Version 2018-06-04 2021-03-16"
       (end-of-line))))
 
 (defhydra hydra-reading
-  (:pre (progn (setq hydra-is-helpful nil)(overwrite-mode -1) (hydra-refresh-mode-line "[N]" "green" ) (hydra-normal-state-cursor) 
+  (:pre (progn (setq hydra-is-helpful nil)(overwrite-mode -1) (hydra-refresh-mode-line "[N]" "green" ) (hydra-normal-state-cursor)
 	       )
    :before-exit (progn (setq hydra-is-helpful t) (hydra-refresh-mode-line "[I]" "red")
 		       (hydra-insert-state-cursor)
@@ -423,7 +423,7 @@ Version 2018-06-04 2021-03-16"
   ;; org relevant
   ("/r"  (progn
 	  (org-roam-hydra/body)
-	  (hydra-push '(hydra-reading/body))	  
+	  (hydra-push '(hydra-reading/body))
 	  ) :color blue)
   ("/c" org-capture)
   ("/d" org-todo)
@@ -434,7 +434,7 @@ Version 2018-06-04 2021-03-16"
   ("<SPC>'" (progn (if (org-src-edit-buffer-p)
 		       (org-edit-src-exit)
 		   (org-edit-special))))
-   
+
   ;; ("." (progn (call-interactively 'avy-goto-char-timer)))
   (":" (progn (call-interactively 'eval-expression)))
   ;; ace-window
@@ -450,19 +450,19 @@ Version 2018-06-04 2021-03-16"
   (".u" winner-undo)
   (".o" (progn
 	  (hydra-window-scroll/body)
-	  (hydra-push '(hydra-reading/body))	  
+	  (hydra-push '(hydra-reading/body))
 	  ) :color blue)
   (".r" winner-redo)
   (".w" (progn
 	  (hydra-window-size/body)
-	  (hydra-push '(hydra-reading/body))	  
+	  (hydra-push '(hydra-reading/body))
 	  ) :color blue)
   (".;" (progn
 	  (hydra-window-frame/body)
-	  (hydra-push '(hydra-reading/body))	  
+	  (hydra-push '(hydra-reading/body))
 	  ) :color blue)
   (".f" toggle-frame-fullscreen)
-  
+
   ;; (";j" (progn
   ;; 	  (hydra-projectile/body)
   ;; 	  (hydra-push '(hydra-reading/body))) :color blue)
@@ -476,11 +476,11 @@ Version 2018-06-04 2021-03-16"
   (";s" eval-last-sexp)
   (";b" xah-close-current-buffer)
   (";k" xah-new-empty-buffer)
-  
+
   ;; bookmark
   (";i" (progn
 	  (hydra-bookmarks/body)
-	  (hydra-push '(hydra-reading/body))	  
+	  (hydra-push '(hydra-reading/body))
 	  ) :color blue)
   (";y" counsel-yank-pop "show yank history")
   (";r" counsel-rg)
@@ -488,7 +488,7 @@ Version 2018-06-04 2021-03-16"
   ("zj" xah-open-file-fast)
   ;; ("zl" counsel-bookmark)
   ("zh" (lambda () (interactive) (hydra--set-bookmark (read-from-minibuffer "Name:"))))
-  
+
   (";d" dired-jump)
   ;; (";j" persp-prev)
   (",t" treemacs :color blue)
@@ -515,19 +515,26 @@ Version 2018-06-04 2021-03-16"
   ("N" awesome-tab-forward-group)
   ("P" awesome-tab-backward-group)
   ("S" swiper-all)
-  ("B" ibuffer) 
-  ("<SPC>j" scroll-down)
-  ("<SPC>k" scroll-up)
+  ("B" ibuffer)
+  ;; ("<SPC>j" scroll-down)
+  ;; ("<SPC>k" scroll-up)
+  ("<SPC>k" xah-clean-whitespace)
   ("<SPC>o" xah-open-last-closed)
   ("<SPC>i" xah-open-recently-closed)
   ("<SPC>e" iedit-mode)
   ("<SPC>b" helm-mini)
+  ("<SPC>f" my-yapf-format-buffer)
   ;; ("T" org-babel-tangle)
+  ("<SPC><SPC>" self-insert-command)  
   ("V" (and (ignore-errors (other-window-for-scrolling) (scroll-other-window-down))))
   ("W" backward-word)
   ("X" (progn (kill-line 0)))
   ("[" awesome-tab-backward-tab)
   ("]" awesome-tab-forward-tab)
+  ("{" awesome-tab-move-current-tab-to-left)
+  ("}" awesome-tab-move-current-tab-to-right)
+  ;; ("<SPC>[" awesome-tab-move-current-tab-to-left)
+  ;; ("<SPC>]" awesome-tab-move-current-tab-to-right)
   ;; ("a" (progn (beginning-of-line) (indent-according-to-mode)))
   ("a" (progn (xah-beginning-of-line-or-block)))
   ("b" ;; (progn (ibuffer) (swiper))
@@ -564,7 +571,7 @@ Version 2018-06-04 2021-03-16"
   ("me" xah-extend-selection)
   ("mq" xah-select-text-in-quote)
   ("mb" xah-select-block)
-  
+
   ("M-;" comment-line)
   ("zk" helpful-key)
   ("zv" counsel-describe-variable)
@@ -578,7 +585,7 @@ Version 2018-06-04 2021-03-16"
   ("o" ace-window)
   ("p" (progn (ded/org-show-previous-heading-tidily)))
   ("r" undo-tree-redo)
-  ("s" counsel-grep)
+  ("s" my-counsel-grep-or-swiper)
   ("t" other-window)
   ("T" (other-window -1))
   ;; ("cc" avy-goto-char)
@@ -598,11 +605,9 @@ Version 2018-06-04 2021-03-16"
   ("M-n" next-user-buffer))
 
 (bind-key "<escape>" 'hydra-reading/body)
-(bind-key "M-j" 'hydra-reading/body)	
+(bind-key "M-j" 'hydra-reading/body)
 
 ;; (add-hook 'find-file-hook '(lambda () (progn (hydra-pop) (hydra-reading/body))))
 
 (provide 'init-hydra)
-
-
 

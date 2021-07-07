@@ -3,10 +3,16 @@
 (require 'init-funcs)
 
 (use-package company
-  :init (global-company-mode)
-  :custom
-  (company-idle-delay 0)
-  (company-minimum-prefix-length 2)
+  :init
+  (setq   company-idle-delay 0.1
+	  company-minimum-prefix-length 2
+	  company-backends '((company-capf :with company-yasnippet))
+                           ;; (company-dabbrev-code company-keywords company-files)
+                           ;; company-dabbrev)
+	  company-global-modes '(not message-mode help-mode
+				     eshell-mode shell-mode)
+	  company-show-numbers t
+  )
   :bind
   (:map company-active-map
 	("M-n" . nil)
@@ -16,17 +22,12 @@
 	("<backtab>" . my-company-yasnippet)
 	:map company-mode-map
          ("<backtab>" . company-yasnippet))
-  ;; :hook (after-init . global-company-mode)
+  :hook (after-init . global-company-mode)
   :config
-  (setq company-show-numbers t)
-  (setq
-   company-global-modes '(not erc-mode message-mode help-mode
-                              gud-mode eshell-mode shell-mode org-mode)
-   company-backends '((company-capf :with company-yasnippet)
-                           (company-dabbrev-code company-keywords company-files)
-                           company-dabbrev)
-   )
+  ;; company-dabbrev 不要补全中文
+  (setq company-dabbrev-char-regexp "[-_A-Za-z0-9]")
   (add-to-list 'company-frontends #'company-echo-metadata-frontend)
+
   (defun my-company-yasnippet ()
     "Hide the current completeions and show snippets."
     (interactive)
@@ -107,8 +108,11 @@
     (interactive)
     (if company-tabnine--disabled
 	(progn (setq company-tabnine--disabled nil)
+	       (add-to-list 'company-backends #'company-tabnine)
 	       (message "tabnine enabled"))
       (setq company-tabnine--disabled t)
+      (setq company-backends (delete 'company-tabnine company-backends))
+      ;; (setq company-backends (delete '(company-capf :with company-tabnine :separate) company-backends))
       (message "tabnine disabled!")
       )
     )
