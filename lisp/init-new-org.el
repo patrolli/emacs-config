@@ -32,6 +32,14 @@
   (setq lxs/org-agenda-directory (concat lxs-home-dir "Documents/org/gtd/"))
   ;; 这个 hook 似乎必须设置到 init 里面才能生效
   (add-hook 'org-mode-hook #'visual-line-mode)
+  ;; I rewrite this function to fix the window pop behaviour of *Org todo*
+  ;; Refer to this link: https://emacs.stackexchange.com/questions/14817/how-to-control-where-the-org-todo-keywords-buffer-displays
+  ;; Maybe it is dangerours
+  ;; (defun org-switch-to-buffer-other-window (args)
+    "Switch to buffer in a second window on the current frame.
+In particular, do not allow pop-up frames.
+Returns the newly created buffer."
+    ;; (switch-to-buffer-other-window args))
   :hook
   (((org-babel-after-execute org-mode) . org-redisplay-inline-images)
    (org-mode . org-hide-block-all)
@@ -161,7 +169,7 @@ prepended to the element after the #+HEADER: tag."
     :config
     (;; (setq org-appear-autolinks t)
      ))
-  
+
     ;; org habit
   (use-package org-tempo
     :ensure nil)
@@ -324,7 +332,7 @@ it can be passed in POS."
   (when (derived-mode-p 'org-mode)
     (call-interactively 'org-toggle-inline-images)
     (call-interactively 'org-toggle-inline-images)))
-;; (add-hook 'before-save-hook #'lxs/org-show-recent-inserted-img)
+(add-hook 'before-save-hook #'lxs/org-show-recent-inserted-img)
 ;; save
 (use-package org-pomodoro
   :after org-agenda
@@ -354,7 +362,8 @@ it can be passed in POS."
 (use-package org-agenda
   :ensure nil
   :init
-  (setq org-agenda-files (directory-files-recursively lxs/org-agenda-directory "\\.org$"))
+  (setq org-agenda-files (directory-files-recursively lxs/org-agenda-directory "\\.org$")
+	org-agenda-window-setup 'other-window)
   :defer t
   :bind
   (:map org-agenda-mode-map
@@ -376,7 +385,6 @@ it can be passed in POS."
   (setq org-todo-keywords
 	    '((sequence "TODO(t)" "NEXT(n)" "|" "DONE(d)")
           (sequence "WAITING(w@/!)" "HOLD(h@/!)" "|" "CANCELLED(c@/!)")))
-
 
   (setq org-todo-keyword-faces
 	    (quote (("TODO" :foreground "red" :weight bold)
@@ -451,7 +459,6 @@ it can be passed in POS."
 				                      ,(concat lxs/org-agenda-directory "learning.org")))))
            nil)))
 
-
   (add-to-list 'org-agenda-custom-commands
                `("r" "Reading" todo ""
 		         ((org-agenda-files '(,(concat lxs/org-agenda-directory "reading.org"))))))
@@ -479,7 +486,6 @@ it can be passed in POS."
                              ("reading.org" :level . 1)
                              ("projects.org" :maxlevel . 2)
 			                 ("learning.org" :level . 1)))
-
 
   ;; 在任务 clock in 后，将其从 TODO 状态切换到 NEXT 状态
   (defun lxs/set-todo-state-next ()
@@ -577,7 +583,6 @@ it can be passed in POS."
           (end-of-line 1)
           (setq newhead (org-get-heading)))
 	    (org-agenda-change-all-lines newhead hdmarker))))
-
 
   (defun lxs/org-inbox-capture ()
     (interactive)
@@ -678,101 +683,102 @@ it can be passed in POS."
 
 (use-package org-roam
   :ensure t
-  :defer t
-  :hook
-  (after-init . org-roam-mode)
+  :init
+  (setq org-roam-v2-ack t)
   :custom
   (org-roam-directory (concat lxs-home-dir "Documents/" "org/" "org-roam-files"))
-  :bind (("C-c n" . org-roam-hydra/body))
+  :bind ("C-c n" . org-roam-hydra/body)
   :pretty-hydra
   ((:title (pretty-hydra-title "Org roam menu" 'faicon "book"  :height 1.1 :v-adjust -0.1)
     :color blue)
    ("Basic"
-    (("f" org-roam-find-file "find file")
+    (("f" org-roam-node-find "find nodes")
      ("b" org-roam-switch-to-buffer "switch buffer")
-     ("i" org-roam-insert "insert")
-     ("I" org-roam-inert-immediate "insert immediate")
+     ("i" org-roam-node-insert "insert")
+     ;; ("I" org-roam-inert-immediate "insert immediate")
      ("t" org-roam-tag-add "add tag"))
     "Dailies"
-    (("j " org-roam-dailies-capture-today "capture today daily")
-     ("y " org-roam-dailies-capture-yesterday "capture yesterday daily")
-     ("s a" org-roam-dailies-today "show today daily")
-     ("s y" org-roam-dailies-yesterday "show yesterday daily")
-     ("s f" org-roam-dailies-find "find dailies"))
+    (("j" org-roam-dailies-goto-today "goto today")
+     ("y" org-roam-dailies-goto-yesterday "goto yesterday")
+     ("d" org-roam-dailies-goto-date "goto date"))
     "Others"
     (("v t" org-tags-view "filt buffer tags")
-     ("q" hydra-pop "exit")
-   )))
-
+     ("q" hydra-pop "exit"))))
   :config
-  (setq org-roam-graph-exclude-matcher '("private" "daily"))  ;; 在 graph 中排除一些笔记
-  (setq org-roam-verbose nil)
+  (org-roam-setup)
+  (setq org-roam-node-display-template "${tags}${filetitle}${olp}${title}")
+  (defun org-roam--tags-to-str (tags)
+    "Convert list of TAGS into a string."
+    (if (> (length tags) 0)
+        (format "(%s) " (mapconcat (lambda (s) (concat "" s)) tags ","))
+      ""))
+  (cl-defmethod org-roam-node-filetitle ((node org-roam-node))
+    "Return the file TITLE for the node."
+    (let ((filetitle (org-roam-get-keyword "TITLE" (org-roam-node-file node)))
+          (title (org-roam-node-title node)))
+      (if (string= filetitle title)
+          ""
+        (format "%s > " filetitle))))
   (setq org-roam-capture-templates
-        '(("d" "default" plain (function org-roam--capture-get-point)
-           "%?"
-           :file-name "${slug}"
-           :head "#+TITLE: ${title}\n#+DATE: %<%Y-%m-%d>\n#+CREATED: %U\n#+LAST_MODIFIED: %U\n#+roam_alias: \n#+roam_tags:\n#+STARTUP: inlineimages latexpreview\n#+AUTHOR:Li Xunsong\n"
+        '(("d" "default" plain "%?"
+           :if-new (file+head "${slug}.org"
+            "#+TITLE: ${title}\n#+DATE: %<%Y-%m-%d>\n#+CREATED: %U\n#+LAST_MODIFIED: %U\n#+roam_alias: \n#+STARTUP: inlineimages latexpreview\n#+AUTHOR:Li Xunsong\n")
            :unnarrowed t)
-          ("p" "private" plain (function org-roam--capture-get-point)
+          ("p" "private" plain
            "%?"
-           :file-name "private-${slug}"
+           :file-name "private-${slug}.org"
            :head "#+TITLE: ${title}\n"
            :unnarrowed t)
-	  ("s" "code snippet" plain (function org-roam--capture-get-point)
+	  ("s" "code snippet"
 	   "* description\n* code\n#+BEGIN_SRC %^{language}\n%^C%?\n#+END_SRC\n* note\n* ref\n"
-	   :file-name "snippet-${slug}"
-	   :head "#+TITLE: ${title}\n#+CREATED: %U\n#+LAST_MODIFIED: %U\n#+roam_tags: \"code snippet\"\n#+AUTHOR: Li Xunsong\n")))
+	   :file-name "snippet-${slug}.org"
+	   :head "#+TITLE: ${title}\n#+CREATED: %U\n#+LAST_MODIFIED: %U\n#+AUTHOR: Li Xunsong\n")
+	  ("r" "ref" plain "%?"
+	   :if-new (file+head "${citekey}.org" "#+TITLE: ${title}\n#+ROAM_KEY: ${ref}\n#+ROAM_ALIAS: \n#+AUTHOR: Li Xunsong\n#+DATE: %<%Y-%m-%d>\n#+CREATED: %U\n#+LAST_MODIFIED: %U\n#+STARTUP: inlineimages latexpreview hideblocks\n\n* Motivation\n\n* Method\n\n* Comment\n\n* Ref\n")
+	   :unnarrowed t)))
       (setq org-roam-ref-capture-templates
         '(("r" "ref" plain (function org-roam--capture-get-point)
            "%?"
            :file-name "websites/${slug}"
-           :head "#+TITLE: ${title}\n#+roam_tags: websites\n
+           :head "#+TITLE: ${title}\n
 - source :: ${ref}"
            :unnarrowed t)))
-	(add-to-list 'org-roam-capture-ref-templates
-             '("a" "Annotation" plain (function org-roam-capture--get-point)
-               "%U\n ${body}\n"
-               :file-name "${slug}"
-               :head "#+title: ${title}\n#+roam_key: ${ref}\n#+roam_alias:\n#+roam_tags: websites\n"
-               :immediate-finish t
-               :unnarrowed t))
+      (add-to-list 'org-roam-capture-ref-templates
+		   '("a" "Annotation" plain (function org-roam-capture--get-point)
+		     "%U\n ${body}\n"
+		     :file-name "${slug}"
+		     :head "#+title: ${title}\n#+roam_key: ${ref}\n#+roam_alias:\n"
+		     :immediate-finish t
+		     :unnarrowed t))
 	;; 设置 org-roam-dailies
-	(setq org-roam-dailies-directory "daily/")
-	(setq org-roam-dailies-capture-templates
-	      '( ;; ("d" "default" entry
-		 ;;  #'org-roam-capture--get-point
-		 ;;  "* %?"
-		 ;;  :file-name "daily/%<%Y-%m-%d>"
-		 ;;  :head "#+title: %<%Y-%m-%d>\n\n* 工作 \n\n* 备忘 \n\n* 随笔 \n\n* 总结 \n\n")
-		("w" "work" entry
-		 #'org-roam-capture--get-point
-		 "* %<[%H:%M:%S]> - %?"
-		 :file-name "daily/%<%Y-%m-%d>"
-		 :head "#+TITLE: Journal %<%Y-%m-%d>\n#+DATE: %<%Y-%m-%d>\n#+ROAM_ALIAS:\n#+ROAM_TAGS: private journal\n\n"
-		 :olp ("工作"))
-		("n" "notes" entry
-		 #'org-roam-capture--get-point
-		 "* %<[%H:%M:%S]> - %?"
-		 :file-name "daily/%<%Y-%m-%d>"
-		 :head "#+TITLE: Journal %<%Y-%m-%d>\n#+DATE: %<%Y-%m-%d>\n#+ROAM_ALIAS:\n#+ROAM_TAGS: private journal\n\n"
-		 :olp ("备忘"))
-		("j" "journal" entry
-		 #'org-roam-capture--get-point
-		 "* %<[%H:%M:%S]> - %?"
-		 :file-name "daily/%<%Y-%m-%d>"
-		 :head "#+TITLE: Journal %<%Y-%m-%d>\n#+DATE: %<%Y-%m-%d>\n#+ROAM_ALIAS:\n#+ROAM_TAGS: private journal\n\n"
-		 :olp ("随笔"))
-		("r" "review" entry
-		 #'org-roam-capture--get-point
-		 "* %<[%H:%M:%S]> - %?"
-		 :file-name "daily/%<%Y-%m-%d>"
-		 :head "#+TITLE: Journal %<%Y-%m-%d>\n#+DATE: %<%Y-%m-%d>\n#+ROAM_ALIAS:\n#+ROAM_TAGS: private journal\n\n"
-		 :olp ("总结"))))
-	)
+      (setq org-roam-dailies-directory "daily/")
+      (setq org-roam-dailies-capture-templates
+	    `(("w" "work" entry
+	     "* %<[%H:%M:%S]> - %?"
+	     :if-new (file+head+olp "%<%Y-%m-%d>.org"
+				    "#+TITLE: Journal %<%Y-%m-%d>\n#+DATE: %<%Y-%m-%d>\n#+ROAM_ALIAS:\n#+ROAM_TAGS: private journal\n\n" ("工作")))
+	    ("n" "notes" entry
+	     "* %<[%H:%M:%S]> - %?"
+	     :if-new (file+head+olp "%<%Y-%m-%d>.org"
+				    "#+TITLE: Journal %<%Y-%m-%d>\n#+DATE: %<%Y-%m-%d>\n#+ROAM_ALIAS:\n#+ROAM_TAGS: private journal\n\n" ("备忘")))
+	    ("j" "journal" entry
+	     "* %<[%H:%M:%S]> - %?"
+	     :if-new (file+head+olp "%<%Y-%m-%d>.org"
+				    "#+TITLE: Journal %<%Y-%m-%d>\n#+DATE: %<%Y-%m-%d>\n#+ROAM_ALIAS:\n#+ROAM_TAGS: private journal\n\n" ("随笔")))
+	    ("r" "review" entry
+	     "* %<[%H:%M:%S]> - %?"
+	     :if-new (file+head+olp "%<%Y-%m-%d>.org"
+				    "#+TITLE: Journal %<%Y-%m-%d>\n#+DATE: %<%Y-%m-%d>\n#+ROAM_ALIAS:\n#+ROAM_TAGS: private journal\n\n" ("总结")))))  
+      (require 'org-roam-protocol)
+      (use-package org-roam-bibtex
+	:config
+	(org-roam-bibtex-mode))
+  )
 
 (use-package org-roam-server
   :defer t
   :ensure t
+  :disabled t
   :hook
   (after-init . org-roam-server-mode)
   :config
@@ -809,20 +815,16 @@ it can be passed in POS."
   (global-set-key (kbd "C-c s") 'dblp-lookup)
   )
 
-
-
-(use-package org-roam-bibtex
-  :ensure t
-  :after org-roam
-  :hook (org-roam-mode . org-roam-bibtex-mode)
-  :config
-  (setq orb-insert-interface 'helm-bibtex)
-  (setq orb-templates
-      '(("r" "ref" plain (function org-roam-capture--get-point) ""
-         :file-name "${citekey}"
-         :head "#+TITLE: ${title}\n#+ROAM_KEY: ${ref}\n#+ROAM_TAGS: \n#+ROAM_ALIAS: \n#+AUTHOR: Li Xunsong\n#+DATE: %<%Y-%m-%d>\n#+CREATED: %U\n#+LAST_MODIFIED: %U\n#+STARTUP: inlineimages latexpreview hideblocks\n\n* Motivation\n\n* Method\n\n* Comment\n\n* Ref\n"
-         :unnarrowed t))))
-
+;; (use-package org-roam-bibtex
+  ;; :ensure t
+  ;; :after org-roam
+  ;; :config
+;;   (setq orb-templates
+;;       '(("r" "ref" plain (function org-roam-capture--get-point) ""
+;;          :file-name "${citekey}"
+;;          :head "#+TITLE: ${title}\n#+ROAM_KEY: ${ref}\n#+ROAM_TAGS: \n#+ROAM_ALIAS: \n#+AUTHOR: Li Xunsong\n#+DATE: %<%Y-%m-%d>\n#+CREATED: %U\n#+LAST_MODIFIED: %U\n#+STARTUP: inlineimages latexpreview hideblocks\n\n* Motivation\n\n* Method\n\n* Comment\n\n* Ref\n"
+  ;;          :unnarrowed t)))
+  ;; )
 
 (use-package org-crypt
   :defer t
@@ -858,6 +860,16 @@ it can be passed in POS."
 
 (org-babel-do-load-languages 'org-babel-load-languages
 			     load-language-list)
+
+(use-package org-clock-watch
+  ;; 由于系统的原因，似乎不能弹出通知
+  :disabled t
+  :load-path "~/.emacs.d/site-lisp/org-clock-watch" ;; TODO: 不能使用相对路径吗？
+  :config
+  (org-clock-watch-toggle 'on)
+  (setq org-clock-watch-work-plan-file-path (concat lxs/org-agenda-directory "next.org"))
+  (setq org-show-notification-handler 'message)
+  )
 
 (server-start)
 

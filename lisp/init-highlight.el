@@ -121,6 +121,7 @@
 ;; Highlight indentions
 (when (display-graphic-p)
   (use-package highlight-indent-guides
+    :disabled t
     :diminish
     :hook (prog-mode . highlight-indent-guides-mode)
     :init (setq highlight-indent-guides-method 'character

@@ -1,10 +1,21 @@
 ;; scratch buffer 的代码有用的一定要记得保存，不然就找不回来了
 
+(defun lxs-copy-contents-under-headline ()
+  (save-excursion
+    (org-back-to-heading)
+    ;; (forward-line)
+    (unless (= (point) (point-max))
+      (let ((b (point))
+            (e (or (outline-next-heading) (point-max))))
+	(buffer-substring-no-properties b e))))
+  )
+
 (defun lxs/org-refile-headline-by-tag ()
-  (interactive)
+  (interactive)  
   (save-excursion
   (let ((tags (org-get-tags nil t))
 	(headline  (nth 4 (org-heading-components)))
+	(contents (lxs-copy-contents-under-headline))
 	remove-flag)
     ;; if the headline has no tag and being under "Un-archieve"
     (when (and (eq 0 (length tags))  (progn
@@ -46,7 +57,9 @@
 		      (progn
 			(goto-char (point-max))
 			(forward-line -1)
-			(insert (format "** %s\n" headline)))
+			;; (insert (format "** %s\n" headline))
+			(insert contents)
+			)
 		      )
 		    )
 		  ))
@@ -55,7 +68,8 @@
 	      (forward-line)
 	      (insert (format "* %s\n" tag))
 	      (forward-line 2)
-	      (insert (format "** %s\n" headline))
+	      ;; (insert (format "** %s\n" headline))
+	      (insert contents)
 	      )
 	    )
 	  )
@@ -147,6 +161,7 @@
       (org-hugo--export-file-to-md (buffer-name))
     (progn
       (beginning-of-buffer)
+      (re-search-forward ":END:\n")
       (insert lxs-org-hugo-header-info)
       (org-hugo--export-file-to-md (buffer-name)
       ))
@@ -165,12 +180,12 @@
 
 
 ;; sql query for org-roam files with Project tag
-(with-eval-after-load 'org-roam
-  (setq lxs/org-roam-project (org-roam-db-query
-                [:select file
-                 :from tags
-                 :where (like tags (quote "%\"Project\"%"))]))
-  )
+;; (with-eval-after-load 'org-roam
+  ;; (setq lxs/org-roam-project (org-roam-db-query
+                ;; [:select file
+                 ;; :from tags
+                 ;; :where (like tags (quote "%\"Project\"%"))]))
+  ;; )
 
 
 
@@ -254,6 +269,11 @@ This command does not push text to `kill-ring'."
     (setq p2 (point))
     (delete-region p1 p2)))
 
+(defun my-kill-line ()
+  (interactive)
+  (beginning-of-line)
+  (kill-line))
+
 (defun my-delete-word (arg)
   "Delete characters forward until encountering the end of a word.
 With argument, do this that many times.
@@ -279,5 +299,45 @@ This command does not push text to `kill-ring'."
     (counsel-grep initial-input)
     )
   )
+
+
+;; quick insert timestamp in texts
+(defvar current-date-time-format "%a %b %d %H:%M:%S %Z %Y"
+  "Format of date to insert with `insert-current-date-time' func
+See help of `format-time-string' for possible replacements")
+
+(defvar current-time-format "%a %H:%M:%S"
+  "Format of date to insert with `insert-current-time' func.
+Note the weekly scope of the command's precision.")
+
+(defun lxs/insert-current-date-time-with-line-split ()
+  "insert the current date and time into current buffer.
+Uses `current-date-time-format' for the formatting the date/time."
+  (interactive)
+  (insert (let () (or comment-start "")))
+  (insert "==========\n")
+  (insert (let () (or comment-start "")))
+  ;; (insert " ")
+  (insert (format-time-string current-date-time-format (current-time)))
+  (insert "\n")
+  )
+
+(defun lxs/insert-current-date-time ()
+  "insert the current date and time into current buffer.
+Uses `current-date-time-format' for the formatting the date/time."
+       (interactive)
+;       (insert (let () (comment-start)))
+       (insert (format-time-string current-date-time-format (current-time)))
+       (insert "\n")
+       )
+
+
+(defun lxs/insert-current-time ()
+  "insert the current time (1-week scope) into the current buffer."
+       (interactive)
+       (insert (format-time-string current-time-format (current-time)))
+       (insert "\n")
+       )
+
 
 (provide 'personal)

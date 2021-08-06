@@ -6,7 +6,7 @@
   :init
   (setq   company-idle-delay 0.1
 	  company-minimum-prefix-length 2
-	  company-backends '((company-capf :with company-yasnippet))
+	  company-backends '((company-capf :separate company-citre :with company-yasnippet))
                            ;; (company-dabbrev-code company-keywords company-files)
                            ;; company-dabbrev)
 	  company-global-modes '(not message-mode help-mode
@@ -76,7 +76,8 @@
   ((nox-managed-mode . (lambda ()
                       (setq company-tabnine-max-num-results 3)
                       (add-to-list 'company-transformers 'company//sort-by-tabnine t)
-                      (add-to-list 'company-backends '(company-capf :with company-tabnine :separate))))
+                      ;; (add-to-list 'company-backends '(company-capf :with company-tabnine :separate))
+		      ))
   ;; (after-init . (lambda () (call-interactively 'company-tabnine))) ;; activate tabnine server when emacs start
   (kill-emacs . company-tabnine-kill-process)
   )

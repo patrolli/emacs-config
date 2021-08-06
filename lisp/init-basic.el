@@ -8,7 +8,7 @@
 
 (if sys/wslp (setq
       cmdExeBin"/mnt/c/Windows/System32/cmd.exe"
-      cmdExeArgs '("/c" "start" "")
+      cmdExeArgs '("/c" "start" "chrome") ;; 更新 windows11 后，在 cmd 输入 start url, 只会打开 edge 了，所以这里指定 start chrome
       browse-url-generic-program  cmdExeBin
       browse-url-generic-args     cmdExeArgs
       browse-url-browser-function 'browse-url-generic)
@@ -48,7 +48,7 @@
 
 (use-package openwith
   :hook
-  (after-init-hook . openwith-mode)
+  (after-init . openwith-mode)
   :config
   ;; (openwith-mode t)
   (setq openwith-associations '(("\\.pdf\\'" " okular" (file))))
@@ -142,7 +142,26 @@ to choose a directory"
   :load-path "site-lisp/awesome-tab"
   :config
   (setq awesome-tab-height 120)
-  (awesome-tab-mode))
+  (awesome-tab-mode)
+  (defun awesome-tab-hide-tab (x)
+  (let ((name (format "%s" x)))
+    (or
+     ;; Hide tab if current window is not dedicated window.
+     (window-dedicated-p (selected-window))
+     ;; Hide sdcv tab.
+     (string-prefix-p "*sdcv" name)
+     ;; Hide tab if current buffer is helm buffer.
+     (string-prefix-p "*helm" name)
+     ;; Hide tab if current buffer is flycheck buffer.
+     (string-prefix-p "*flycheck" name)
+     ;; Hide blacklist if emacs version < 27 (use header-line).
+     (and (eq awesome-tab-display-line 'header-line)
+          (or (string-prefix-p "*Compile-Log*" name)
+              (string-prefix-p "*Flycheck" name)))
+     ;; my custom hide rules
+     (string-suffix-p ".org_archive" name)
+     )))
+  )
 
 ;; (setq global-visual-line-mode t)
 ;; (setq truncate-lines nil)

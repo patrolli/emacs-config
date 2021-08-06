@@ -47,9 +47,12 @@
 (use-package pyim
   :init
   (setq default-input-method "pyim")
-  (setq pyim-indicator #'ignore)
+  ;; (setq pyim-indicator-list (list #'pyim-indicator-with-modeline))
+  ;; (pyim-indicator-stop-daemon)
   :bind
   ("M-k" . pyim-convert-string-at-point)
+  :hook
+  (after-init . pyim-indicator-stop-daemon)
   :config
   ;; (global-set-key (kbd "M-k") 'pyim-convert-string-at-point)
   (pyim-default-scheme 'xiaohe-shuangpin)
@@ -69,9 +72,16 @@
   (setq pyim-dicts
 	'((:name "sougou_base" :file "~/.emacs.d/pyim/sougou_base.pyim"))
 	pyim-enable-shortcode nil)
-  (pyim-indicator-stop-daemon)
-  
-  )
+  ;; ivy 拼音搜索
+  (defun eh-ivy-cregexp (str)
+    (let ((a (ivy--regex-plus str))
+          (b (let ((case-fold-search nil))
+               (pyim-cregexp-build str))))
+      (if (and a (stringp a))
+          (concat a "\\|" b)
+        a)))
+  (setq ivy-re-builders-alist
+        '((t . eh-ivy-cregexp))))
 
 ;; (global-set-key (kbd "M-k") 'toggle-input-method) 
 (provide 'init-input-method)

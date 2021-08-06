@@ -1,0 +1,11 @@
+# -*- mode: snippet -*-
+# name: mylogging
+# key: mylog
+# Author: Li Xunsong
+# Email: lixunsonghcl@126.com
+# --
+
+with open("logging_config.yml", "r", encoding="utf8") as f:
+      logging_config = yaml.safe_load(f)
+  logging.config.dictConfig(logging_config)
+  logger = logging.getLogger('default')

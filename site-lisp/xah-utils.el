@@ -128,7 +128,8 @@ When the file save name is duplicated, add a number at the
 end make each untitled buffer saved uniquely."
   (interactive)
   (let* ((untitled-dir "~/Documents/")
-	 (save-name (concat (format-time-string "%Y-%m-%d") "-" (buffer-name)))
+	 ;; (save-name (concat (format-time-string "%Y-%m-%d") "-" (buffer-name)))
+	 (save-name (concat (format-time-string "%Y-%m-%d") "-" (replace-regexp-in-string "\\\(<\\\|>\\\|-\\\)" "_" (buffer-name))))
 	 (postfix (cdr (assoc major-mode lxs-major-mode-to-file-postfix))))  
     (let ((target (concat untitled-dir save-name postfix))
 	  (num 1))

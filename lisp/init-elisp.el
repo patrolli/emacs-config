@@ -197,7 +197,7 @@ Lisp function does not specify a special indentation."
 
 
 (use-package helpful
-  :disabled t
+  ;; :disabled t
   :defines (counsel-describe-function-function
             counsel-describe-variable-function)
   :commands helpful--buffer
@@ -241,6 +241,10 @@ Lisp function does not specify a special indentation."
                                          (marker-buffer button)))
         (helpful--goto-char-widen pos)))
     (advice-add #'helpful--navigate :override #'my-helpful--navigate)))
+
+(use-package elisp-demos
+  :config
+  (advice-add 'helpful-update :after #'elisp-demos-advice-helpful-update))
 
 ;; (use-package lispy
 ;;   :hook (emacs-lisp-mode-hook . (lambda () (lispy-mode 1))))

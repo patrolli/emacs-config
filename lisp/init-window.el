@@ -238,10 +238,10 @@
 	  ("*Go Translate*" :select t :size 20 :align 'below)
 	  ("*Bookmark List*" :select t :size 10 :align 'below)
 
-          ((" *Agenda Commands*" " *Org todo*" "*Org Dashboard*" "*Org Select*") :select t :size 0.1 :align 'below :autoclose t)
+          ((" *Agenda Commands*" " *Org todo*" "*Org Dashboard*" "*Org Select*") :select t :size 10 :align 'below :autoclose t)
 	  ("*Org Agenda*" :select t :size 10 :align 'right)
           (("\\*Capture\\*" "^CAPTURE-.*\\.org*" "*Org Note*") :regexp t :select t :size 0.3 :align 'below :autoclose t)
-	  ("*xah-run output*" :select t :size 10 :align 'below)
+	  ("*xah-run output*" :select nil :size 10 :align 'below)
 
           ("*ert*" :size 15 :align 'below :autoclose t)
           (overseer-buffer-mode :size 15 :align 'below :autoclose t)
@@ -272,6 +272,8 @@
           ((process-menu-mode cargo-process-mode) :select t :size 0.3 :align 'below :autoclose t)
           (list-environment-mode :select t :size 0.3 :align 'below :autoclose t)
           (tabulated-list-mode :size 0.4 :align 'below))))
+
+(use-package eyebrowse)
 
 (provide 'init-window)
 
