@@ -115,7 +115,7 @@ prepended to the element after the #+HEADER: tag."
 	org-startup-indented t
 	org-hide-emphasis-markers t
 	org-catch-invisible-edits 'smart
-	org-tags-column -180
+	org-tags-column -77
 	org-priority-faces '((?A . error)
                              (?B . warning)
                              (?C . success)))
@@ -224,28 +224,21 @@ prepended to the element after the #+HEADER: tag."
 	(setq end (save-excursion (org-end-of-subtree t t))))
       (org-end-of-subtree)))
 
-  (defun lxs/create-hugo-file (path)
-    (let ( (filename (format-time-string "%Y-%m-%d-%H-%M")) )
-      (find-file (expand-file-name (format "%s.org" filename) path))
-    ))
-
+  (defun my/org-capture-maybe-create-id ()
+    (when (org-capture-get :create-id)
+      (org-id-get-create)))
+  (add-hook 'org-capture-prepare-finalize-hook #'my/org-capture-maybe-create-id)
   (setq org-capture-templates
 	`(("i" "task" entry (file ,(concat lxs/org-agenda-directory "inbox.org"))
            "* TODO %?\nCaptured %<%Y-%m-%d %H:%M>")
 	  ("p" "capture paper" entry (file ,(concat lxs/org-agenda-directory "inbox.org"))
 	   "* TODO [[%:link][%:description]]\n\n %i" :immediate-finish t)
-          ("n" "note" entry (file ,(concat lxs-home-dir "Documents/" "org/" "notes.org"))
-           "* %^{heading}\n%?")
 	  ("c" "web bookmarks" entry (file ,(concat lxs/org-agenda-directory "webclips.org"))
 	   "* [[%:link][%:description]]\n " :prepend t :empty-lines-after 1 :immediate-finish t)
-	  ("j" "journal" entry (file+datetree ,(concat lxs-home-dir "Documents/" "org/" "journal.org"))
-	   "* %U - %^{heading}\n  %?")
-	  ("b" "billing" plain
-           (file+function ,(concat lxs-home-dir "Documents/" "org/" "billing.org") find-month-tree)
-           " | %U | %^{类别|吃饭|日用|其他} | %^{描述} | %^{金额} |" :kill-buffer t)
-	  ("s" "code snippet" entry (file ,(concat lxs-home-dir "Documents/" "org/" "snippet.org"))
-	   "* %<%Y-%m-%d> - %^{title}\t%^g\n#+BEGIN_SRC %^{language}\n%^C%?\n#+END_SRC")
-	  ("h" "hugo blog file" entry (file (lambda () (lxs/create-hugo-file (concat lxs-home-dir "Documents/" "org/" "HugoBlogs/"))) ) "* ")
+	  ("s" "code cookbook" entry (file+headline ,(concat lxs-home-dir "Documents/" "org/" "org-roam-files/" "quick-notes.org") "Cookbook")
+	   "* %U %^{描述}\n%i** 代码\n" :create-id t)
+	  ("n" "code api" entry (file+headline ,(concat lxs-home-dir "Documents/" "org/" "org-roam-files/" "quick-notes.org") "Api")
+	   "* %u %?\n%i- Signature: ==\n描述: ")
 	  ))
 
 (defun lxs/org-find-project-journal-datetree ()
@@ -695,7 +688,9 @@ it can be passed in POS."
     (("f" org-roam-node-find "find nodes")
      ("b" org-roam-switch-to-buffer "switch buffer")
      ("i" org-roam-node-insert "insert")
+     ("u" my/roam-init-node "init node")
      ;; ("I" org-roam-inert-immediate "insert immediate")
+     ("p" org-toggle-properties "show proper")
      ("t" org-roam-tag-add "add tag"))
     "Dailies"
     (("j" org-roam-dailies-goto-today "goto today")
@@ -703,6 +698,9 @@ it can be passed in POS."
      ("d" org-roam-dailies-goto-date "goto date"))
     "Others"
     (("v t" org-tags-view "filt buffer tags")
+     ("a" org-roam-buffer-toggle "backlinks")
+     ("s" org-clock-in "clock in")
+     ("c" org-clock-out "clock out")
      ("q" hydra-pop "exit"))))
   :config
   (org-roam-setup)
@@ -756,44 +754,30 @@ it can be passed in POS."
 	    `(("w" "work" entry
 	     "* %<[%H:%M:%S]> - %?"
 	     :if-new (file+head+olp "%<%Y-%m-%d>.org"
-				    "#+TITLE: Journal %<%Y-%m-%d>\n#+DATE: %<%Y-%m-%d>\n#+ROAM_ALIAS:\n#+ROAM_TAGS: private journal\n\n" ("工作")))
+				    "#+TITLE: Journal %<%Y-%m-%d>\n#+DATE: %<%Y-%m-%d>\n#+ROAM_ALIAS:\n#+filetag: :private: :journal:\n\n" ("工作")))
 	    ("n" "notes" entry
 	     "* %<[%H:%M:%S]> - %?"
 	     :if-new (file+head+olp "%<%Y-%m-%d>.org"
-				    "#+TITLE: Journal %<%Y-%m-%d>\n#+DATE: %<%Y-%m-%d>\n#+ROAM_ALIAS:\n#+ROAM_TAGS: private journal\n\n" ("备忘")))
+				    "#+TITLE: Journal %<%Y-%m-%d>\n#+DATE: %<%Y-%m-%d>\n#+ROAM_ALIAS:\n#+filetag: :private: :journal:\n\n" ("备忘")))
 	    ("j" "journal" entry
 	     "* %<[%H:%M:%S]> - %?"
 	     :if-new (file+head+olp "%<%Y-%m-%d>.org"
-				    "#+TITLE: Journal %<%Y-%m-%d>\n#+DATE: %<%Y-%m-%d>\n#+ROAM_ALIAS:\n#+ROAM_TAGS: private journal\n\n" ("随笔")))
+				    "#+TITLE: Journal %<%Y-%m-%d>\n#+DATE: %<%Y-%m-%d>\n#+ROAM_ALIAS:\n#+filetag: :private: :journal:\n\n" ("随笔")))
 	    ("r" "review" entry
 	     "* %<[%H:%M:%S]> - %?"
 	     :if-new (file+head+olp "%<%Y-%m-%d>.org"
-				    "#+TITLE: Journal %<%Y-%m-%d>\n#+DATE: %<%Y-%m-%d>\n#+ROAM_ALIAS:\n#+ROAM_TAGS: private journal\n\n" ("总结")))))  
+				    "#+TITLE: Journal %<%Y-%m-%d>\n#+DATE: %<%Y-%m-%d>\n#+ROAM_ALIAS:\n#+filetag: :private: :journal:\n\n" ("总结")))))  
       (require 'org-roam-protocol)
-      (use-package org-roam-bibtex
-	:config
-	(org-roam-bibtex-mode))
-  )
+      (defun my/roam-init-node ()
+	"init org-roam headline node"
+	(interactive)
+	(progn (org-id-get-create)
+               (org-entry-put nil "CREATED" (format-time-string "[%Y-%m-%d %a %H:%M]"))))
+      )
 
-(use-package org-roam-server
-  :defer t
-  :ensure t
-  :disabled t
-  :hook
-  (after-init . org-roam-server-mode)
+(use-package org-roam-bibtex
   :config
-  (use-package org-roam-protocol)
-  (setq org-roam-server-host "127.0.0.1"
-        org-roam-server-port 9090
-        org-roam-server-authenticate nil
-        org-roam-server-export-inline-images t
-        org-roam-server-serve-files nil
-        org-roam-server-served-file-extensions '("pdf" "mp4" "ogv")
-        org-roam-server-network-poll t
-        org-roam-server-network-arrows nil
-        org-roam-server-network-label-truncate t
-        org-roam-server-network-label-truncate-length 60
-        org-roam-server-network-label-wrap-length 20))
+  (org-roam-bibtex-mode))
 
 (use-package org-ref
   :ensure t
@@ -814,17 +798,6 @@ it can be passed in POS."
   (global-set-key (kbd "C-c ]") 'org-ref-helm-insert-cite-link)
   (global-set-key (kbd "C-c s") 'dblp-lookup)
   )
-
-;; (use-package org-roam-bibtex
-  ;; :ensure t
-  ;; :after org-roam
-  ;; :config
-;;   (setq orb-templates
-;;       '(("r" "ref" plain (function org-roam-capture--get-point) ""
-;;          :file-name "${citekey}"
-;;          :head "#+TITLE: ${title}\n#+ROAM_KEY: ${ref}\n#+ROAM_TAGS: \n#+ROAM_ALIAS: \n#+AUTHOR: Li Xunsong\n#+DATE: %<%Y-%m-%d>\n#+CREATED: %U\n#+LAST_MODIFIED: %U\n#+STARTUP: inlineimages latexpreview hideblocks\n\n* Motivation\n\n* Method\n\n* Comment\n\n* Ref\n"
-  ;;          :unnarrowed t)))
-  ;; )
 
 (use-package org-crypt
   :defer t
@@ -848,9 +821,11 @@ it can be passed in POS."
 (setq org-confirm-babel-evaluate nil
       org-src-fontify-natively t
       org-src-tab-acts-natively t)
+(require 'ob-ipython)
 (defvar load-language-list '((emacs-lisp . t)
 			     (perl . t)
 			     (python . t)
+			     (ipython . t)
 			     (ruby . t)
 			     (js . t)
 			     (css . t)
@@ -870,6 +845,31 @@ it can be passed in POS."
   (setq org-clock-watch-work-plan-file-path (concat lxs/org-agenda-directory "next.org"))
   (setq org-show-notification-handler 'message)
   )
+
+(defun org-hide-properties ()
+  "Hide all org-mode headline property drawers in buffer. Could be slow if it has a lot of overlays."
+  (interactive)
+  (save-excursion
+    (goto-char (point-min))
+    (while (re-search-forward
+            "^ *:properties:\n\\( *:.+?:.*\n\\)+ *:end:\n" nil t)
+      (let ((ov_this (make-overlay (match-beginning 0) (match-end 0))))
+        (overlay-put ov_this 'display "")
+        (overlay-put ov_this 'hidden-prop-drawer t))))
+  (put 'org-toggle-properties-hide-state 'state 'hidden))
+
+(defun org-show-properties ()
+  "Show all org-mode property drawers hidden by org-hide-properties."
+  (interactive)
+  (remove-overlays (point-min) (point-max) 'hidden-prop-drawer t)
+  (put 'org-toggle-properties-hide-state 'state 'shown))
+
+(defun org-toggle-properties ()
+  "Toggle visibility of property drawers."
+  (interactive)
+  (if (eq (get 'org-toggle-properties-hide-state 'state) 'hidden)
+      (org-show-properties)
+    (org-hide-properties)))
 
 (server-start)
 
