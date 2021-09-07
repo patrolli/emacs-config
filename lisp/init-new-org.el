@@ -43,7 +43,7 @@ Returns the newly created buffer."
   :hook
   (((org-babel-after-execute org-mode) . org-redisplay-inline-images)
    (org-mode . org-hide-block-all)
-   (org-mode . org-overview)
+   (org-mode . org-content)
    ;; (org-mode . toggle-word-wrap)
    ;; (org-mode . turn-on-org-cdlatex)
    ;; (org-mode . (lambda () (setq truncate-lines t)))
@@ -229,16 +229,14 @@ prepended to the element after the #+HEADER: tag."
       (org-id-get-create)))
   (add-hook 'org-capture-prepare-finalize-hook #'my/org-capture-maybe-create-id)
   (setq org-capture-templates
-	`(("i" "task" entry (file ,(concat lxs/org-agenda-directory "inbox.org"))
+	`(("i" "待办" entry (file+headline ,(concat lxs/org-agenda-directory "next.org" "待办"))
            "* TODO %?\nCaptured %<%Y-%m-%d %H:%M>")
-	  ("p" "capture paper" entry (file ,(concat lxs/org-agenda-directory "inbox.org"))
-	   "* TODO [[%:link][%:description]]\n\n %i" :immediate-finish t)
 	  ("c" "web bookmarks" entry (file ,(concat lxs/org-agenda-directory "webclips.org"))
 	   "* [[%:link][%:description]]\n " :prepend t :empty-lines-after 1 :immediate-finish t)
 	  ("s" "code cookbook" entry (file+headline ,(concat lxs-home-dir "Documents/" "org/" "org-roam-files/" "quick-notes.org") "Cookbook")
-	   "* %U %^{描述}\n%i** 代码\n" :create-id t)
+	   "* %U %^{描述}\n%i** 代码\n%?" :create-id t :jump-to-captured t)
 	  ("n" "code api" entry (file+headline ,(concat lxs-home-dir "Documents/" "org/" "org-roam-files/" "quick-notes.org") "Api")
-	   "* %u %?\n%i- Signature: ==\n描述: ")
+	   "* %u %?\n%i- Signature: ==\n描述: " :create-id t :jump-to-captured t)
 	  ))
 
 (defun lxs/org-find-project-journal-datetree ()
@@ -689,12 +687,13 @@ it can be passed in POS."
      ("b" org-roam-switch-to-buffer "switch buffer")
      ("i" org-roam-node-insert "insert")
      ("u" my/roam-init-node "init node")
-     ;; ("I" org-roam-inert-immediate "insert immediate")
      ("p" org-toggle-properties "show proper")
      ("t" org-roam-tag-add "add tag"))
     "Dailies"
-    (("j" org-roam-dailies-goto-today "goto today")
-     ("y" org-roam-dailies-goto-yesterday "goto yesterday")
+    (("j" org-roam-dailies-capture-today "capture today")
+     ("y" org-roam-dailies-capture-yesterday "capture yesterday")
+     ("J" org-roam-dailies-goto-today "goto today")
+     ("Y" org-roam-dailies-goto-yesterday "goto yesterday")
      ("d" org-roam-dailies-goto-date "goto date"))
     "Others"
     (("v t" org-tags-view "filt buffer tags")
@@ -734,46 +733,29 @@ it can be passed in POS."
 	  ("r" "ref" plain "%?"
 	   :if-new (file+head "${citekey}.org" "#+TITLE: ${title}\n#+ROAM_KEY: ${ref}\n#+ROAM_ALIAS: \n#+AUTHOR: Li Xunsong\n#+DATE: %<%Y-%m-%d>\n#+CREATED: %U\n#+LAST_MODIFIED: %U\n#+STARTUP: inlineimages latexpreview hideblocks\n\n* Motivation\n\n* Method\n\n* Comment\n\n* Ref\n")
 	   :unnarrowed t)))
-      (setq org-roam-ref-capture-templates
-        '(("r" "ref" plain (function org-roam--capture-get-point)
-           "%?"
-           :file-name "websites/${slug}"
-           :head "#+TITLE: ${title}\n
-- source :: ${ref}"
-           :unnarrowed t)))
-      (add-to-list 'org-roam-capture-ref-templates
-		   '("a" "Annotation" plain (function org-roam-capture--get-point)
-		     "%U\n ${body}\n"
-		     :file-name "${slug}"
-		     :head "#+title: ${title}\n#+roam_key: ${ref}\n#+roam_alias:\n"
-		     :immediate-finish t
-		     :unnarrowed t))
+
 	;; 设置 org-roam-dailies
-      (setq org-roam-dailies-directory "daily/")
-      (setq org-roam-dailies-capture-templates
-	    `(("w" "work" entry
-	     "* %<[%H:%M:%S]> - %?"
-	     :if-new (file+head+olp "%<%Y-%m-%d>.org"
-				    "#+TITLE: Journal %<%Y-%m-%d>\n#+DATE: %<%Y-%m-%d>\n#+ROAM_ALIAS:\n#+filetag: :private: :journal:\n\n" ("工作")))
-	    ("n" "notes" entry
-	     "* %<[%H:%M:%S]> - %?"
-	     :if-new (file+head+olp "%<%Y-%m-%d>.org"
-				    "#+TITLE: Journal %<%Y-%m-%d>\n#+DATE: %<%Y-%m-%d>\n#+ROAM_ALIAS:\n#+filetag: :private: :journal:\n\n" ("备忘")))
-	    ("j" "journal" entry
-	     "* %<[%H:%M:%S]> - %?"
-	     :if-new (file+head+olp "%<%Y-%m-%d>.org"
-				    "#+TITLE: Journal %<%Y-%m-%d>\n#+DATE: %<%Y-%m-%d>\n#+ROAM_ALIAS:\n#+filetag: :private: :journal:\n\n" ("随笔")))
-	    ("r" "review" entry
-	     "* %<[%H:%M:%S]> - %?"
-	     :if-new (file+head+olp "%<%Y-%m-%d>.org"
-				    "#+TITLE: Journal %<%Y-%m-%d>\n#+DATE: %<%Y-%m-%d>\n#+ROAM_ALIAS:\n#+filetag: :private: :journal:\n\n" ("总结")))))  
-      (require 'org-roam-protocol)
-      (defun my/roam-init-node ()
-	"init org-roam headline node"
-	(interactive)
-	(progn (org-id-get-create)
-               (org-entry-put nil "CREATED" (format-time-string "[%Y-%m-%d %a %H:%M]"))))
-      )
+  (setq org-roam-dailies-directory "daily/")
+
+  (setq org-roam-dailies-capture-templates (let ((head
+          (concat
+           "#+title: %<%A, %d %B %Y>\n#+filetags: :private: :dailies:\n* Log\n* Review\n")))
+     `(("r" "review" entry
+        "* %?"
+        :if-new (file+head+olp "%<%Y>/%<%B>/%<%Y-%m-%d>.org" ,head ("Review"))
+        :unnarrowed t)
+       ("l" "log" entry
+        "* %U: %?"
+        :if-new (file+head+olp "%<%Y>/%<%B>/%<%Y-%m-%d>.org" ,head ("Log")))
+       )))
+
+  (require 'org-roam-protocol)
+  (defun my/roam-init-node ()
+    "init org-roam headline node"
+    (interactive)
+    (progn (org-id-get-create)
+           (org-entry-put nil "CREATED" (format-time-string "[%Y-%m-%d %a %H:%M]"))))
+  )
 
 (use-package org-roam-bibtex
   :config
