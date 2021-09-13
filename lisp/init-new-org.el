@@ -252,11 +252,14 @@ prepended to the element after the #+HEADER: tag."
            "* TODO %?\nCaptured %<%Y-%m-%d %H:%M>")
 	  ("c" "web bookmarks" entry (file ,(concat lxs/org-agenda-directory "webclips.org"))
 	   "* [[%:link][%:description]]\n " :prepend t :empty-lines-after 1 :immediate-finish t)
+	  ("n" "notes" entry (file+headline ,(concat lxs-home-dir "Documents/" "org/" "org-roam-files/" "quick-notes.org") "Notes")
+	   "* %^{标题}\n%?" :create-id t)
 	  ("s" "code cookbook" entry (file+headline ,(concat lxs-home-dir "Documents/" "org/" "org-roam-files/" "quick-notes.org") "Cookbook")
-	   "* %U %^{描述}\n%i** 代码\n%?" :create-id t :jump-to-captured t)
-	  ("n" "code api" entry (file+headline ,(concat lxs-home-dir "Documents/" "org/" "org-roam-files/" "quick-notes.org") "Api")
-	   "* %u %?\n%i- Signature: ==\n描述: " :create-id t :jump-to-captured t)
+	   "* %^{描述}\n%i** 代码\n%?" :create-id t :jump-to-captured t)
+	  ("a" "code api" entry (file+headline ,(concat lxs-home-dir "Documents/" "org/" "org-roam-files/" "quick-notes.org") "Api")
+	   "* %?\n%i- Signature: ==\n描述: " :create-id t :jump-to-captured t)
 	  ))
+  (add-hook 'org-capture-before-finalize-hook #'org-set-created-property)
 
 (defun lxs/org-find-project-journal-datetree ()
   ;; (interactive)
@@ -331,6 +334,21 @@ it can be passed in POS."
         (delete-region (point) (line-end-position))
         (let* ((now (format-time-string "[%Y-%m-%d %a %H:%M]")))
           (insert now)))))
+  (defvar org-created-property-name "CREATED"
+    "The name of the org-mode property that stores the creation date of the entry")
+  
+  (defun org-set-created-property (&optional active NAME)
+  "Set a property on the entry giving the creation time.
+By default the property is called CREATED. If given the `NAME'
+argument will be used instead. If the property already exists, it
+will not be modified."
+  (interactive)
+  (let* ((created (or NAME org-created-property-name))
+         (fmt (if active "<%s>" "[%s]"))
+         (now  (format fmt (format-time-string "%Y-%m-%d %a %H:%M"))))
+    (unless (org-entry-get (point) created nil)
+      (org-set-property created now))))
+  
   (defun zp/org-set-last-modified ()
     "Update the LAST_MODIFIED file property in the preamble."
     (when (derived-mode-p 'org-mode)
