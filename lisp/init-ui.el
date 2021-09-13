@@ -16,7 +16,7 @@
 
 ;; randomly pick my favourite themes
 ;; ref: https://github.com/redguardtoo/emacs.d/blob/5c0f5702eebc430363d05e058077f65c4d6c2a2d/lisp/init-theme.el#L10
-(defvar my-favourite-color-themes '(doom-gruvbox doom-one-light doom-zenburn)
+(defvar my-favourite-color-themes '(doom-gruvbox doom-one-light doom-zenburn modus-operandi)
   "A set of themes randomly picked when eamcs starts up")
 
 (defun random-choice (items)
