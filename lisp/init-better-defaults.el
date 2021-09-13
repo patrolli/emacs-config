@@ -68,6 +68,7 @@
         (end-of-line)
         (insert " ")
         (insert title)
+	(my/swap-org-ref-cite-title)
         (next-line)
 	(beginning-of-line)
 	))))
