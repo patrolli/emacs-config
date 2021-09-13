@@ -198,6 +198,25 @@ prepended to the element after the #+HEADER: tag."
 
   (setq org-columns-default-format "%40ITEM(Task) %Effort(EE){:} %CLOCKSUM(Time Spent) %SCHEDULED(Scheduled) %DEADLINE(Deadline)")
 
+  ;; 补全 quote
+  (defun org-completion-symbols ()
+  (interactive)
+  (when (looking-back "=[a-zA-Z\\-_]+")
+    (let (cands)
+      (save-match-data
+        (save-excursion
+          (goto-char (point-min))
+          (while (re-search-forward "=\\([a-zA-Z\\-_]+\\)=" nil t)
+            (cl-pushnew
+             (match-string-no-properties 0) cands :test 'equal))
+          cands))
+      (when cands
+        (list (match-beginning 0) (match-end 0) cands :exclusive 'no)))))
+
+  (add-hook 'completion-at-point-functions
+	    #'org-completion-symbols
+	    'append)
+
   ;; org-capture 相关配置
   (defun get-year-and-month ()
     (list (format-time-string "%Y年") (format-time-string "%m月")))
@@ -678,13 +697,14 @@ it can be passed in POS."
   (setq org-roam-v2-ack t)
   :custom
   (org-roam-directory (concat lxs-home-dir "Documents/" "org/" "org-roam-files"))
+  (org-roam-completion-everywhere t)
   :bind ("C-c n" . org-roam-hydra/body)
   :pretty-hydra
   ((:title (pretty-hydra-title "Org roam menu" 'faicon "book"  :height 1.1 :v-adjust -0.1)
     :color blue)
    ("Basic"
     (("f" org-roam-node-find "find nodes")
-     ("b" org-roam-switch-to-buffer "switch buffer")
+     ;; ("b" org-roam-switch-to-buffer "switch buffer")
      ("i" org-roam-node-insert "insert")
      ("u" my/roam-init-node "init node")
      ("p" org-toggle-properties "show proper")
@@ -703,12 +723,8 @@ it can be passed in POS."
      ("q" hydra-pop "exit"))))
   :config
   (org-roam-setup)
-  (setq org-roam-node-display-template "${tags}${filetitle}${olp}${title}")
-  (defun org-roam--tags-to-str (tags)
-    "Convert list of TAGS into a string."
-    (if (> (length tags) 0)
-        (format "(%s) " (mapconcat (lambda (s) (concat "" s)) tags ","))
-      ""))
+  (setq org-roam-node-display-template "${my-tags}${filetitle}${olp}${title:*}")
+
   (cl-defmethod org-roam-node-filetitle ((node org-roam-node))
     "Return the file TITLE for the node."
     (let ((filetitle (org-roam-get-keyword "TITLE" (org-roam-node-file node)))
@@ -716,6 +732,13 @@ it can be passed in POS."
       (if (string= filetitle title)
           ""
         (format "%s > " filetitle))))
+
+  (cl-defmethod org-roam-node-my-tags ((node org-roam-node))
+    (let ((tags (org-roam-node-tags node)))
+      (if (> (length tags) 0)
+	  (format "(%s) " (mapconcat (lambda (s) (concat "" s)) tags ","))
+	"")))
+
   (setq org-roam-capture-templates
         '(("d" "default" plain "%?"
            :if-new (file+head "${slug}.org"
