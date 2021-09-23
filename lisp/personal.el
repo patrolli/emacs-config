@@ -169,51 +169,6 @@
     ))
 
 
-;; (use-package coin-ticker
-;;   ;; 查看我的 shib 涨跌
-;;   :load-path "site-lisp/"
-;;   :custom
-;;   (coin-ticker-count 4723867)
-;;   :config
-;;   (coin-ticker-mode 1))
-
-
-
-;; sql query for org-roam files with Project tag
-;; (with-eval-after-load 'org-roam
-  ;; (setq lxs/org-roam-project (org-roam-db-query
-                ;; [:select file
-                 ;; :from tags
-                 ;; :where (like tags (quote "%\"Project\"%"))]))
-  ;; )
-
-
-
-;; eaf configuration, but it will not work perfectly on wsl1
-(use-package eaf
-  :disabled t
-  :load-path "~/.emacs.default/site-lisp/emacs-application-framework" ; Set to "/usr/share/emacs/site-lisp/eaf" if installed from AUR
-  :init
-  (use-package epc :defer t :ensure t)
-  (use-package ctable :defer t :ensure t)
-  (use-package deferred :defer t :ensure t)
-  (use-package s :defer t :ensure t)
-  :custom
-  (eaf-browser-continue-where-left-off t)
-  :config
-  (eaf-setq eaf-browser-enable-adblocker "true")
-  (eaf-bind-key scroll_up "C-n" eaf-pdf-viewer-keybinding)
-  (eaf-bind-key scroll_down "C-p" eaf-pdf-viewer-keybinding)
-  (eaf-bind-key take_photo "p" eaf-camera-keybinding)
-  (eaf-bind-key nil "M-q" eaf-browser-keybinding))
-
-
-;; snippet to change package source
-;; (setq package-archives '(("melpa" . "http://mirrors.tuna.tsinghua.edu.cn/elpa/melpa/")
-;; 			 ("gnu" . "http://mirrors.tuna.tsinghua.edu.cn/elpa/gnu/")))
-
-
-
 ;; call windows exe to open file
 (defmacro wsl--open-with (id &optional app dir)
   `(defun ,(intern (format "wsl/%s" id)) ()
@@ -310,6 +265,9 @@ See help of `format-time-string' for possible replacements")
   "Format of date to insert with `insert-current-time' func.
 Note the weekly scope of the command's precision.")
 
+(defvar current-date-format "%a %b %d"
+  "Format of date to insert with `insert-curent-date' func")
+
 (defun lxs/insert-current-date-time-with-line-split ()
   "insert the current date and time into current buffer.
 Uses `current-date-time-format' for the formatting the date/time."
@@ -338,6 +296,15 @@ Uses `current-date-time-format' for the formatting the date/time."
        (insert (format-time-string current-time-format (current-time)))
        (insert "\n")
        )
+
+(defun lxs/insert-current-date ()
+  "insert the current time (1-week scope) into the current buffer."
+       (interactive)
+       (insert (format-time-string current-date-format (current-time)))
+       (insert "\n")
+       )
+
+(require 'xs-org-clock-watch)
 
 
 (provide 'personal)
