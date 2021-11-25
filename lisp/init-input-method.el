@@ -59,7 +59,7 @@
   (if (posframe-workable-p)
     (setq pyim-page-tooltip 'posframe)
   (setq pyim-page-tooltip 'popup))
-  (setq pyim-page-length 5)
+  (setq pyim-page-length 7)
   (setq-default pyim-english-input-switch-functions
               '(pyim-probe-dynamic-english
                 pyim-probe-isearch-mode

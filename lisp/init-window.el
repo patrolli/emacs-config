@@ -273,7 +273,9 @@
           (list-environment-mode :select t :size 0.3 :align 'below :autoclose t)
           (tabulated-list-mode :size 0.4 :align 'below))))
 
-(use-package eyebrowse)
+(use-package eyebrowse
+  :config
+  (eyebrowse-mode))
 
 (provide 'init-window)
 

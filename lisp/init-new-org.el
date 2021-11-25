@@ -1,6 +1,9 @@
 (require 'init-custom)
 (require 'init-const)
 
+(use-package alert-toast
+  :load-path "alert-toast")
+
 (use-package org
   :ensure nil
   :commands (org-dynamic-block-define)
@@ -213,9 +216,9 @@ prepended to the element after the #+HEADER: tag."
       (when cands
         (list (match-beginning 0) (match-end 0) cands :exclusive 'no)))))
 
-  (add-hook 'completion-at-point-functions
-	    #'org-completion-symbols
-	    'append)
+  (defun my-org-register-completion-functions-h ()
+      (add-hook 'completion-at-point-functions #'org-completion-symbols -100 t))
+  (add-hook 'org-mode-hook #'my-org-register-completion-functions-h)
 
   ;; org-capture 相关配置
   (defun get-year-and-month ()
@@ -246,16 +249,22 @@ prepended to the element after the #+HEADER: tag."
   (defun my/org-capture-maybe-create-id ()
     (when (org-capture-get :create-id)
       (org-id-get-create)))
+  (defun my/org-capture-maybe-prev-create-id ()
+    (when (org-capture-get :create-prev-id)
+      (outline-previous-heading)
+      (outline-previous-heading)
+      (org-id-get-create)))
   (add-hook 'org-capture-prepare-finalize-hook #'my/org-capture-maybe-create-id)
+  (add-hook 'org-capture-prepare-finalize-hook #'my/org-capture-maybe-prev-create-id)
   (setq org-capture-templates
-	`(("i" "待办" entry (file+headline ,(concat lxs/org-agenda-directory "next.org" "待办"))
+	`(("i" "待办" entry (file+headline ,(concat lxs/org-agenda-directory "next.org") "待办")
            "* TODO %?\nCaptured %<%Y-%m-%d %H:%M>")
 	  ("c" "web bookmarks" entry (file ,(concat lxs/org-agenda-directory "webclips.org"))
 	   "* [[%:link][%:description]]\n " :prepend t :empty-lines-after 1 :immediate-finish t)
 	  ("n" "notes" entry (file+headline ,(concat lxs-home-dir "Documents/" "org/" "org-roam-files/" "quick-notes.org") "Notes")
 	   "* %^{标题}\n%?" :create-id t)
 	  ("s" "code cookbook" entry (file+headline ,(concat lxs-home-dir "Documents/" "org/" "org-roam-files/" "quick-notes.org") "Cookbook")
-	   "* %^{描述}\n%i** 代码\n%?" :create-id t :jump-to-captured t)
+	   "* %^{描述}\n** 代码\n%?" :create-prev-id t :jump-to-captured t)
 	  ("a" "code api" entry (file+headline ,(concat lxs-home-dir "Documents/" "org/" "org-roam-files/" "quick-notes.org") "Api")
 	   "* %?\n%i- Signature: ==\n描述: " :create-id t :jump-to-captured t)
 	  ))
@@ -336,7 +345,7 @@ it can be passed in POS."
           (insert now)))))
   (defvar org-created-property-name "CREATED"
     "The name of the org-mode property that stores the creation date of the entry")
-  
+
   (defun org-set-created-property (&optional active NAME)
   "Set a property on the entry giving the creation time.
 By default the property is called CREATED. If given the `NAME'
@@ -348,7 +357,7 @@ will not be modified."
          (now  (format fmt (format-time-string "%Y-%m-%d %a %H:%M"))))
     (unless (org-entry-get (point) created nil)
       (org-set-property created now))))
-  
+
   (defun zp/org-set-last-modified ()
     "Update the LAST_MODIFIED file property in the preamble."
     (when (derived-mode-p 'org-mode)
@@ -378,8 +387,6 @@ will not be modified."
 					 (alert-toast-notify '(:title "pomodoro" :message "A long break done, ready a new pomodoro !!!" :data (:long t)))
                 )))
   :config
-  (use-package alert-toast
-    :load-path "alert-toast")
   (setq org-pomodoro-keep-killed-pomodoro-time t)
   (setq org-pomodoro-length 25)
   ;; (setq org-pomodoro-manual-break t)
@@ -714,7 +721,7 @@ will not be modified."
   :init
   (setq org-roam-v2-ack t)
   :custom
-  (org-roam-directory (concat lxs-home-dir "Documents/" "org/" "org-roam-files"))
+  (org-roam-directory (concat lxs-home-dir "Documents/" "org/" "org-roam-files/"))
   (org-roam-completion-everywhere t)
   :bind ("C-c n" . org-roam-hydra/body)
   :pretty-hydra
@@ -733,15 +740,20 @@ will not be modified."
      ("J" org-roam-dailies-goto-today "goto today")
      ("Y" org-roam-dailies-goto-yesterday "goto yesterday")
      ("d" org-roam-dailies-goto-date "goto date"))
+    "Timer"
+    (("s" (org-clock-in '(4)) "clock recent")
+     ("S" org-clock-in "clock in")
+     ("c" org-clock-out "clock out")
+     ("g" org-clock-goto "clock goto")
+     )
     "Others"
     (("v t" org-tags-view "filt buffer tags")
      ("a" org-roam-buffer-toggle "backlinks")
-     ("s" org-clock-in "clock in")
-     ("c" org-clock-out "clock out")
      ("q" hydra-pop "exit"))))
   :config
   (org-roam-setup)
-  (setq org-roam-node-display-template "${my-tags}${filetitle}${olp}${title:*}")
+  ;; (setq org-roam-node-display-template "${my-tags}${filetitle}${olp}${title:*}")
+  (setq org-roam-node-display-template "${my-tags}${filetitle}${title:*}")
 
   (cl-defmethod org-roam-node-filetitle ((node org-roam-node))
     "Return the file TITLE for the node."
@@ -781,12 +793,12 @@ will not be modified."
   (setq org-roam-dailies-capture-templates (let ((head
           (concat
            "#+title: %<%A, %d %B %Y>\n#+filetags: :private: :dailies:\n* Log\n* Review\n")))
-     `(("r" "review" entry
-        "* %?"
+     `(("r" "review" item
+        "- %?"
         :if-new (file+head+olp "%<%Y>/%<%B>/%<%Y-%m-%d>.org" ,head ("Review"))
         :unnarrowed t)
        ("l" "log" entry
-        "* %U: %?"
+        "* %U %?"
         :if-new (file+head+olp "%<%Y>/%<%B>/%<%Y-%m-%d>.org" ,head ("Log")))
        )))
 
@@ -821,6 +833,10 @@ will not be modified."
   (global-set-key (kbd "C-c ]") 'org-ref-helm-insert-cite-link)
   (global-set-key (kbd "C-c s") 'dblp-lookup)
   )
+
+;; 在 bibtex mode 下一些有用的函数
+(use-package bibtex-utils
+  :load-path "site-lisp/bibtex-utils")
 
 (use-package org-crypt
   :defer t
@@ -858,16 +874,6 @@ will not be modified."
 
 (org-babel-do-load-languages 'org-babel-load-languages
 			     load-language-list)
-
-(use-package org-clock-watch
-  ;; 由于系统的原因，似乎不能弹出通知
-  :disabled t
-  :load-path "~/.emacs.d/site-lisp/org-clock-watch" ;; TODO: 不能使用相对路径吗？
-  :config
-  (org-clock-watch-toggle 'on)
-  (setq org-clock-watch-work-plan-file-path (concat lxs/org-agenda-directory "next.org"))
-  (setq org-show-notification-handler 'message)
-  )
 
 (defun org-hide-properties ()
   "Hide all org-mode headline property drawers in buffer. Could be slow if it has a lot of overlays."

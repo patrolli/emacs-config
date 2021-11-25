@@ -533,5 +533,5 @@ Org-mode properties drawer already, keep the headline and don’t insert
        (kill-buffer "*hugo-github-deploy*"))
      (message "Blog deployed")
      (when hugo-url
-       (browse-url hugo-url))
+       (browse-url easy-hugo-url))
     ))

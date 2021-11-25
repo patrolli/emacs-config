@@ -146,10 +146,10 @@ _l_ist bookmark     _s_ toggle bm    sh_o_w TODO
 ^^                  _f_ show bm      _i_nsert TODO
 "
   ;; bookmarks
-  ("q" hydra-pop )
+  ("q" hydra-pop)
   ("a" hydra--set-bookmark )
   ("n" (lambda () (interactive) (hydra--set-bookmark (read-from-minibuffer "Name:"))) )
-  ("l" my-bookmark-bmenu-list)
+  ("l" my-bookmark-bmenu-list :exit nil)
   ;; bm bookmark
   ("j" bm-next :exit nil)
   ("k" bm-previous :exit nil)
@@ -421,19 +421,21 @@ Version 2018-06-04 2021-03-16"
   ("%" view-jump-brace)
 
   ;; org relevant
-  ("/r"  (progn
+  ("p"  (progn
 	  (org-roam-hydra/body)
 	  (hydra-push '(hydra-reading/body))
 	  ) :color blue)
-  ("/c" org-capture)
+  ;; ("/c" org-capture)
+  ("dj" org-capture)
   ("/d" org-todo)
   ("/ss" org-schedule)
   ("/sd" org-deadline)
   ("/," org-priority)
   ("/a" org-agenda-list)
   ("/t" org-todo-list)
-  ("/sv" org-toggle-inline-images)
-  ("/sl" org-latex-preview)
+  ("/q" org-sidebar-toggle)
+  ("/v" org-toggle-inline-images)
+  ("/l" org-latex-preview)
   ("<SPC>'" (progn (if (org-src-edit-buffer-p)
 		       (org-edit-src-exit)
 		   (org-edit-special))))
@@ -481,6 +483,7 @@ Version 2018-06-04 2021-03-16"
   (";s" eval-last-sexp)
   (";b" xah-close-current-buffer)
   (";k" xah-new-empty-buffer)
+  (";v" wsl/reveal-in-explorer)
 
   ;; bookmark
   (";i" (progn
@@ -520,7 +523,7 @@ Version 2018-06-04 2021-03-16"
   ;; ("P" previous-user-buffer)
   ("N" awesome-tab-forward-group)
   ("P" awesome-tab-backward-group)
-  ("S" swiper-all)
+  ("S" my-counsel-grep-or-swiper)
   ("B" ibuffer)
   ;; ("<SPC>j" scroll-down)
   ;; ("<SPC>k" scroll-up)
@@ -532,7 +535,9 @@ Version 2018-06-04 2021-03-16"
   ("<SPC>f" my-yapf-format-buffer)
   ("<SPC>h" eyebrowse-prev-window-config)
   ("<SPC>l" eyebrowse-next-window-config)
-  ("<SPC><SPC>" self-insert-command)  
+  ("<SPC>g" eyebrowse-switch-to-window-config)
+  ("<SPC>m" eyebrowse-create-window-config)
+  ("<SPC><SPC>" self-insert-command)
   ("V" (and (ignore-errors (other-window-for-scrolling) (scroll-other-window-down))))
   ("W" backward-word)
   ("X" (progn (kill-line 0)))
@@ -557,7 +562,7 @@ Version 2018-06-04 2021-03-16"
   ;; ("dp" duplicate-line-or-region :color blue)
   ("dc" thing-cut-comment)
   ("ds" thing-cut-sexp)
-  ("dj" thing-cut-symbol)
+  ;; ("dj" thing-cut-symbol)
   ;; ("e" end-of-line)
   ("e" xah-end-of-line-or-block)
   ("f" (progn (call-interactively 'avy-goto-word-1-forward-in-line)))
@@ -579,7 +584,6 @@ Version 2018-06-04 2021-03-16"
   ("me" xah-extend-selection)
   ("mq" xah-select-text-in-quote)
   ("mb" xah-select-block)
-
   ("M-;" comment-line)
   ("zk" helpful-key)
   ("zv" counsel-describe-variable)
@@ -591,9 +595,10 @@ Version 2018-06-04 2021-03-16"
   ("<SPC>n" widen)
   ;; ("o" ace-link) ;; future use for org-mode hydra
   ("o" ace-window)
-  ("p" (progn (ded/org-show-previous-heading-tidily)))
+  ;; ("p" (progn (ded/org-show-previous-heading-tidily)))
   ("r" undo-tree-redo)
-  ("s" my-counsel-grep-or-swiper)
+  ;; ("s" my-counsel-grep-or-swiper)
+  ("s" swiper-isearch)
   ("t" other-window)
   ("T" (other-window -1))
   ;; ("cc" avy-goto-char)

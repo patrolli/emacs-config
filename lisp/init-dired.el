@@ -1,7 +1,5 @@
 (setq dired-recursive-copies 'always)
 
-;; 配置dired，所有目录共用一个buffer
-(put 'dired-find-alternate-file 'disabled nil)
 ;; 延迟加载dired，节省emacs启动时间
 (with-eval-after-load 'dired
   (define-key dired-mode-map (kbd "RET") 'dired-find-alternate-file)
@@ -9,6 +7,9 @@
 ;; 打开当前目录的dired mode，快捷键C－c C－j
 (require 'dired-x)
 (setq dired-dwim-target 1)
+
+(define-key dired-mode-map (kbd "RET") 'dired-find-alternate-file) ; was dired-advertised-find-file
+(define-key dired-mode-map (kbd "^") (lambda () (interactive) (find-alternate-file "..")))  ; was dired-up-directory
 
 ;; Colourful dired
 (use-package diredfl

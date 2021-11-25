@@ -1,8 +1,8 @@
 (use-package vterm
   :ensure t
-  :defer t
   :bind (:map vterm-mode-map
-	      ([f9] . shell-pop))
+	 ([f4] . vterm-toggle)
+	 ("M-j" . hydra-reading/body))
   :config
   (setq vterm-buffer-name-string nil)
   (defun my/vterm ()
@@ -11,7 +11,7 @@
   (interactive)
    (let ((completion-ignore-case  t)
      (command (completing-read "Choose: " '("local"
-                                         "aimax-ht -p 25051"; your profiles
+                                         "aimax-ht -p 25997"; your profiles
                                          "aimax-ht -p 25532"
                                          "aimax-ht -p 25778"
 					 "diggers3") nil t)))
@@ -24,6 +24,7 @@
   )))
 
 (use-package shell-pop
+  :disabled t
   :init (setq shell-pop-window-size 30
               shell-pop-shell-type
               (cond ((fboundp 'vterm) '("vterm" "*vterm*"  #'vterm))
