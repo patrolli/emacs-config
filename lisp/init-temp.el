@@ -535,3 +535,72 @@ Org-mode properties drawer already, keep the headline and don’t insert
      (when hugo-url
        (browse-url hugo-url))
     ))
+
+(setq bibtex-completion-library-path '("/mnt/c/Users/lixun/Documents/bibliography/"))
+(ivy-set-actions
+ 'ivy-bibtex
+ '(("p" ivy-bibtex-open-any "Open PDF, URL, or DOI" ivy-bibtex-open-any)
+   ("e" ivy-bibtex-edit-notes "Edit notes" ivy-bibtex-edit-notes)
+   ("r" ivy-bibtex-create-headline "Create headline" ivy-bibtex-create-headline)))
+(ivy-bibtex-ivify-action bibtex-completion-create-roam-headline ivy-bibtex-create-headline)
+(defun bibtex-completion-create-roam-headline (keys)
+  (with-output-to-temp-buffer "*lxs*"
+    (print keys))
+  )
+
+(use-package grammatical-edit
+  :load-path "~/.emacs.d/site-lisp/grammatical-edit"
+  :config
+  (dolist (hook (list
+               'c-mode-common-hook
+               'c-mode-hook
+               'c++-mode-hook
+               'java-mode-hook
+               'emacs-lisp-mode-hook
+               'lisp-interaction-mode-hook
+               'lisp-mode-hook
+               'python-mode-hook
+               ))
+    (add-hook hook '(lambda () (grammatical-edit-mode 1))))
+
+  (define-key grammatical-edit-mode-map (kbd "(") 'grammatical-edit-open-round)
+  (define-key grammatical-edit-mode-map (kbd "[") 'grammatical-edit-open-bracket)
+  (define-key grammatical-edit-mode-map (kbd "{") 'grammatical-edit-open-curly)
+  (define-key grammatical-edit-mode-map (kbd ")") 'grammatical-edit-close-round)
+  (define-key grammatical-edit-mode-map (kbd "]") 'grammatical-edit-close-bracket)
+  (define-key grammatical-edit-mode-map (kbd "}") 'grammatical-edit-close-curly)
+  (define-key grammatical-edit-mode-map (kbd "=") 'grammatical-edit-equal)
+
+  (define-key grammatical-edit-mode-map (kbd "%") 'grammatical-edit-match-paren)
+  (define-key grammatical-edit-mode-map (kbd "\"") 'grammatical-edit-double-quote)
+ 
+  (define-key grammatical-edit-mode-map (kbd "SPC") 'grammatical-edit-space)
+  (define-key grammatical-edit-mode-map (kbd "RET") 'grammatical-edit-newline)
+
+  (define-key grammatical-edit-mode-map (kbd "M-o") 'grammatical-edit-backward-delete)
+  (define-key grammatical-edit-mode-map (kbd "C-d") 'grammatical-edit-forward-delete)
+  (define-key grammatical-edit-mode-map (kbd "C-k") 'grammatical-edit-kill)
+
+  (define-key grammatical-edit-mode-map (kbd "M-\"") 'grammatical-edit-wrap-double-quote)
+  (define-key grammatical-edit-mode-map (kbd "M-[") 'grammatical-edit-wrap-bracket)
+  (define-key grammatical-edit-mode-map (kbd "M-{") 'grammatical-edit-wrap-curly)
+  (define-key grammatical-edit-mode-map (kbd "M-(") 'grammatical-edit-wrap-round)
+  (define-key grammatical-edit-mode-map (kbd "M-)") 'grammatical-edit-unwrap)
+
+  (define-key grammatical-edit-mode-map (kbd "M-p") 'grammatical-edit-jump-right)
+  (define-key grammatical-edit-mode-map (kbd "M-n") 'grammatical-edit-jump-left)
+  (define-key grammatical-edit-mode-map (kbd "M-:") 'grammatical-edit-jump-out-pair-and-newline)
+  )
+
+
+;; custom dogears with counsel completing backend
+(defun counsel-dogears ()
+  (interactive)
+  (ivy-read "Dogear list: "
+            (cl-loop for place in dogears-list
+                     collect (cons (dogears--format-record place)
+                                   place))
+	    :action (lambda (x) (dogears-go x))
+	    )
+  )
+

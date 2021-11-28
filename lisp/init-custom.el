@@ -25,7 +25,7 @@ If Non-nil, save and restore the frame's geometry."
   :group 'lxs
   :type 'boolean)
 
-(defcustom lxs-proxy "127.0.0.1:8078"
+(defcustom lxs-proxy "127.0.0.1:4780"
   "Set network proxy"
   :group 'lxs
   :type 'string)

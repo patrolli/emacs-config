@@ -484,6 +484,8 @@ Version 2018-06-04 2021-03-16"
   (";b" xah-close-current-buffer)
   (";k" xah-new-empty-buffer)
   (";v" wsl/reveal-in-explorer)
+  ("; <SPC>" ivy-bibtex)
+  (";g" ivy-resume)
 
   ;; bookmark
   (";i" (progn
@@ -566,7 +568,8 @@ Version 2018-06-04 2021-03-16"
   ;; ("e" end-of-line)
   ("e" xah-end-of-line-or-block)
   ("f" (progn (call-interactively 'avy-goto-word-1-forward-in-line)))
-  ("g" awesome-tab-counsel-switch-group)
+  ;; ("g" awesome-tab-counsel-switch-group)
+  ("g" keyboard-quit)
   ("G" go-translate)
   ("h" backward-char)
   ("i" nil)
@@ -588,7 +591,7 @@ Version 2018-06-04 2021-03-16"
   ("zk" helpful-key)
   ("zv" counsel-describe-variable)
   ("zf" counsel-describe-function)
-  ("zg" keyboard-quit)
+  ;; ("zg" keyboard-quit)
   ("zd" helpful-at-point)
   ;; ("n" (progn (ded/org-show-next-heading-tidily)))
   ("n" narrow-to-region)
