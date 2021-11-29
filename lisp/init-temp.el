@@ -527,7 +527,7 @@ Org-mode properties drawer already, keep the headline and don’t insert
     (print deployscript)
     (unless (executable-find deployscript)
       (error "%s do not execute" deployscript))
-    (let ((ret (call-process-shell-command deployscript nil "*hugo-github-deploy*" t)))
+    (let ((ret (call-process deployscript nil "*hugo-github-deploy*" t)))
        (unless (zerop ret)
 	 (switch-to-buffer (get-buffer "*hugo-github-deploy*"))
 	 (error "%s command does not end normally" deployscript)))
