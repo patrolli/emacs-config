@@ -536,18 +536,6 @@ Org-mode properties drawer already, keep the headline and don’t insert
        (browse-url hugo-url))
     ))
 
-(setq bibtex-completion-library-path '("/mnt/c/Users/lixun/Documents/bibliography/"))
-(ivy-set-actions
- 'ivy-bibtex
- '(("p" ivy-bibtex-open-any "Open PDF, URL, or DOI" ivy-bibtex-open-any)
-   ("e" ivy-bibtex-edit-notes "Edit notes" ivy-bibtex-edit-notes)
-   ("r" ivy-bibtex-create-headline "Create headline" ivy-bibtex-create-headline)))
-(ivy-bibtex-ivify-action bibtex-completion-create-roam-headline ivy-bibtex-create-headline)
-(defun bibtex-completion-create-roam-headline (keys)
-  (with-output-to-temp-buffer "*lxs*"
-    (print keys))
-  )
-
 (use-package grammatical-edit
   :load-path "~/.emacs.d/site-lisp/grammatical-edit"
   :config
@@ -604,3 +592,26 @@ Org-mode properties drawer already, keep the headline and don’t insert
 	    )
   )
 
+;; (defun counsel-roam-tag-add ()
+  ;; (interactive)
+  ;; (ivy-read "Complete roam tags: "
+	    ;; (org-roam-tag-completions)
+	    ;; )
+  ;; :action 
+  ;; )
+
+(defun lxs/org-roam-tag-add (tags)
+  "Add TAGS to the node at point."
+  (interactive
+   (list (ivy-completing-read "Tag: " (org-roam-tag-completions))))
+  (let ((node (org-roam-node-at-point 'assert)))
+    (save-excursion
+      (goto-char (org-roam-node-point node))
+      (if (= (org-outline-level) 0)
+          (let ((current-tags (split-string (or (cadr (assoc "FILETAGS"
+                                                             (org-collect-keywords '("filetags"))))
+                                                "")
+                                            ":" 'omit-nulls)))
+            (org-roam-set-keyword "filetags" (org-make-tag-string (seq-uniq (append tags current-tags)))))
+        (org-set-tags (seq-uniq (append tags (org-get-tags)))))
+      tags)))

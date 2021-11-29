@@ -249,8 +249,7 @@ _l_ist bookmark     _s_ toggle bm    sh_o_w TODO
 (defun hydra-push (expr)
   (push `(lambda () ,expr) hydra-stack))
 
-(defun hydra-pop ()
-  (interactive)
+(cl-defun hydra-pop (&rest)
   (let ((x (pop hydra-stack)))
     (when x
       (funcall x))))
@@ -492,7 +491,7 @@ Version 2018-06-04 2021-03-16"
 	  (hydra-bookmarks/body)
 	  (hydra-push '(hydra-reading/body))
 	  ) :color blue)
-  (";y" counsel-yank-pop "show yank history")
+  (";y" counsel-yank-pop)
   (";r" counsel-rg)
   ("zl" my-bookmark-bmenu-list)
   ("zj" xah-open-file-fast)

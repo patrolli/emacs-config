@@ -821,18 +821,42 @@ will not be modified."
   ;; (setq org-ref-bibtex-hydra-key-binding "\C-cj")
   :config
   (setq reftex-default-bibliography '("/mnt/c/Users/lixun/Documents/bibliography/library.bib"))
-  (use-package helm-bibtex
-    :ensure t
-    :after org-ref
-  :config
-  (setq bibtex-completion-bibliography (concat lxs-home-dir "Documents/" "bibliography/" "library.bib")))
-  ;; see org-ref for use of these variables
-  (setq org-ref-bibliography-notes "/mnt/c/Users/lixun/Documents/org/paper-reading.org"
-	org-ref-default-bibliography '("/mnt/c/Users/lixun/Documents/bibliography/library.bib")
-	org-ref-pdf-directory "/mnt/c/Users/lixun/Documents/bibliography")
-  (global-set-key (kbd "C-c ]") 'org-ref-helm-insert-cite-link)
+  ;; bibtex-completions settings  
+  (setq bibtex-completion-bibliography (concat lxs-home-dir "Documents/" "bibliography/" "library.bib"))
+  (setq bibtex-completion-library-path `(,(concat lxs-home-dir "Documents/" "bibiography")))
+  
+  (global-set-key (kbd "C-c ]") 'org-ref-ivy-insert-cite-link)
   (global-set-key (kbd "C-c s") 'dblp-lookup)
   )
+
+(use-package ivy-bibtex
+    :ensure t
+    :after org-ref
+    :config
+    (ivy-set-actions
+     'ivy-bibtex
+     '(("p" ivy-bibtex-open-any "Open PDF, URL, or DOI" ivy-bibtex-open-any)
+       ("e" ivy-bibtex-edit-notes "Edit notes" ivy-bibtex-edit-notes)
+       ("c" ivy-bibtex-create-headline "Create headline" ivy-bibtex-create-headline)))
+
+    ;; 定制一个 roam insert node 的 function.
+    ;; 供 `bibtex-completion-create-roam-headline' 函数使用
+    (defun my-orb-node-insert (node)
+      (let* ((description (org-roam-node-refs node)))
+	(insert (org-link-make-string
+                 (concat "id:" (org-roam-node-id node))
+                 description)))
+      )
+    (defun bibtex-completion-create-roam-headline (keys)
+      ;; 这个函数是针对 ivy-bibtex 插入 ref 时使用
+      (if-let ((node (orb-note-exists-p (car keys))))
+	  ;; 这里确认有这个 node, 我们直接插入 roam 的 node link
+	  (my-orb-node-insert node)
+	(message "no roam keys, insert cite links")
+	(insert (format "cite:%s" (car keys)))
+	)
+      )
+    (ivy-bibtex-ivify-action bibtex-completion-create-roam-headline ivy-bibtex-create-headline))
 
 ;; 在 bibtex mode 下一些有用的函数
 (use-package bibtex-utils
