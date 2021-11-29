@@ -524,7 +524,6 @@ Org-mode properties drawer already, keep the headline and don’t insert
 	 (deployscript (file-truename (expand-file-name
 				       github-deploy-script
 				       hugo-base-dir))))
-    (print deployscript)
     (unless (executable-find deployscript)
       (error "%s do not execute" deployscript))
     (let ((ret (call-process-shell-command deployscript nil "*hugo-github-deploy*" t)))
