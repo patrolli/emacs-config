@@ -19,7 +19,8 @@
                   (if (or (region-active-p) (looking-back "^\s*" 1))
                       (org-hydra/body)
                     (self-insert-command 1))))
-  ("C-c m" . hydra-org-movement/body)))
+  ("C-c m" . hydra-org-movement/body)
+  ("C-c ]" . nil)))
   :custom
   (org-src-block-faces 'nil)
   (org-file-apps
@@ -48,7 +49,7 @@ Returns the newly created buffer."
    (org-mode . org-hide-block-all)
    (org-mode . org-content)
    ;; (org-mode . toggle-word-wrap)
-   ;; (org-mode . turn-on-org-cdlatex)
+   (org-mode . turn-on-org-cdlatex)
    ;; (org-mode . (lambda () (setq truncate-lines t)))
    ;; (org-mode . visual-line-mode)
    (org-mode . (lambda ()
@@ -172,6 +173,10 @@ prepended to the element after the #+HEADER: tag."
     :config
     (;; (setq org-appear-autolinks t)
      ))
+
+  (use-package xenops
+    :hook
+    (org-mode . xenops-mode))
 
     ;; org habit
   (use-package org-tempo
@@ -785,7 +790,8 @@ will not be modified."
 	   :head "#+TITLE: ${title}\n#+CREATED: %U\n#+LAST_MODIFIED: %U\n#+AUTHOR: Li Xunsong\n")
 	  ("r" "ref" plain "%?"
 	   :if-new (file+head "${citekey}.org" "#+TITLE: ${title}\n#+ROAM_KEY: ${ref}\n#+ROAM_ALIAS: \n#+AUTHOR: Li Xunsong\n#+DATE: %<%Y-%m-%d>\n#+CREATED: %U\n#+LAST_MODIFIED: %U\n#+STARTUP: inlineimages latexpreview hideblocks\n\n* Motivation\n\n* Method\n\n* Comment\n\n* Ref\n")
-	   :unnarrowed t)))
+	   :unnarrowed t)
+	  ))
 
 	;; 设置 org-roam-dailies
   (setq org-roam-dailies-directory "daily/")
@@ -803,11 +809,31 @@ will not be modified."
        )))
 
   (require 'org-roam-protocol)
+  ;; 设置 org-protocol 的 catpure 模板
+  (setq org-roam-capture-ref-templates
+	'(
+	  ("r" "ref" plain "%?"
+	   :target (file+head "${slug}.org"
+			      "#+title: ${title}")
+	   :unnarrowed t)
+	  ("l" "leetcode" plain "%?"
+	   :if-new (file+head "${slug}.org"
+			      "#+TITLE: ${title}\n\n* My Solution\n\n* Notes\n")
+	   :unnarrowed t)
+	  ))
+
   (defun my/roam-init-node ()
     "init org-roam headline node"
     (interactive)
     (progn (org-id-get-create)
            (org-entry-put nil "CREATED" (format-time-string "[%Y-%m-%d %a %H:%M]"))))
+  
+  (defun my/orb-init-node ()
+    "init org-roam headline with REFS: for org-roam-bibxtex"
+    (interactive)
+    ;; 首先检查 citekey 是否已经对应了一个 roam node
+    ;; 需要根据 headline 的标题进行查找
+    )
   )
 
 (use-package org-roam-bibtex
@@ -816,29 +842,31 @@ will not be modified."
 
 (use-package org-ref
   :ensure t
-  :after org
   :init
   ;; (setq org-ref-bibtex-hydra-key-binding "\C-cj")
   :config
   (setq reftex-default-bibliography '("/mnt/c/Users/lixun/Documents/bibliography/library.bib"))
-  ;; bibtex-completions settings  
-  (setq bibtex-completion-bibliography (concat lxs-home-dir "Documents/" "bibliography/" "library.bib"))
-  (setq bibtex-completion-library-path `(,(concat lxs-home-dir "Documents/" "bibiography")))
-  
-  (global-set-key (kbd "C-c ]") 'org-ref-ivy-insert-cite-link)
-  (global-set-key (kbd "C-c s") 'dblp-lookup)
+  (require 'org-ref-ivy)
+  (with-eval-after-load "org"
+    (global-set-key (kbd "C-c ]") 'org-ref-insert-link)
+    (global-set-key (kbd "C-c s") 'dblp-lookup)
+    )
   )
 
 (use-package ivy-bibtex
     :ensure t
-    :after org-ref
     :config
-    (ivy-set-actions
-     'ivy-bibtex
-     '(("p" ivy-bibtex-open-any "Open PDF, URL, or DOI" ivy-bibtex-open-any)
-       ("e" ivy-bibtex-edit-notes "Edit notes" ivy-bibtex-edit-notes)
-       ("c" ivy-bibtex-create-headline "Create headline" ivy-bibtex-create-headline)))
+  ;; bibtex-completions settings
+  (setq bibtex-completion-bibliography `(,(concat lxs-home-dir "Documents/" "bibliography/" "library.bib")))
+  (setq bibtex-completion-library-path `(,(concat lxs-home-dir "Documents/" "bibliography/")))
 
+  (ivy-set-actions
+   'ivy-bibtex
+   '(("p" ivy-bibtex-open-any "Open PDF, URL, or DOI" ivy-bibtex-open-any)
+     ("e" ivy-bibtex-edit-notes "Edit notes" ivy-bibtex-edit-notes)
+     ("c" ivy-bibtex-create-headline "Create headline" ivy-bibtex-create-headline)
+     ("i" ivy-bibtex-insert-headline "Insert headline")
+     ))
     ;; 定制一个 roam insert node 的 function.
     ;; 供 `bibtex-completion-create-roam-headline' 函数使用
     (defun my-orb-node-insert (node)
@@ -856,7 +884,16 @@ will not be modified."
 	(insert (format "cite:%s" (car keys)))
 	)
       )
-    (ivy-bibtex-ivify-action bibtex-completion-create-roam-headline ivy-bibtex-create-headline))
+    ;;
+    (defun bibtex-completion-insert-headline (keys)
+      (let* ((entry (bibtex-completion-get-entry (car keys)))
+	     (title (funcall orb-bibtex-entry-get-value-function "title" entry)))
+	(insert title)
+	)
+      )
+    (ivy-bibtex-ivify-action bibtex-completion-create-roam-headline ivy-bibtex-create-headline)
+    (ivy-bibtex-ivify-action bibtex-completion-insert-headline ivy-bibtex-insert-headline)
+    )
 
 ;; 在 bibtex mode 下一些有用的函数
 (use-package bibtex-utils

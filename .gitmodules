@@ -19,3 +19,21 @@
 [submodule "librime"]
 	path = librime
 	url = https://github.com/rime/librime.git
+[submodule "site-lisp/bibtex-utils"]
+	path = site-lisp/bibtex-utils
+	url = git@github.com:plantarum/bibtex-utils.git
+[submodule "site-lisp/grammatical-edit"]
+	path = site-lisp/grammatical-edit
+	url = git@github.com:manateelazycat/grammatical-edit.git
+[submodule "site-lisp/org-clock-watch"]
+	path = site-lisp/org-clock-watch
+	url = git@github.com:wztdream/org-clock-watch.git
+[submodule "site-lisp/org-roam-ui"]
+	path = site-lisp/org-roam-ui
+	url = git@github.com:org-roam/org-roam-ui.git
+[submodule "site-lisp/sort-tab"]
+	path = site-lisp/sort-tab
+	url = git@github.com:manateelazycat/sort-tab.git
+[submodule "site-lisp/taxy"]
+	path = site-lisp/taxy
+	url = https://github.com/alphapapa/taxy.el.git

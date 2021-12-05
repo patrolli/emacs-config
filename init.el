@@ -7,7 +7,11 @@
    (require 'package)
      (package-initialize)
      (setq package-archives '(("gnu"   . "http://mirrors.tuna.tsinghua.edu.cn/elpa/gnu/")
-			      ("melpa" . "http://mirrors.tuna.tsinghua.edu.cn/elpa/melpa/"))))
+			      ;; ("melpa" . "https://mirrors.tuna.tsinghua.edu.cn/elpa/melpa/")
+			      ;; ("melpa" . "https://elpa.zilongshanren.com/melpa/")
+			      ;; ("melpa" . "https://mirrors.sjtug.sjtu.edu.cn/emacs-elpa/")
+			      ("melpa" . "https://melpa.org/packages/")
+			      )))
 
 ;; Speed up startup
 (defvar centaur-gc-cons-threshold (if (display-graphic-p) 16000000 1600000)
@@ -129,3 +133,4 @@ decrease this. If you experience stuttering, increase this.")
 
 ;; add emacs in frame title for ahk searching the emacs window
 (add-to-list 'frame-title-format "emacs")
+(put 'dired-find-alternate-file 'disabled nil)

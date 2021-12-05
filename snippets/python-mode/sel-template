@@ -1,0 +1,66 @@
+# -*- mode: snippet -*-
+# name: sel-template
+# key: sel-temp
+# Author: Li Xunsong
+# Email: lixunsonghcl@126.com
+# --
+
+import sys
+import os
+
+currentdir = os.path.dirname(os.path.realpath(__file__))
+parentdir = os.path.dirname(currentdir)
+sys.path.append(parentdir)
+from SelScraper import SelScraper
+import time
+import logging
+import logging.config
+import yaml
+import requests
+import random
+import os
+from datetime import datetime
+
+overtime = '${1}'
+print(f' 试用版期限将于 {overtime} 到期')
+time_del = datetime.strptime(overtime, "%Y-%m-%d %H:%M") - datetime.now()
+if time_del.days < 0:
+    print('试用版到期！')
+    sys.exit()
+print(f'距离到期还有 {time_del.days} 天 {time_del.seconds} 秒')
+
+class Engine():
+
+    def __init__(self,
+                 url,
+                 config_path='./config.yaml',
+                 driver_path='./drivers/chromedriver.exe',
+                 log_config_path='./logging_config.yaml'):
+
+        self.url = url
+        self.root_path = os.path.dirname(os.path.realpath(sys.argv[0]))
+        with open(os.path.join(self.root_path, config_path), 'r', encoding='utf-8') as f:
+            config = yaml.safe_load(f)
+
+        self.xxx = config['XXX']
+
+        self.logger = self.get_logger(os.path.join(self.root_path, log_config_path))
+
+        self.sel = SelScraper(driver_path,
+                              logger=self.logger,
+                              hidden=True,
+                              headless=False,
+                              debug=False,
+                              debug_port=9222)
+
+    def get_logger(self, log_config_path):
+        with open(log_config_path, "r", encoding='utf-8') as f:
+            logging_config = yaml.safe_load(f)
+        logging.config.dictConfig(logging_config)
+        logger = logging.getLogger('default')
+        return logger
+
+if __name__ == '__main__':
+    url = 'http://www.xxx.com/'
+    engine = Engine(url, driver_path='./drivers/chromedriver.exe')
+    engine.run()

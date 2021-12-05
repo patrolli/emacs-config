@@ -1,0 +1,12 @@
+# -*- mode: snippet -*-
+# name: demo-time
+# key: demo
+# --
+
+overtime = '2021-8-25 23:00'
+print(f' 试用版期限将于 {overtime} 到期')
+time_del = datetime.strptime(overtime, "%Y-%m-%d %H:%M") - datetime.now()
+if time_del.days < 0:
+    print('试用版到期！')
+    sys.exit()
+print(f'距离到期还有 {time_del.days} 天 {time_del.seconds} 秒')

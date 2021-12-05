@@ -30,12 +30,16 @@
     (message "download %s to %s" url fpath)))
 
 (defun my/cite-parse ()
-  (let* ((parsed-cite (org-ref-parse-cite))
-         (cite-key (nth 0 (car parsed-cite)))
-         (cite-end-pos (nth 2 (car parsed-cite)))
+  (let* ((object (org-element-context))
+	 (link-string (org-element-property :path object))
+	 (data (org-ref-parse-cite-path link-string))
+	 (references (plist-get data :references))
+	 (key (plist-get (car references) :key))
+         (cite-end-pos (org-element-property :end object))
          (line-end-pos (line-end-position))
          (have-title (if (< cite-end-pos line-end-pos) t nil)))
-    (list cite-key have-title cite-end-pos line-end-pos)))
+    (list key have-title cite-end-pos line-end-pos)))
+
 
 (defun my/cite-title (key)
   (substring

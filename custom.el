@@ -4,9 +4,17 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(TeX-command "tex")
+ '(dogears-idle 10)
+ '(elfeed-feeds
+   '("http://arxiv.org/rss/cs.CV" "https://oremacs.com/atom.xml" "https://emacs-china.org/latest.rss"
+     ("https://planet.emacslife.com/atom.xml" planet emacslife)
+     ("http://www.masteringemacs.org/feed/" mastering)
+     ("https://oremacs.com/atom.xml" oremacs)
+     ("https://pinecast.com/feed/emacscast" emacscast)
+     ("https://www.reddit.com/r/emacs.rss" reddit)))
  '(hl-sexp-background-color "#efebe9")
  '(org-agenda-files
-   '("/mnt/c/Users/lixun/Documents/org/org-roam-files/awesome_human_object_interaction.org" "/mnt/c/Users/lixun/Documents/org/org-roam-files/paper_index.org" "/mnt/c/Users/lixun/Documents/org/gtd/billing.org" "/mnt/c/Users/lixun/Documents/org/gtd/inbox.org" "/mnt/c/Users/lixun/Documents/org/gtd/journal.org" "/mnt/c/Users/lixun/Documents/org/gtd/learning.org" "/mnt/c/Users/lixun/Documents/org/gtd/next.org" "/mnt/c/Users/lixun/Documents/org/gtd/notes.org" "/mnt/c/Users/lixun/Documents/org/gtd/paper-notes-archive.org" "/mnt/c/Users/lixun/Documents/org/gtd/projects.org" "/mnt/c/Users/lixun/Documents/org/gtd/reading.org" "/mnt/c/Users/lixun/Documents/org/gtd/repeater.org" "/mnt/c/Users/lixun/Documents/org/gtd/someday.org" "/mnt/c/Users/lixun/Documents/org/gtd/time-tracking.org" "/mnt/c/Users/lixun/Documents/org/gtd/webclips.org"))
+   '("/mnt/c/Users/lixun/Documents/org/gtd/next.org" "/mnt/c/Users/lixun/Documents/org/org-roam-files/paper_index.org" "/mnt/c/Users/lixun/Documents/org/gtd/inbox.org" "/mnt/c/Users/lixun/Documents/org/gtd/learning.org" "/mnt/c/Users/lixun/Documents/org/gtd/projects.org" "/mnt/c/Users/lixun/Documents/org/gtd/reading.org" "/mnt/c/Users/lixun/Documents/org/gtd/repeater.org" "/mnt/c/Users/lixun/Documents/org/gtd/review.org" "/mnt/c/Users/lixun/Documents/org/gtd/someday.org" "/mnt/c/Users/lixun/Documents/org/gtd/time-tracking.org" "/mnt/c/Users/lixun/Documents/org/gtd/webclips.org"))
  '(vc-annotate-background "#fafafa")
  '(vc-annotate-background-mode nil)
  '(vc-annotate-color-map
@@ -30,6 +38,7 @@
     (cons 340 "#383a42")
     (cons 360 "#383a42")))
  '(vc-annotate-very-old-color nil)
+ '(warning-suppress-types '(((unlock-file)) ((unlock-file)) (:warning)))
  '(weechat-color-list
    '(unspecified "#272822" "#3C3D37" "#F70057" "#F92672" "#86C30D" "#A6E22E" "#BEB244" "#E6DB74" "#40CAE4" "#66D9EF" "#FB35EA" "#FD5FF0" "#74DBCD" "#A1EFE4" "#F8F8F2" "#F8F8F0"))
  '(which-function-mode t)

@@ -517,10 +517,10 @@ Org-mode properties drawer already, keep the headline and don’t insert
 ;; 把 easy-hugo 的 `easy-hugo-github-deploy' 拿过来改的
 (defun lxs/deploy-hugo ()
   (interactive)
-  (with-output-to-temp-buffer "*lxs*"
   (let* ((hugo-url "https://patrolli.github.io/xssq/")
 	 (github-deploy-script "deploy.sh")
 	 (hugo-base-dir "/mnt/c/Users/lixun/Documents/xssq-blog/")
+	 (default-directory hugo-basedir)
 	 (deployscript (file-truename (expand-file-name
 				       github-deploy-script
 				       hugo-base-dir))))
@@ -531,12 +531,11 @@ Org-mode properties drawer already, keep the headline and don’t insert
        (unless (zerop ret)
 	 (switch-to-buffer (get-buffer "*hugo-github-deploy*"))
 	 (error "%s command does not end normally" deployscript)))
-     (when (get-buffer "*hugo-github-deploy*")
-       (kill-buffer "*hugo-github-deploy*"))
+     ;; (when (get-buffer "*hugo-github-deploy*")
+       ;; (kill-buffer "*hugo-github-deploy*"))
      (message "Blog deployed")
      (when hugo-url
        (browse-url hugo-url))
-     )
     ))
 
 (use-package grammatical-edit
@@ -618,3 +617,80 @@ Org-mode properties drawer already, keep the headline and don’t insert
             (org-roam-set-keyword "filetags" (org-make-tag-string (seq-uniq (append tags current-tags)))))
         (org-set-tags (seq-uniq (append tags (org-get-tags)))))
       tags)))
+
+
+(defun my/test ()
+  (interactive)
+  (with-output-to-temp-buffer "*lxs*"
+    (let* ((object (org-element-context))
+	   (end-pos (org-element-property :end object))
+	   (link-string (org-element-property :path object))
+	   (data (org-ref-parse-cite-path link-string))
+	   (references (plist-get data :references))
+	   (key (plist-get (car references) :key)))
+      (print (format "%s" end-pos))
+      (print "\n")
+      )
+    )
+  )
+
+(use-package taxy
+  :load-path "~/.emacs.d/site-lisp/")
+
+(require 'taxy)
+
+(defvar numbery
+  (make-taxy
+   :name "Numbery"
+   :description "A silly taxonomy of numbers."
+   :taxys (list (make-taxy
+                 :name "< 10"
+                 :description "Numbers below 10 (consuming)"
+                 :predicate (lambda (n) (< n 10))
+                 :taxys (list
+                         ;; These sub-taxys further classify the numbers below 10 into odd
+                         ;; and even.  The odd taxy "consumes" numbers, while the even one
+                         ;; doesn't, leaving them to reappear in the parent taxy's items.
+                         (make-taxy :name "Odd"
+                                    :description "(consuming)"
+                                    :predicate #'oddp)
+                         (make-taxy :name "Even"
+                                    :description "(non-consuming)"
+                                    :predicate #'evenp
+                                    :then #'identity)))
+                (make-taxy
+                 :name ">= 10"
+                 :description "Numbers above 9 (consuming)"
+                 :predicate (lambda (n) (>= n 10))
+                 :taxys (list
+                         ;; Like in the "< 10" taxy, these sub-taxys further classify
+                         ;; the numbers, but only one of them consumes numbers it
+                         ;; takes in, leaving the rest to reappear in the parent taxy.
+                         (make-taxy :name "Divisible by 3"
+                                    :description "(non-consuming)"
+                                    :predicate (lambda (n) (zerop (mod n 3)))
+                                    :then #'identity)
+                         (make-taxy :name "Divisible by 4"
+                                    :description "(non-consuming)"
+                                    :predicate (lambda (n) (zerop (mod n 4)))
+                                    :then #'identity)
+                         (make-taxy :name "Divisible by 3 or 4"
+                                    :description "(consuming)"
+                                    ;; Since this taxy's `:then' function is unset,
+                                    ;; it defaults to `ignore', which causes it to
+                                    ;; consume numbers it takes in.  Since these
+                                    ;; numbers have already been taken in (without
+                                    ;; being consumed) by the previous two sibling
+                                    ;; taxys, they also appear in them.
+                                    :predicate (lambda (n) (or (zerop (mod n 3))
+                                                               (zerop (mod n 4)))))
+                         (make-taxy :name "Divisible by 5"
+                                    :description "(non-consuming)"
+                                    :predicate (lambda (n) (zerop (mod n 5)))
+                                    :then #'identity))))))
+
+(let ((numbers (cl-loop for i below 100 collect i))
+      ;; Since `numbery' is stored in a variable, we use an emptied
+      ;; copy of it to avoid mutating the original taxy.
+      (taxy (taxy-emptied numbery)))
+  (taxy-plain (taxy-fill (reverse numbers) taxy)))
