@@ -49,7 +49,7 @@ Returns the newly created buffer."
    (org-mode . org-hide-block-all)
    (org-mode . org-content)
    ;; (org-mode . toggle-word-wrap)
-   (org-mode . turn-on-org-cdlatex)
+   ;; (org-mode . turn-on-org-cdlatex)
    ;; (org-mode . (lambda () (setq truncate-lines t)))
    ;; (org-mode . visual-line-mode)
    (org-mode . (lambda ()
@@ -209,12 +209,12 @@ prepended to the element after the #+HEADER: tag."
   ;; 补全 quote
   (defun org-completion-symbols ()
   (interactive)
-  (when (looking-back "=[a-zA-Z\\-_]+")
+  (when (looking-back "=[[:ascii:]]+")
     (let (cands)
       (save-match-data
         (save-excursion
           (goto-char (point-min))
-          (while (re-search-forward "=\\([a-zA-Z\\-_]+\\)=" nil t)
+          (while (re-search-forward "=\\([[:ascii:]]+\\)=" nil t)
             (cl-pushnew
              (match-string-no-properties 0) cands :test 'equal))
           cands))
@@ -649,7 +649,7 @@ will not be modified."
   )
 
 (use-package ox-latex
-  :defer t
+  :ensure nil
   :config
   (add-to-list 'org-latex-classes
            '("note"
@@ -845,7 +845,7 @@ will not be modified."
   :init
   ;; (setq org-ref-bibtex-hydra-key-binding "\C-cj")
   :config
-  (setq reftex-default-bibliography '("/mnt/c/Users/lixun/Documents/bibliography/library.bib"))
+  (setq reftex-default-bibliography `(,(concat lxs-home-dir "Documents/bibliography/library.bib")))
   (require 'org-ref-ivy)
   (with-eval-after-load "org"
     (global-set-key (kbd "C-c ]") 'org-ref-insert-link)
@@ -900,7 +900,8 @@ will not be modified."
   :load-path "site-lisp/bibtex-utils")
 
 (use-package org-crypt
-  :defer t
+  ;; :defer t
+  :ensure nil
   :config
   (require 'epa-file)
   (epa-file-enable)
@@ -921,7 +922,10 @@ will not be modified."
 (setq org-confirm-babel-evaluate nil
       org-src-fontify-natively t
       org-src-tab-acts-natively t)
-(require 'ob-ipython)
+
+(use-package ob-ipython
+  :ensure t)
+
 (defvar load-language-list '((emacs-lisp . t)
 			     (perl . t)
 			     (python . t)
@@ -960,6 +964,14 @@ will not be modified."
   (if (eq (get 'org-toggle-properties-hide-state 'state) 'hidden)
       (org-show-properties)
     (org-hide-properties)))
+
+(use-package org-download
+  :ensure t
+  :config
+  (org-download-enable)
+  (setq-default org-download-image-dir (concat lxs-home-dir "Documents/" "org/" "static/" "img/"))
+  (setq org-download-screenshot-method "xfce4-screenshooter -r -o cat > %s")
+  )
 
 (server-start)
 

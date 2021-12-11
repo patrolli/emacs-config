@@ -694,3 +694,42 @@ Org-mode properties drawer already, keep the headline and don’t insert
       ;; copy of it to avoid mutating the original taxy.
       (taxy (taxy-emptied numbery)))
   (taxy-plain (taxy-fill (reverse numbers) taxy)))
+
+(use-package eglot
+  :ensure t
+  :config
+  (add-to-list 'eglot-server-programs '(python-mode . ("pyright-langserver" "--stdio")))
+  (setq read-process-output-max (* 1024 1024))
+  ;; (push :documentHighlightProvider eglot-ignored-server-capabilities)
+  (setq eldoc-echo-area-use-multiline-p nil)
+)
+
+(use-package lsp-pyright
+       :preface
+       ;; Use yapf to format
+       (defun lsp-pyright-format-buffer ()
+         (interactive)
+         (when (and (executable-find "yapf") buffer-file-name)
+           (call-process "yapf" nil nil nil "-i" buffer-file-name)))
+       ;; :hook (python-mode . (lambda ()
+       ;;                        (require 'lsp-pyright)
+       ;;                        (add-hook 'after-save-hook #'lsp-pyright-format-buffer t t)))
+       :init (when (executable-find "python3")
+               (setq lsp-pyright-python-executable-cmd "python3")))
+
+;; pixel precision scroll
+;; (setq pixel-scroll-precision-large-scroll-height 60)
+;; (setq pixel-scroll-precision-interpolation-factor 8.0)
+;; (setq scroll-preserve-screen-position t
+      ;; scroll-margin 0
+      ;; scroll-conservatively 97)
+;; (setq make-cursor-line-fully-visible nil)
+
+
+;; org-clock-watch
+(use-package org-clock-watch
+  :load-path "site-lisp/org-clock-watch"
+  :config
+  (setq org-clock-watch-work-plan-file-path (concat lxs-home-dir "Documents/" "org/" "gtd/" "next.org")))
+
+

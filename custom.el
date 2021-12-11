@@ -38,7 +38,7 @@
     (cons 340 "#383a42")
     (cons 360 "#383a42")))
  '(vc-annotate-very-old-color nil)
- '(warning-suppress-types '(((unlock-file)) ((unlock-file)) (:warning)))
+ '(warning-suppress-types '((use-package) ((unlock-file)) ((unlock-file)) (:warning)))
  '(weechat-color-list
    '(unspecified "#272822" "#3C3D37" "#F70057" "#F92672" "#86C30D" "#A6E22E" "#BEB244" "#E6DB74" "#40CAE4" "#66D9EF" "#FB35EA" "#FD5FF0" "#74DBCD" "#A1EFE4" "#F8F8F2" "#F8F8F0"))
  '(which-function-mode t)

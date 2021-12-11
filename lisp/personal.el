@@ -304,8 +304,8 @@ Uses `current-date-time-format' for the formatting the date/time."
        (insert "\n")
        )
 
-(with-eval-after-load 'alert-toast
-  (require 'xs-org-clock-watch)
-  (add-hook 'after-init-hook 'xs-org-clock-watch-toggle))
+;; (with-eval-after-load 'alert-toast
+  ;; (require 'xs-org-clock-watch)
+  ;; (add-hook 'after-init-hook 'xs-org-clock-watch-toggle))
 
 (provide 'personal)

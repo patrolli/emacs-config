@@ -32,7 +32,7 @@
 
 ;; Directional window-selection routines
 (use-package windmove
-  :ensure nil
+  :ensure t
   :hook (after-init . windmove-default-keybindings))
 
 ;; Restore old window configurations
@@ -53,6 +53,7 @@
 
 ;; Quickly switch windows
 (use-package ace-window
+  :ensure t
   :pretty-hydra
   ((:title (pretty-hydra-title "Window Management" 'faicon "th" :height 1.1 :v-adjust -0.1)
     :foreign-keys warn :quit-key "q")
@@ -142,6 +143,7 @@
 
 ;; Enforce rules for popups
 (use-package shackle
+  :ensure t
   :functions org-switch-to-buffer-other-window
   :commands shackle-display-buffer
   :hook (after-init . shackle-mode)
@@ -275,6 +277,7 @@
           (tabulated-list-mode :size 0.4 :align 'below))))
 
 (use-package eyebrowse
+  :ensure t
   :config
   (eyebrowse-mode))
 

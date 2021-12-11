@@ -47,12 +47,12 @@
 (use-package pyim
   :init
   (setq default-input-method "pyim")
-  ;; (setq pyim-indicator-list (list #'pyim-indicator-with-modeline))
+  (setq pyim-indicator-list nil)
   ;; (pyim-indicator-stop-daemon)
   :bind
   ("M-k" . pyim-convert-string-at-point)
-  :hook
-  (after-init . pyim-indicator-stop-daemon)
+  ;; :hook
+  ;; (after-init . pyim-indicator-stop-daemon)
   :config
   ;; (global-set-key (kbd "M-k") 'pyim-convert-string-at-point)
   (pyim-default-scheme 'xiaohe-shuangpin)

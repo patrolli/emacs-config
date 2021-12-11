@@ -193,6 +193,6 @@
          ("B" . browse-at-remote)))
 
 ;; Git related modes
-(use-package gitignore-mode)
+;; (use-package gitignore-mode)
 
 (provide 'init-vcs)

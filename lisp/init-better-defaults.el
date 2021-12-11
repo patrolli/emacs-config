@@ -27,7 +27,9 @@
          (dpath (expand-file-name "./"))
          (fpath (format "%s/%s.pdf" dpath key)))
     (start-process-shell-command ""  nil (format "curl %s > %s" url fpath))
-    (message "download %s to %s" url fpath)))
+    ;; (message (format "curl %s > %s" url fpath))
+    (message "download %s to %s" url fpath)
+    ))
 
 (defun my/cite-parse ()
   (let* ((object (org-element-context))

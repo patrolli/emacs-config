@@ -52,7 +52,7 @@ Loaded by `org-babel-load-file'.")
   "Are we running on a Cygwin system?")
 
 (defconst sys/wslp
-  (cond ((eq system-type 'gnu/linux))
+  (and (eq system-type 'gnu/linux)
         (string-match-p "Linux.*Microsoft.*Linux"
                         (shell-command-to-string "uname -a"))))
 

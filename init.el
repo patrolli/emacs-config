@@ -54,9 +54,9 @@ decrease this. If you experience stuttering, increase this.")
          return(set-fontset-font t 'unicode font nil 'prepend))
 
 ;; add emoji support
-(when (member "Noto Color Emoji" (font-family-list))
-  (set-fontset-font
-   t 'symbol (font-spec :family "Noto Color Emoji") nil 'prepend))
+;; (when (member "Noto Color Emoji" (font-family-list))
+  ;; (set-fontset-font
+   ;; t 'symbol (font-spec :family "Noto Color Emoji") nil 'prepend))
 
 (require 'init-packages)
 
@@ -68,7 +68,7 @@ decrease this. If you experience stuttering, increase this.")
 
 (require 'init-ui)
 (require 'init-hydra)
-(require 'init-battery)
+;; (require 'init-battery)
 (require 'init-edit)
 (require 'init-ivy)
 (require 'init-company)
@@ -109,12 +109,19 @@ decrease this. If you experience stuttering, increase this.")
 ;;                   :weight 'normal
 ;;                   :slant 'normal
 ;;                   :size 12.5))
+;; (set-face-attribute
+ ;; 'default nil
+ ;; :font (font-spec :name "-UKWN-Iosevka-normal-normal-normal-*-16-*-*-*-d-0-iso10646-1"
+                  ;; :weight 'normal
+                  ;; :slant 'normal
+                  ;; :size 13.5))
 (set-face-attribute
  'default nil
- :font (font-spec :name "-UKWN-Iosevka-normal-normal-normal-*-16-*-*-*-d-0-iso10646-1"
+ :font (font-spec :name "-WenQ-WenQuanYi Zen Hei Mono-medium-normal-normal-*-19-*-*-*-*-0-iso10646-1"
                   :weight 'normal
                   :slant 'normal
-                  :size 13.5))
+                  :size 14.5))
+;; -WQYF-WenQuanYi Micro Hei Mono-regular-normal-normal-*-17-*-*-*-*-0-iso10646-1
 ;; (set-face-attribute
 ;;  'default nil
 ;;  :font (font-spec :name "Iosevka"
@@ -132,5 +139,5 @@ decrease this. If you experience stuttering, increase this.")
               :size 12.5)))
 
 ;; add emacs in frame title for ahk searching the emacs window
-(add-to-list 'frame-title-format "emacs")
+;; (add-to-list 'frame-title-format "emacs")
 (put 'dired-find-alternate-file 'disabled nil)
