@@ -156,12 +156,12 @@ prepended to the element after the #+HEADER: tag."
     ("g" org-goto "goto" :exit t))
 
   ;; 在 org-mode 中流畅地翻阅图片
-  (use-package iscroll
+  ;; (use-package iscroll
     ;;
-    :load-path "iscroll"
-    :hook
-    (org-mode . iscroll-mode)
-    )
+    ;; :load-path "iscroll"
+    ;; :hook
+    ;; (org-mode . iscroll-mode)
+    ;; )
 
   (use-package valign
     :hook
@@ -176,7 +176,8 @@ prepended to the element after the #+HEADER: tag."
 
   (use-package xenops
     :hook
-    (org-mode . xenops-mode))
+    (org-mode . #'(lambda () (xenops-mode -1)))
+    :ensure t)
 
     ;; org habit
   (use-package org-tempo
@@ -264,6 +265,9 @@ prepended to the element after the #+HEADER: tag."
   (setq org-capture-templates
 	`(("i" "待办" entry (file+headline ,(concat lxs/org-agenda-directory "next.org") "待办")
            "* TODO %?\nCaptured %<%Y-%m-%d %H:%M>")
+	  ("h" "之后" entry (file+headline ,(concat lxs/org-agenda-directory "next.org") "Inbox")
+	   "* %?\nCaptured %<%Y-%m-%d %H:%M>"
+	   )
 	  ("c" "web bookmarks" entry (file ,(concat lxs/org-agenda-directory "webclips.org"))
 	   "* [[%:link][%:description]]\n " :prepend t :empty-lines-after 1 :immediate-finish t)
 	  ("n" "notes" entry (file+headline ,(concat lxs-home-dir "Documents/" "org/" "org-roam-files/" "quick-notes.org") "Notes")
@@ -274,38 +278,6 @@ prepended to the element after the #+HEADER: tag."
 	   "* %?\n%i- Signature: ==\n描述: " :create-id t :jump-to-captured t)
 	  ))
   (add-hook 'org-capture-before-finalize-hook #'org-set-created-property)
-
-(defun lxs/org-find-project-journal-datetree ()
-  ;; (interactive)
-  (let* ((project (completing-read "Choose a project" '("compaction")))
-	(m (org-find-olp (cons (org-capture-expand-file (concat lxs-home-dir "Documents/" "org/" "org-roam-files/" project ".org")) '("Journal")))))
-    (set-buffer (marker-buffer m))
-   ;; (org-capture-put-target-region-and-position)
-   (widen)
-   (goto-char m)
-   (set-marker m nil)
-   ;; (org-capture-put-target-region-and-position)
-   (org-datetree-find-date-create (calendar-gregorian-from-absolute (org-today)) (when '("Journal") 'subtree-at-point))
-   )
-  )
-
-(defun lxs/org-find-project-idea-datetree ()
-  ;; (interactive)
-  (let* ((project (completing-read "Choose a project" '("compaction")))
-	(m (org-find-olp (cons (org-capture-expand-file (concat lxs-home-dir "Documents/" "org/" "org-roam-files/" project ".org")) '("Idea")))))
-    (set-buffer (marker-buffer m))
-   ;; (org-capture-put-target-region-and-position)
-   (widen)
-   (goto-char m)
-   (set-marker m nil)
-   ;; (org-capture-put-target-region-and-position)
-   (org-datetree-find-date-create (calendar-gregorian-from-absolute (org-today)) (when '("Idea") 'subtree-at-point))
-   )
-  )
-
-(add-to-list 'org-capture-templates `("w" "Project"))
-(add-to-list 'org-capture-templates `("wj" "project joural" entry (function lxs/org-find-project-journal-datetree) "* %U - %^{heading}\n  %?"))
-(add-to-list 'org-capture-templates `("wi" "project idea" entry (function lxs/org-find-project-idea-datetree)	"* %U - %^{heading}\n  %?"))
 
   ;; 为 org 的 header 的 created 和 last_modified 两个属性设置自动检测时间戳
   (defun zp/org-find-time-file-property (property &optional anywhere)
@@ -784,13 +756,6 @@ will not be modified."
            :file-name "private-${slug}.org"
            :head "#+TITLE: ${title}\n"
            :unnarrowed t)
-	  ("s" "code snippet"
-	   "* description\n* code\n#+BEGIN_SRC %^{language}\n%^C%?\n#+END_SRC\n* note\n* ref\n"
-	   :file-name "snippet-${slug}.org"
-	   :head "#+TITLE: ${title}\n#+CREATED: %U\n#+LAST_MODIFIED: %U\n#+AUTHOR: Li Xunsong\n")
-	  ("r" "ref" plain "%?"
-	   :if-new (file+head "${citekey}.org" "#+TITLE: ${title}\n#+ROAM_KEY: ${ref}\n#+ROAM_ALIAS: \n#+AUTHOR: Li Xunsong\n#+DATE: %<%Y-%m-%d>\n#+CREATED: %U\n#+LAST_MODIFIED: %U\n#+STARTUP: inlineimages latexpreview hideblocks\n\n* Motivation\n\n* Method\n\n* Comment\n\n* Ref\n")
-	   :unnarrowed t)
 	  ))
 
 	;; 设置 org-roam-dailies
@@ -837,6 +802,8 @@ will not be modified."
   )
 
 (use-package org-roam-bibtex
+  :after (org-roam)
+  :hook (org-roam-mode . org-roam-bibtex-mode)
   :config
   (org-roam-bibtex-mode))
 
@@ -870,7 +837,7 @@ will not be modified."
     ;; 定制一个 roam insert node 的 function.
     ;; 供 `bibtex-completion-create-roam-headline' 函数使用
     (defun my-orb-node-insert (node)
-      (let* ((description (org-roam-node-refs node)))
+      (let* ((description (org-roam-node-title node)))
 	(insert (org-link-make-string
                  (concat "id:" (org-roam-node-id node))
                  description)))
@@ -972,6 +939,18 @@ will not be modified."
   (setq-default org-download-image-dir (concat lxs-home-dir "Documents/" "org/" "static/" "img/"))
   (setq org-download-screenshot-method "xfce4-screenshooter -r -o cat > %s")
   )
+
+;; save edicted org files every one hour
+(run-at-time "00:59" 3600 'org-save-all-org-buffers)
+
+;; org-clock-watch
+;; https://github.com/wztdream/org-clock-watch
+(use-package org-clock-watch
+  :load-path "site-lisp/org-clock-watch"
+  :config
+  (org-clock-watch-toggle 'on)
+  (setq org-clock-watch-work-plan-file-path (concat lxs-home-dir "Documents/" "org/" "gtd/" "next.org")
+	org-clock-watch-choose-task-func '(lambda (x) (find-file org-clock-watch-work-plan-file-path))))
 
 (server-start)
 
