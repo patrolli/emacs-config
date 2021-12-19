@@ -154,7 +154,7 @@ Lisp function does not specify a special indentation."
               (setq ad-list (car ad-list))))))))
 
   (define-advice describe-function-1 (:after (function) advice-remove-button)
-    (add-button-to-remove-advice "*Help*" function))
+  (add-button-to-remove-advice "*Help*" function))
 
   ;; Remove hook
   (defun remove-hook-at-point ()
@@ -195,7 +195,6 @@ Lisp function does not specify a special indentation."
   :ensure nil
   :diminish)
 
-
 (use-package helpful
   ;; :disabled t
   :defines (counsel-describe-function-function
@@ -205,7 +204,10 @@ Lisp function does not specify a special indentation."
          ([remap describe-symbol] . helpful-symbol)
          ("C-c C-d" . helpful-at-point)
          :map helpful-mode-map
-         ("r" . remove-hook-at-point))
+         ("r" . remove-hook-at-point)
+	 ("q" . delete-window)
+	 ("M-n" . lxs-helpful-next)
+	 ("M-p" . lxs-helpful-prev))
   :hook (helpful-mode . cursor-sensor-mode) ; for remove-advice button
   :init
   (with-eval-after-load 'counsel
@@ -240,16 +242,109 @@ Lisp function does not specify a special indentation."
       (-when-let (pos (get-text-property button 'position
                                          (marker-buffer button)))
         (helpful--goto-char-widen pos)))
-    (advice-add #'helpful--navigate :override #'my-helpful--navigate)))
+    (advice-add #'helpful--navigate :override #'my-helpful--navigate)
+  (setq helpful-max-buffers 5)
+  (setq helpful-switch-buffer-function
+        (lambda (buf) (if-let ((window (display-buffer-reuse-mode-window buf '((mode . helpful-mode)))))
+                          ;; ensure the helpful window is selected for `helpful-update'.
+                          (select-window window)
+                        ;; line above returns nil if no available window is found
+                        (pop-to-buffer buf))))
+  (advice-add #'helpful-update :around #'moon-helpful@helpful-update)))
+
+  (defun moon-helpful@helpful-update (oldfunc)
+  "Insert back/forward buttons."
+  (funcall oldfunc)
+  (let ((inhibit-read-only t))
+    (goto-char (point-min))
+    (insert-text-button "Back"
+                        'action (lambda (&rest _)
+                                  (interactive)
+                                  (lxs-helpful-prev)))
+    (insert " / ")
+    (insert-text-button "Forward"
+                        'action (lambda (&rest _)
+                                  (interactive)
+                                  (lxs-helpful-next)))
+    (insert "\n\n")))
+
+(defun lxs-helpful-prev ()
+  (interactive)
+  (lxs-helpful-cycle-buffer (current-buffer) -1))
+
+(defun lxs-helpful-next ()
+  (interactive)
+  (lxs-helpful-cycle-buffer (current-buffer) 1))
+
+(defvar lxs-helpful-cur-bufs nil
+  "记录当前有哪些 helpful buffers")
+
+(defun lxs-helpful-cycle-buffer (buffer &optional offset)
+  (interactive)
+  (require 'dash)
+  (let* ((buffers (buffer-list))
+	 (helpful-bufs (--filter (with-current-buffer it
+                                   (eq major-mode 'helpful-mode))
+				 buffers))
+	 )
+    (dolist (buf helpful-bufs)
+    (unless (member buf lxs-helpful-cur-bufs)
+      (push buf lxs-helpful-cur-bufs))
+    )
+    ;; clean killed buffers
+    (setq lxs-helpful-cur-bufs (--filter (buffer-live-p it) lxs-helpful-cur-bufs))
+    (let ((idx (+ (or offset 0) (-elem-index buffer lxs-helpful-cur-bufs))))
+      ;; (with-output-to-temp-buffer "*lxs*"
+      ;; 	(print lxs-helpful-cur-bufs))
+      ;; (message "switch from %s to %s" (-elem-index buffer lxs-helpful-cur-bufs) idx)
+      (cond ((< idx 0) (switch-to-buffer (nth (- (length lxs-helpful-cur-bufs) 1) lxs-helpful-cur-bufs)))
+	    ((> (+ idx 1) (length lxs-helpful-cur-bufs))
+	     (switch-to-buffer (nth 0 lxs-helpful-cur-bufs)))
+	    (t (switch-to-buffer (nth idx lxs-helpful-cur-bufs))))
+      )
+    )
+  )
+
+;; 找到 helpful 的窗口
+(defun helpful--get-window()
+  "Get the vterm window which is visible (active or inactive)."
+  (cl-find-if #'(lambda(w)
+                  (provided-mode-derived-p
+                   (buffer-local-value 'major-mode (window-buffer w))
+                   'helpful-mode))
+              (window-list)))
+
+;; toggle helpful 的 buffer
+(defun lxs-helpful-toggle ()
+  (interactive)
+  (let ((helpful-bufs (--filter (with-current-buffer it
+                                  (eq major-mode 'helpful-mode))
+				(buffer-list)))
+	(window (helpful--get-window)))
+    (if window
+	(delete-window window)
+      (display-buffer (nth 0 helpful-bufs))
+      )
+    )
+  )
+
+(global-set-key (kbd "<f3>") #'lxs-helpful-toggle)
 
 (use-package elisp-demos
   :config
   (advice-add 'helpful-update :after #'elisp-demos-advice-helpful-update))
 
+(use-package macrostep
+  :ensure t
+  :custom-face
+  (macrostep-expansion-highlight-face ((t (:inherit tooltip :extend t))))
+  :bind (:map emacs-lisp-mode-map
+         ("C-c e" . macrostep-expand)
+         :map lisp-interaction-mode-map
+         ("C-c e" . macrostep-expand)))
+
 ;; (use-package lispy
 ;;   :hook (emacs-lisp-mode-hook . (lambda () (lispy-mode 1))))
-
-
 
 (provide 'init-elisp)
 
