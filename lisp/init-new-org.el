@@ -756,6 +756,9 @@ will not be modified."
            :file-name "private-${slug}.org"
            :head "#+TITLE: ${title}\n"
            :unnarrowed t)
+	  ("r" "paper notes" plain "%?"
+	   :if-new (file+head "${citekey}.org" "#+TITLE: ${title}\n#+ROAM_KEY: ${ref}\n#+AUTHOR: Li Xunsong\n#+DATE: %<%Y-%m-%d>\n#+CREATED: %U\n#+LAST_MODIFIED: %U\n#+STARTUP: inlineimages\n\n* Motivation\n\n* Method\n\n* Comment\n\n* Ref\n")
+	   :unnarrowed t)
 	  ))
 
 	;; 设置 org-roam-dailies
@@ -783,7 +786,7 @@ will not be modified."
 	   :unnarrowed t)
 	  ("l" "leetcode" plain "%?"
 	   :if-new (file+head "${slug}.org"
-			      "#+TITLE: ${title}\n\n* My Solution\n\n* Notes\n")
+			      "#+TITLE: ${title}\n#+filetags: :leetcode:\n\n* My Solution\n\n* Notes\n")
 	   :unnarrowed t)
 	  ))
 
