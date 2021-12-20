@@ -4,10 +4,6 @@
   :disabled t
   :init
   (defvar nox-python-path "/opt/anaconda/bin/python3")
-  ;; (defvar nox-python-path "/opt/anaconda/bin/python")
-  ;; 对于 nox+mspyls, 需要指定 python 解释器的路径， vitural envs 似乎不能够起到作用
-  ;; (defvar lsp-python "/home/lixunsong/anaconda3/envs/py-emacs/bin/python3.7")
-  ;; (defvar lsp-search-paths [])
 
   ;; :custom
   ;;
@@ -58,6 +54,51 @@
     (ignore-case (not citre-completion-case-sensitive))))
   )
 
+
+;; lsp config
+(use-package lsp-mode
+  :hook
+  ((prog-mode . (lambda () (unless (derived-mode-p 'emacs-lisp-mode 'lisp-mode 'makefile-mode)
+				  (lsp-deferred))))) ;; lsp-deferred 保证只有文件是见过了，才会启动 lsp server
+  :init
+  (setq read-process-output-max (* 1024 1024)) ;; 1MB
+
+  ;; 关掉不必要的功能，保证性能
+  (setq lsp-keymap-prefix "C-c l"
+        lsp-keep-workspace-alive nil
+        lsp-signature-auto-activate nil
+        lsp-modeline-code-actions-enable nil
+        lsp-modeline-diagnostics-enable nil
+        lsp-modeline-workspace-status-enable nil
+        lsp-headerline-breadcrumb-enable nil
+
+        lsp-enable-file-watchers nil
+        lsp-enable-folding nil
+        lsp-enable-symbol-highlighting nil
+        lsp-enable-text-document-color nil
+
+        lsp-enable-indentation nil
+        lsp-enable-on-type-formatting nil)
+  
+  ;; :config
+
+  ;; (setq lsp-headerline-breadcrumb-enable nil
+	;; lsp-on-idle-hook nil)
+  )
+
+(use-package lsp-pyright
+       :preface
+       ;; Use yapf to format
+       (defun lsp-pyright-format-buffer ()
+         (interactive)
+         (when (and (executable-find "yapf") buffer-file-name)
+           (call-process "yapf" nil nil nil "-i" buffer-file-name)))
+       ;; :hook (python-mode . (lambda ()
+       ;;                        (require 'lsp-pyright)
+       ;;                        (add-hook 'after-save-hook #'lsp-pyright-format-buffer t t)))
+       :init (when (executable-find "python3")
+               (setq lsp-pyright-python-executable-cmd "python3")))
+
 ;; (setq python-shell-interpreter "/home/lixunsong/anaconda3/bin/python3.8")
 ;; python
 (use-package pyvenv
@@ -82,6 +123,7 @@
 
 ;; leetcode
 (use-package leetcode
+  :defer t
   :config
   (setq leetcode-prefer-language "python3"
 	leetcode-save-solutions t
