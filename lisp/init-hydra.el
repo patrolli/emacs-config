@@ -405,11 +405,17 @@ Version 2018-06-04 2021-03-16"
       (end-of-line))))
 
 (defhydra hydra-reading
-  (:pre (progn (setq hydra-is-helpful nil)(overwrite-mode -1) (hydra-refresh-mode-line "[N]" "green" ) (hydra-normal-state-cursor)
+  (:pre (progn
+	  (setq hydra-is-helpful nil)
+	  (overwrite-mode -1)
+	  ;; (hydra-refresh-mode-line "[N]" "green" )
+	  (hydra-normal-state-cursor)
 	       )
-   :before-exit (progn (setq hydra-is-helpful t) (hydra-refresh-mode-line "[I]" "red")
-		       (hydra-insert-state-cursor)
-			    )
+   :before-exit (progn
+		  (setq hydra-is-helpful t)
+		  ;; (hydra-refresh-mode-line "[I]" "red")
+		  (hydra-insert-state-cursor)
+		  )
 	:foreign-keys run
 	:color amaranth
 	:hint nil)
@@ -450,7 +456,8 @@ Version 2018-06-04 2021-03-16"
   (".b" balance-windows)
   (".n" aw-flip-window)
   (".m" delete-other-windows)
-  ("q" delete-other-windows) ;; 如果没有其他要删除的窗口，那么就当作普通的 q
+  ;; ("q" delete-other-windows) ;; 如果没有其他要删除的窗口，那么就当作普通的 q
+  ("q" toggle-maximize-window)
   ("Q" ace-delete-window)
   (".h" split-window-right)
   (".u" winner-undo)
@@ -476,7 +483,7 @@ Version 2018-06-04 2021-03-16"
   ("; M-j" projectile-find-file-other-window)
   (";f" counsel-file-jump)
   (";a" color-rg-search-project)
-  (";q" color-rg-search-input-in-current-file)
+  ;; (";q" color-rg-search-input-in-current-file)
   (";o" lxs/search-org)
   (";e" eval-buffer)
   (";s" eval-last-sexp)
@@ -533,7 +540,9 @@ Version 2018-06-04 2021-03-16"
   ("<SPC>i" xah-open-recently-closed)
   ("<SPC>e" iedit-mode)
   ("<SPC>b" helm-mini)
-  ("<SPC>f" my-yapf-format-buffer)
+  ;; ("<SPC>f" my-yapf-format-buffer)
+  ("<SPC>f" counsel-dogears)
+  ("<SPC>d" dogears-remember)
   ("<SPC>h" eyebrowse-prev-window-config)
   ("<SPC>l" eyebrowse-next-window-config)
   ("<SPC>g" eyebrowse-switch-to-window-config)
@@ -614,13 +623,13 @@ Version 2018-06-04 2021-03-16"
   ("w" forward-word)
   ("x" delete-char)
   ("y" yank)
-  ("<escape>" nil)
+  ;; ("<escape>" nil)
   ("M-j" nil)
   ("M-k" toggle-input-method)
   ("M-p" previous-user-buffer)
   ("M-n" next-user-buffer))
 
-(bind-key "<escape>" 'hydra-reading/body)
+;; (bind-key "<escape>" 'hydra-reading/body)
 (bind-key "M-j" 'hydra-reading/body)
 
 ;; (add-hook 'find-file-hook '(lambda () (progn (hydra-pop) (hydra-reading/body))))
