@@ -122,7 +122,8 @@ prepended to the element after the #+HEADER: tag."
 	org-tags-column -77
 	org-priority-faces '((?A . error)
                              (?B . warning)
-                             (?C . success)))
+                             (?C . success))
+	org-log-done t)
 
   (with-eval-after-load 'counsel
     (bind-key [remap org-set-tags-command] #'counsel-org-tag org-mode-map))
@@ -380,226 +381,37 @@ will not be modified."
   :bind
   (:map org-agenda-mode-map
    ("i" . org-agenda-clock-in)
-   ("r" . lxs/org-process-inbox)
-   ("R" . org-agenda-refile)
-   ("c" . lxs/org-inbox-capture))
-  :hook
-  (after-init . org-agenda-mode)
+   ("R" . org-agenda-refile))
+  ;; :hook
+  ;; (after-init . org-agenda-mode)
   :config
   ;; 一些基础配置
   ;; (setq org-agenda-files (directory-files-recursively lxs/org-agenda-directory "\\.org$"))
-  (add-to-list 'org-agenda-files (concat lxs-home-dir "Documents/" "org/" "org-roam-files/" "paper_index.org"))
+
   (setq org-agenda-archives-mode t)
   ;; org-todo-list config
   (setq org-agenda-todo-list-sublevels nil)
 
   ;; 设置 TODO state and faces
   (setq org-todo-keywords
-	    '((sequence "TODO(t)" "NEXT(n)" "|" "DONE(d)")
-          (sequence "WAITING(w@/!)" "HOLD(h@/!)" "|" "CANCELLED(c@/!)")))
+	    '((sequence "TODO(t)" "DOING(n)" "|" "DONE(d)")
+          (sequence "HOLD(h@/!)" "|" "CANCELLED(c@/!)")))
 
   (setq org-todo-keyword-faces
 	    (quote (("TODO" :foreground "red" :weight bold)
-		        ("NEXT" :inherit warning)
+		        ("DOING" :inherit warning)
 		        ("DONE" :foreground "forest green" :weight bold)
-		        ("WAITING" :foreground "orange" :weight bold)
 		        ("HOLD" :foreground "magenta" :weight bold)
 		        ("CANCELLED" :foreground "forest green" :weight bold)
 		        ("REPEAT" :foreground "red" :weight bold)
 		        )))
 
-  ;; 设置 agenda 显示位置
-  ;; (setq org-agenda-window-setup 'current-window)
-  ;; 设置 agenda 打开在行首而不是在最末尾
-  ;; ref: https://www.reddit.com/r/orgmode/comments/j59h02/org_agenda_cursor_starts_at_bottom/
-  ;; (add-hook 'org-agenda-finalize-hook #'org-agenda-find-same-or-today-or-agenda 90) ;; 这个 hook 会引发一些问题
-  (add-hook 'org-agenda-finalize-hook (lambda () (goto-char (point-min))) 90)
-  ;; 在 agenda 中按 Tab 打开 headline 在 底部弹出
-  (define-advice org-agenda-goto (:around (orig-fn &rest args) "new-frame")
-    (let ((display-buffer-overriding-action '(display-buffer-at-bottom)))
-      (apply orig-fn args)))
-
-  ;; agenda view
-  (defun lxs/org-agenda-prefix-string ()
-    (let ((path (org-format-outline-path (org-get-outline-path))))
-      (if (> (length path) 0)
-	      (concat "[" path "]") "")
-      ))
-  (setq org-agenda-prefix-format '((agenda . " %i %-12:c%?-12t% s")
-				                   (todo . " %i %-12:c %(lxs/org-agenda-prefix-string)")
-				                   (tags . " %i %-12:c")
-				                   (search . " %i %-12:c")))
-  (setq lxs/org-agenda-todo-view
-	    `(" " "Agenda"
-          ((agenda ""
-                   ((org-agenda-span 'day)
-                    (org-deadline-warning-days 14)))
-           (todo "TODO"
-		         ((org-agenda-overriding-header "To Refile")
-                  (org-agenda-files '(,(concat lxs/org-agenda-directory "inbox.org")))))
-           (todo "NEXT|HOLD"
-		         ((org-agenda-overriding-header "In Progress")
-                  (org-agenda-files '(,(concat lxs/org-agenda-directory "someday.org")
-                                      ,(concat lxs/org-agenda-directory "projects.org")
-                                      ,(concat lxs/org-agenda-directory "next.org")
-                                      ,(concat lxs/org-agenda-directory "learning.org")
-				                      ,(concat lxs-home-dir "Documents/" "org/" "org-roam-files/" "paper_index.org")))
-                  ))
-           (todo "TODO"
-		         ((org-agenda-overriding-header "Projects")
-                  (org-agenda-files '(,(concat lxs/org-agenda-directory "projects.org")
-				                      ,(concat lxs/org-agenda-directory "learning.org")
-				                      ,(concat lxs-home-dir "Documents/" "org/" "org-roam-files/" "paper_index.org")))
-                  ))
-           (todo "TODO"
-		         ((org-agenda-overriding-header "One-off Tasks")
-                  (org-agenda-files '(,(concat lxs/org-agenda-directory "next.org")
-				                      ,(concat lxs/org-agenda-directory "someday.org")))
-                  (org-agenda-skip-function '(org-agenda-skip-entry-if 'deadline 'scheduled))))
-	       (todo "TODO|NEXT"
-		         ((org-agenda-overriding-header "Reading")
-		          (org-agenda-files '(,(concat lxs/org-agenda-directory "reading.org")))
-		          ))
-	       (todo "TODO"
-		         ((org-agenda-overriding-header "Blogs")
-		          (org-agenda-files '(,(concat lxs-home-dir "Documents/" "org/" "HugoBlogs/" "short-notes.org")))))
-	       (todo "WAITING"
-		         ((org-agenda-overriding-header "Waiting List")
-		          (org-agenda-files '(,(concat lxs/org-agenda-directory "next.org")
-				                      ,(concat lxs/org-agenda-directory "someday.org")
-				                      ,(concat lxs/org-agenda-directory "projects.org")
-				                      ,(concat lxs/org-agenda-directory "learning.org")))))
-           nil)))
-
-  (add-to-list 'org-agenda-custom-commands
-               `("r" "Reading" todo ""
-		         ((org-agenda-files '(,(concat lxs/org-agenda-directory "reading.org"))))))
-  (add-to-list 'org-agenda-custom-commands `,lxs/org-agenda-todo-view)
-
-  ;; 快速切换到 agenda view
-  (defun lxs/switch-to-agenda ()
-    (interactive)
-    (org-agenda nil " "))
-  (bind-key "<f5>" 'lxs/switch-to-agenda)
-  ;; 设置默认的 tag
-  (setq org-tag-alist (quote (("@home" . ?h)
-                              ("@school" . ?s)
-                              (:newline)
-                              ("WAITING" . ?w)
-                              ("HOLD" . ?H)
-                              ("CANCELLED" . ?c))))
-
-  ;; 设置 refile 的目标文件夹 all file from inbox.org to these
-  (setq org-refile-use-outline-path 'file
-	    org-outline-path-complete-in-steps nil)
-  (setq org-refile-allow-creating-parent-nodes 'confirm)
-  (setq org-refile-targets '(("next.org" :level . 1)
-                             ("someday.org" :level . 1)
-                             ("reading.org" :level . 1)
-                             ("projects.org" :maxlevel . 2)
-			                 ("learning.org" :level . 1)))
-
-  ;; 在任务 clock in 后，将其从 TODO 状态切换到 NEXT 状态
+  ;; 在任务 clock in 后，将其从 TODO 状态切换到 DOING 状态
   (defun lxs/set-todo-state-next ()
-    "Visit each parent task and change NEXT states to TODO"
-    (org-todo "NEXT"))
+    "Visit each parent task and change DOING states to TODO"
+    (org-todo "DOING"))
   (add-hook 'org-clock-in-hook 'lxs/set-todo-state-next 'append)
 
-  ;; 批量处理 inbox.org 中的文件
-  (defun custom/org-agenda-bulk-mark-regexp-category (regexp)
-    "Mark entries whose category matches REGEXP for future agenda bulk action."
-    (interactive "sMark entries with category matching regexp: ")
-    (let ((entries-marked 0) txt-at-point)
-      (save-excursion
-        (goto-char (point-min))
-        (goto-char (next-single-property-change (point) 'org-hd-marker))
-        (while (and (re-search-forward regexp nil t)
-                    (setq category-at-point
-                          (get-text-property (match-beginning 0) 'org-category)))
-          (if (get-char-property (point) 'invisible)
-              (beginning-of-line 2)
-            (when (string-match-p regexp category-at-point)
-              (setq entries-marked (1+ entries-marked))
-              (call-interactively 'org-agenda-bulk-mark)))))
-      (unless entries-marked
-        (message "No entry matching this regexp."))))
-
-  (defun lxs/org-process-inbox ()
-    "Called in org-agenda-mode, processes all inbox items."
-    (interactive)
-    (custom/org-agenda-bulk-mark-regexp-category "inbox")
-    (lxs/bulk-process-entries))
-
-  (defun lxs/org-agenda-process-inbox-item ()
-    "Process a single item in the org-agenda."
-    (org-with-wide-buffer
-     ;; (org-agenda-set-tags)
-     (org-agenda-priority)
-     (call-interactively 'lxs/my-org-agenda-set-effort)
-     (org-agenda-refile nil nil t)))
-
-  (defvar lxs/org-agenda-bulk-process-key ?f
-    "Default key for bulk processing inbox items.")
-
-  (defun lxs/bulk-process-entries ()
-    (if (not (null org-agenda-bulk-marked-entries))
-	    (let ((entries (reverse org-agenda-bulk-marked-entries))
-              (processed 0)
-              (skipped 0))
-          (dolist (e entries)
-            (let ((pos (text-property-any (point-min) (point-max) 'org-hd-marker e)))
-              (if (not pos)
-                  (progn (message "Skipping removed entry at %s" e)
-			             (cl-incf skipped))
-		        (goto-char pos)
-		        (let (org-loop-over-headlines-in-active-region) (funcall 'lxs/org-agenda-process-inbox-item))
-		        ;; `post-command-hook' is not run yet.  We make sure any
-		        ;; pending log note is processed.
-		        (when (or (memq 'org-add-log-note (default-value 'post-command-hook))
-                          (memq 'org-add-log-note post-command-hook))
-                  (org-add-log-note))
-		        (cl-incf processed))))
-          (org-agenda-redo)
-          (unless org-agenda-persistent-marks (org-agenda-bulk-unmark-all))
-          (message "Acted on %d entries%s%s"
-                   processed
-                   (if (= skipped 0)
-                       ""
-                     (format ", skipped %d (disappeared before their turn)"
-                             skipped))
-                   (if (not org-agenda-persistent-marks) "" " (kept marked)")))))
-
-  (setq org-agenda-bulk-custom-functions `((,lxs/org-agenda-bulk-process-key lxs/org-agenda-process-inbox-item)))
-
-  (defvar lxs/org-current-effort "1:00"
-    "Current effort for agenda items.")
-
-  (defun lxs/my-org-agenda-set-effort (effort)
-    "Set the effort property for the current headline."
-    (interactive
-     (list (read-string (format "Effort [%s]: " lxs/org-current-effort) nil nil lxs/org-current-effort)))
-    (setq lxs/org-current-effort effort)
-    (org-agenda-check-no-diary)
-    (let* ((hdmarker (or (org-get-at-bol 'org-hd-marker)
-			             (org-agenda-error)))
-           (buffer (marker-buffer hdmarker))
-           (pos (marker-position hdmarker))
-           (inhibit-read-only t)
-           newhead)
-      (org-with-remote-undo buffer
-	    (with-current-buffer buffer
-          (widen)
-          (goto-char pos)
-          (org-show-context 'agenda)
-          (funcall-interactively 'org-set-effort nil lxs/org-current-effort)
-          (end-of-line 1)
-          (setq newhead (org-get-heading)))
-	    (org-agenda-change-all-lines newhead hdmarker))))
-
-  (defun lxs/org-inbox-capture ()
-    (interactive)
-    "Capture a task in agenda mode."
-    (org-capture nil "i"))  ;; 存疑，似乎没有用到过
 
   ;; archive done and cancelled tasks
   (defun org-archive-done-tasks ()
@@ -957,4 +769,4 @@ will not be modified."
 
 (server-start)
 
-(provide 'init-new-org)
+(provide 'init-org)
