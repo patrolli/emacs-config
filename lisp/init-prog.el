@@ -111,25 +111,31 @@
   (pyvenv-workon "py39")
   )
 
-(use-package helm-dash
-  :ensure t
-  :disabled t
-  :bind
-  (:map prog-mode-map ("M-[" . helm-dash-at-point))
-  :config
-  (setq helm-dash-common-docsets '("Python 3" "PyTorch"))
-  (setq helm-dash-browser-func 'eww)
-  )
-
 ;; leetcode
 (use-package leetcode
   :defer t
   :config
   (setq leetcode-prefer-language "python3"
 	leetcode-save-solutions t
-	leetcode-directory (concat lxs-home-dir "leetcode")))
+	leetcode-directory (concat lxs-home-dir "leetcode"))
+  ;; 在 leetcode mode 中，给当前做的题目快速添加一个 roam note
+  (defun leetcode-take-notes ()
+    (interactive)
+    (when-let* ((buf (get-buffer "*leetcode-description*")))
+      (with-current-buffer "*leetcode-description*"
+	(goto-char (point-min))
+	(let* ((headline (string-trim (buffer-substring-no-properties (point-min) (point-at-eol))))
+	       (title (string-trim (car (last(split-string headline "\\."))))) ;; 141. Linked List Cycle
+	       (url (concat "https://leetcode-cn.com" "/problems/" (leetcode--slugify-title title))))
+	  (org-roam-capture-
+	   :keys "l"  ;; leetcode 对应的 roam capture 模板
+	   :node (org-roam-node-create
+		  :title headline)
+	   :info (list :ref url)
+	   :templates org-roam-capture-ref-templates)
+	  )))
+  ))
 
-;;
 (add-hook 'prog-mode-hook 'show-paren-mode)
 
 (provide 'init-prog)
