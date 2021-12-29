@@ -11,11 +11,8 @@
   (add-function :before-until electric-pair-inhibit-predicate
 		(lambda (c) (eq c ?<))))
 
-;; ;; expand-region 选择一块区域
-;; (use-package expand-region
-;;   :bind
-;;   ("C-=" . 'er/expand-region)
-;;   ("C--" . 'er/contract-region))
+;; ;; expand-region
+(use-package expand-region)
 
 ;; Treat undo history as a tree
 (use-package undo-tree
@@ -32,7 +29,7 @@
     (setq-default undo-tree-visualizer-diff t)))
 
 (use-package imenu
-  :ensure nil
+  :ensure t
   :bind
   (("C-'" . imenu-list-smart-toggle))
   :config
@@ -40,14 +37,16 @@
   (setq imenu-list-focus-after-activation t)   
   )
 
+;; (use-package iedit
+  ;; :hook (prog-mode . iedit-mode)
+  ;; :ensure t)
+
 (use-package rainbow-mode
   :ensure t
   :config
-  (progn
-    (defun @-enable-rainbow ()
-      (rainbow-mode t))
-    (add-hook 'lisp-interaction-mode-hook '@-enable-rainbow)
-    ))
+  (defun @-enable-rainbow ()
+    (rainbow-mode t))
+  (add-hook 'lisp-interaction-mode-hook '@-enable-rainbow))
 
 (use-package rainbow-delimiters
   :ensure t
