@@ -6,7 +6,7 @@
   :init
   (setq   company-idle-delay 0.1
 	  company-minimum-prefix-length 2
-	  company-backends '((company-capf :separate company-citre :with company-yasnippet))
+	  company-backends '((company-capf :separate company-dabbrev :with company-yasnippet))
                            ;; (company-dabbrev-code company-keywords company-files)
                            ;; company-dabbrev)
 	  company-global-modes '(not message-mode help-mode
@@ -26,6 +26,11 @@
   :config
   ;; company-dabbrev 不要补全中文
   (setq company-dabbrev-char-regexp "[-_A-Za-z0-9]")
+  ;; 只补全当前 buffer 的 dabbrev
+  (setq company-dabbrev-other-buffers nil)
+  ;; 保持大小写敏感
+  (setq company-dabbrev-downcase nil)
+  (setq company-dabbrev-ignore-case nil)
   (add-to-list 'company-frontends #'company-echo-metadata-frontend)
 
   (defun my-company-yasnippet ()
