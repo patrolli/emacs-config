@@ -123,7 +123,8 @@ prepended to the element after the #+HEADER: tag."
 	org-priority-faces '((?A . error)
                              (?B . warning)
                              (?C . success))
-	org-log-done t)
+	org-log-done t
+	org-clock-x11idle-program-name "xprintidle")
 
   (with-eval-after-load 'counsel
     (bind-key [remap org-set-tags-command] #'counsel-org-tag org-mode-map))
@@ -176,9 +177,9 @@ prepended to the element after the #+HEADER: tag."
      ))
 
   (use-package xenops
+    :ensure t
     :hook
-    (org-mode . #'(lambda () (xenops-mode -1)))
-    :ensure t)
+    (org-mode . (lambda () (xenops-mode -1))))
 
     ;; org habit
   (use-package org-tempo
@@ -274,7 +275,7 @@ prepended to the element after the #+HEADER: tag."
 	  ("n" "notes" entry (file+headline ,(concat lxs-home-dir "Documents/" "org/" "org-roam-files/" "quick-notes.org") "Notes")
 	   "* %^{标题}\n%?" :create-id t)
 	  ("s" "code cookbook" entry (file+headline ,(concat lxs-home-dir "Documents/" "org/" "org-roam-files/" "quick-notes.org") "Cookbook")
-	   "* %^{描述}\n** 代码\n%?" :create-prev-id t :jump-to-captured t)
+	   "* %^{描述}\n%?" :create-prev-id t :jump-to-captured t)
 	  ("a" "code api" entry (file+headline ,(concat lxs-home-dir "Documents/" "org/" "org-roam-files/" "quick-notes.org") "Api")
 	   "* %?\n%i- Signature: ==\n描述: " :create-id t :jump-to-captured t)
 	  ))
@@ -618,7 +619,7 @@ will not be modified."
 
 (use-package org-roam-bibtex
   :after (org-roam)
-  :hook (org-roam-mode . org-roam-bibtex-mode)
+  ;; :hook (org-roam-mode . org-roam-bibtex-mode)
   :config
   (org-roam-bibtex-mode))
 
@@ -753,6 +754,18 @@ will not be modified."
   (org-download-enable)
   (setq-default org-download-image-dir (concat lxs-home-dir "Documents/" "org/" "static/" "img/"))
   (setq org-download-screenshot-method "xfce4-screenshooter -r -o cat > %s")
+  (defun org-download--dir-2 ()
+    (substring (buffer-name) 0 -4))
+  )
+
+;; 将 org buffer 中的图片复制到剪贴板
+(defun xs-org-img-to-clipboard-at-point ()
+  (interactive)
+  (let* ((dir-path (org-download--dir))
+	 (current-name (file-name-nondirectory (org-element-property :path (org-element-context))))
+	 (img-path (concat dir-path "/" current-name)))
+    (call-process-shell-command (format "cat %s | xclip -selection clipboard -target image/png -i" img-path) nil nil)
+    )
   )
 
 ;; save edicted org files every one hour
@@ -761,11 +774,38 @@ will not be modified."
 ;; org-clock-watch
 ;; https://github.com/wztdream/org-clock-watch
 (use-package org-clock-watch
+  :disabled t
   :load-path "site-lisp/org-clock-watch"
   :config
   (org-clock-watch-toggle 'on)
   (setq org-clock-watch-work-plan-file-path (concat lxs-home-dir "Documents/" "org/" "gtd/" "next.org")
 	org-clock-watch-choose-task-func '(lambda (x) (find-file org-clock-watch-work-plan-file-path))))
+
+;; auto clock out taks when idle
+(defvar xs-org-clock-out-idle-threshold 600
+  "threshold to auto clock out a task")
+
+(defun xs-org-clock-idle-watch ()
+  (when (and (org-clocking-p)
+	     (> (org-x11-idle-seconds) xs-org-clock-out-idle-threshold))
+    (ignore-errors (org-clock-out nil t (time-subtract (current-time) (org-x11-idle-seconds))))
+    (message "auto clock out due to idle")
+    )
+  )
+
+(defun xs-org-clock-idle-watch-toggle ()
+  (interactive)
+  (if xs-org-clock-idle-watch-timer
+      (setq xs-org-clock-idle-watch-timer (cancel-timer xs-org-clock-idle-watch-timer))
+    (setq xs-org-clock-idle-watch-timer (run-with-timer 5 1 'xs-org-clock-idle-watch))
+    )
+  (if xs-org-clock-idle-watch-timer
+      (message "org clock idle watch started")
+    (message "org clock idle watch stopped")
+    )
+  )
+
+
 
 (server-start)
 
