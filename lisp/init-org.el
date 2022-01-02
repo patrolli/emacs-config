@@ -39,11 +39,6 @@
   ;; I rewrite this function to fix the window pop behaviour of *Org todo*
   ;; Refer to this link: https://emacs.stackexchange.com/questions/14817/how-to-control-where-the-org-todo-keywords-buffer-displays
   ;; Maybe it is dangerours
-  ;; (defun org-switch-to-buffer-other-window (args)
-    "Switch to buffer in a second window on the current frame.
-In particular, do not allow pop-up frames.
-Returns the newly created buffer."
-    ;; (switch-to-buffer-other-window args))
   :hook
   (((org-babel-after-execute org-mode) . org-redisplay-inline-images)
    (org-mode . org-hide-block-all)
@@ -212,12 +207,12 @@ prepended to the element after the #+HEADER: tag."
   ;; 补全 quote
   (defun org-completion-symbols ()
   (interactive)
-  (when (looking-back "=[[:ascii:]]+")
+  (when (looking-back "=[[:ascii:]]+$")
     (let (cands)
       (save-match-data
         (save-excursion
           (goto-char (point-min))
-          (while (re-search-forward "=\\([[:ascii:]]+\\)=" nil t)
+          (while (re-search-forward "=\\([[:ascii:]]+\\)=$" nil t)
             (cl-pushnew
              (match-string-no-properties 0) cands :test 'equal))
           cands))
@@ -764,48 +759,10 @@ will not be modified."
   (let* ((dir-path (org-download--dir))
 	 (current-name (file-name-nondirectory (org-element-property :path (org-element-context))))
 	 (img-path (concat dir-path "/" current-name)))
-    (call-process-shell-command (format "cat %s | xclip -selection clipboard -target image/png -i" img-path) nil nil)
-    )
-  )
+    (call-process-shell-command (format "cat %s | xclip -selection clipboard -target image/png -i" img-path) nil nil)))
 
 ;; save edicted org files every one hour
 (run-at-time "00:59" 3600 'org-save-all-org-buffers)
-
-;; org-clock-watch
-;; https://github.com/wztdream/org-clock-watch
-(use-package org-clock-watch
-  :disabled t
-  :load-path "site-lisp/org-clock-watch"
-  :config
-  (org-clock-watch-toggle 'on)
-  (setq org-clock-watch-work-plan-file-path (concat lxs-home-dir "Documents/" "org/" "gtd/" "next.org")
-	org-clock-watch-choose-task-func '(lambda (x) (find-file org-clock-watch-work-plan-file-path))))
-
-;; auto clock out taks when idle
-(defvar xs-org-clock-out-idle-threshold 600
-  "threshold to auto clock out a task")
-
-(defun xs-org-clock-idle-watch ()
-  (when (and (org-clocking-p)
-	     (> (org-x11-idle-seconds) xs-org-clock-out-idle-threshold))
-    (ignore-errors (org-clock-out nil t (time-subtract (current-time) (org-x11-idle-seconds))))
-    (message "auto clock out due to idle")
-    )
-  )
-
-(defun xs-org-clock-idle-watch-toggle ()
-  (interactive)
-  (if xs-org-clock-idle-watch-timer
-      (setq xs-org-clock-idle-watch-timer (cancel-timer xs-org-clock-idle-watch-timer))
-    (setq xs-org-clock-idle-watch-timer (run-with-timer 5 1 'xs-org-clock-idle-watch))
-    )
-  (if xs-org-clock-idle-watch-timer
-      (message "org clock idle watch started")
-    (message "org clock idle watch stopped")
-    )
-  )
-
-
 
 (server-start)
 
