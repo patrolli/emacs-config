@@ -34,24 +34,16 @@
      ("begin" "$1" "$" "$$" "\\(" "\\[")))
   :init
   (setq lxs/org-agenda-directory (concat lxs-home-dir "Documents/org/gtd/"))
-  ;; 这个 hook 似乎必须设置到 init 里面才能生效
+  ;; hook 似乎必须设置到 init 里面才能生效
   (add-hook 'org-mode-hook #'visual-line-mode)
-  ;; I rewrite this function to fix the window pop behaviour of *Org todo*
-  ;; Refer to this link: https://emacs.stackexchange.com/questions/14817/how-to-control-where-the-org-todo-keywords-buffer-displays
-  ;; Maybe it is dangerours
+  (add-hook 'org-mode-hook #'(lambda ()
+			       "Beautify org symbols."
+			       (setq prettify-symbols-alist lxs-prettify-org-symbols-alist)
+			       (unless prettify-symbols-mode
+				 (prettify-symbols-mode 1))))
   :hook
-  (((org-babel-after-execute org-mode) . org-redisplay-inline-images)
-   (org-mode . org-hide-block-all)
-   (org-mode . org-content)
-   ;; (org-mode . toggle-word-wrap)
-   ;; (org-mode . turn-on-org-cdlatex)
-   ;; (org-mode . (lambda () (setq truncate-lines t)))
-   ;; (org-mode . visual-line-mode)
-   (org-mode . (lambda ()
-                       "Beautify org symbols."
-                       (setq prettify-symbols-alist lxs-prettify-org-symbols-alist)
-                       (prettify-symbols-mode 1))))
-  ;; (add-hook 'LaTeX-mode-hook 'turn-on-cdlatex)
+  ((org-mode . org-hide-block-all)
+   (org-mode . org-content))
   :pretty-hydra
   ((:title (pretty-hydra-title "Org Template" 'fileicon "org" :face 'all-the-icons-green :height 1.1 :v-adjust 0.0)
     :color blue :quit-key "q")
@@ -692,7 +684,8 @@ will not be modified."
 (defun org-export-docx ()
   (interactive)
   (let ((docx-file (concat (file-name-sans-extension (buffer-file-name)) "-org-export" ".docx"))
-           (template-file "/mnt/c/Users/lixun/Documents/org/Summaries/template.docx"))
+        (template-file "/home/lixunsong/Documents/org/Summaries/template.docx"))
+    ;; (message (format "pandoc %s -o %s --reference-doc=%s" (buffer-file-name) docx-file template-file))
     (shell-command (format "pandoc %s -o %s --reference-doc=%s" (buffer-file-name) docx-file template-file))
     (message "Convert finish: %s" docx-file)))
 
