@@ -25,7 +25,7 @@ If Non-nil, save and restore the frame's geometry."
   :group 'lxs
   :type 'boolean)
 
-(defcustom lxs-proxy "127.0.0.1:4780"
+(defcustom lxs-proxy "127.0.0.1:20171"
   "Set network proxy"
   :group 'lxs
   :type 'string)
@@ -60,10 +60,7 @@ Nil to use font supports ligatures."
   :type '(alist :key-type string :value-type (choice character sexp)))
 
 (defcustom lxs-prettify-org-symbols-alist
-  '(("[ ]" . ?☐)
-    ("[X]" . ?☑)
-    ("[-]" . ?⛝)
-
+  '(
     ("#+ARCHIVE:" . ?📦)
     ("#+AUTHOR:" . ?👤)
     ("#+CREATOR:" . ?💁)
@@ -74,11 +71,13 @@ Nil to use font supports ligatures."
     ("#+SETUPFILE:" . ?⛮)
     ("#+TAGS:" . ?🏷)
     ("#+TITLE:" . ?📓)
-
-    ("#+BEGIN_SRC" . ?✎)
-    ("#+END_SRC" . ?□)
-    ("#+BEGIN_QUOTE" . ?»)
-    ("#+END_QUOTE" . ?«)
+    ("#+BEGIN_SRC" . ?➤)
+    ("#+begin_src" . ?➤)
+    ("#+END_SRC" . ?➤)
+    ("#+end_src" . ?➤)
+    ("#+begin_quote" . ?«)
+    ("#+end_quote" . ?«)
+    ("#+DOWNLOADED:" . ?)
     ("#+HEADERS" . ?☰)
     ("#+RESULTS:" . ?💻))
   "Alist of symbol prettifications for `org-mode'."
