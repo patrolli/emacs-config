@@ -285,29 +285,20 @@ Lisp function does not specify a special indentation."
   (let* ((buffers (buffer-list))
 	 (helpful-bufs (--filter (with-current-buffer it
                                    (eq major-mode 'helpful-mode))
-				 buffers))
-	 )
+				 buffers)))
     (dolist (buf helpful-bufs)
-    (unless (member buf lxs-helpful-cur-bufs)
-      (push buf lxs-helpful-cur-bufs))
-    )
+      (unless (member buf lxs-helpful-cur-bufs)
+	(push buf lxs-helpful-cur-bufs)))
     ;; clean killed buffers
     (setq lxs-helpful-cur-bufs (--filter (buffer-live-p it) lxs-helpful-cur-bufs))
     (let ((idx (+ (or offset 0) (-elem-index buffer lxs-helpful-cur-bufs))))
-      ;; (with-output-to-temp-buffer "*lxs*"
-      ;; 	(print lxs-helpful-cur-bufs))
-      ;; (message "switch from %s to %s" (-elem-index buffer lxs-helpful-cur-bufs) idx)
       (cond ((< idx 0) (switch-to-buffer (nth (- (length lxs-helpful-cur-bufs) 1) lxs-helpful-cur-bufs)))
 	    ((> (+ idx 1) (length lxs-helpful-cur-bufs))
 	     (switch-to-buffer (nth 0 lxs-helpful-cur-bufs)))
-	    (t (switch-to-buffer (nth idx lxs-helpful-cur-bufs))))
-      )
-    )
-  )
+	    (t (switch-to-buffer (nth idx lxs-helpful-cur-bufs)))))))
 
-;; 找到 helpful 的窗口
 (defun helpful--get-window()
-  "Get the vterm window which is visible (active or inactive)."
+  "Get the helpful window which is visible (active or inactive)."
   (cl-find-if #'(lambda(w)
                   (provided-mode-derived-p
                    (buffer-local-value 'major-mode (window-buffer w))
@@ -323,10 +314,7 @@ Lisp function does not specify a special indentation."
 	(window (helpful--get-window)))
     (if window
 	(delete-window window)
-      (display-buffer (nth 0 helpful-bufs))
-      )
-    )
-  )
+      (display-buffer (nth 0 helpful-bufs)))))
 
 (global-set-key (kbd "<f3>") #'lxs-helpful-toggle)
 
