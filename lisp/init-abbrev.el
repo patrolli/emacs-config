@@ -3,6 +3,8 @@
 (define-abbrev-table 'global-abbrev-table
   '(
 
+    ;; ✅☑️✔️❌❎
+    
     ;; net abbrev
 
     ;; english word abbrev
@@ -17,6 +19,8 @@
     ("dogface" "🐶")
     ("hearts" "♥💕💓💔💖💗💘💝💞💟💙💚💛💜" )
     ("ra" "→" )
+    ("chm" "✅")
+    ("crm" "❌")
     ;; quick file path
     ("lorg" "/mnt/c/Users/lixun/Documents/org/")
     ("lpw" "/mnt/c/Users/lixun/Documents/python_work/")
