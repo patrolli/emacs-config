@@ -95,7 +95,7 @@
   (let ((my-compaction-file "/mnt/c/Users/lixun/Documents/org/org-roam-files/compaction.org"))
     (find-file my-compaction-file)))
 
-(global-set-key (kbd "<f3>") #'lxs/open-compaction-file)
+;; (global-set-key (kbd "<f3>") #'lxs/open-compaction-file)
 
 (defun lxs/org-find-datetree ()
   (interactive)
@@ -110,27 +110,6 @@
    )
   )
 
-
-
-
-;; (use-package which-function-mode
-;;   :hook ((prog-mode . which-function-mode)
-;;          (org-mode . which-function-mode))
-;;   :init
-;;   (setq which-func-unknown "")
-;;   (add-hook 'which-function-mode-hook
-;;             #'(lambda ()
-;;                 (add-to-list 'which-func-functions
-;;                              #'(lambda ()
-;;                                  (when (eq major-mode 'org-mode)
-;;                                    (mapconcat 'identity (org-get-outline-path t)
-;;                                               \" > \"))))))
-;;   )
-
-;; (add-hook 'prog-mode-hook '(lambda () (setq header-line-format
-;;                                        '((which-func-mode (\"\" which-func-format))))))
-;; (add-hook 'org-mode-hook '(lambda () (setq header-line-format
-;; 					   '((which-func-mode (\"\" which-func-format))))))
 
 (defun lxs-org-is-hugo-file-p (fPath)
   "Predict if the org file has been converted into hugo"
@@ -141,19 +120,19 @@
 	  )
     ))
 
-(defun lxs-org-is-hugo-file-p-test ()
-  "Predict if the org file has been converted into hugo"
-  (interactive)
-  (with-temp-buffer
-    (let ((keyline "#+HUGO_DRAFT: false\n"))
-	  (insert-file-contents "/mnt/c/Users/lixun/Documents/org/org-roam-files/emacs_counsel_find_file_快速输入目标路径.org")
-	  (if (and (search-forward keyline nil t) t)
-	      (message "yes")
-	    (message "no"))
-	  )
-    ))
+;; (defun lxs-org-is-hugo-file-p-test ()
+  ;; "Predict if the org file has been converted into hugo"
+  ;; (interactive)
+  ;; (with-temp-buffer
+    ;; (let ((keyline "#+HUGO_DRAFT: false\n"))
+	  ;; (insert-file-contents "/mnt/c/Users/lixun/Documents/org/org-roam-files/emacs_counsel_find_file_快速输入目标路径.org")
+	  ;; (if (and (search-forward keyline nil t) t)
+	      ;; (message "yes")
+	    ;; (message "no"))
+	  ;; )
+    ;; ))
 
-(setq lxs-org-hugo-header-info "#+HUGO_BASE_DIR: /mnt/c/Users/lixun/Documents/xssq-blog\n#+HUGO_AUTO_SET_LASTMOD: t\n#+HUGO_TAGS: \n#+HUGO_CATEGORIES: \n#+HUGO_DRAFT: false\n\n")
+(setq lxs-org-hugo-header-info "#+HUGO_BASE_DIR: ~/Documents/xssq-blog\n#+HUGO_AUTO_SET_LASTMOD: t\n#+HUGO_TAGS: \n#+HUGO_CATEGORIES: \n#+HUGO_DRAFT: false\n\n")
 
 (defun lxs/org-hugo-export-current-buffer ()
   (interactive)
@@ -167,6 +146,30 @@
       ))
   ;; (org-hugo--export-file-to-md (buffer-name))
     ))
+
+;; 运行 hugo 文件夹下面的 deploy.sh, 发布博客
+;; 把 easy-hugo 的 `easy-hugo-github-deploy' 拿过来改的
+(defun lxs/deploy-hugo ()
+  (interactive)
+  (let* ((hugo-url "https://patrolli.github.io/xssq/")
+	 (github-deploy-script "deploy.sh")
+	 (hugo-basedir "~/Documents/xssq-blog/")
+	 (default-directory hugo-basedir)
+	 (deployscript (file-truename (expand-file-name
+				       github-deploy-script
+				       hugo-basedir))))
+    (print deployscript)
+    (unless (executable-find deployscript)
+      (error "%s do not execute" deployscript))
+    (let ((ret (call-process-shell-command deployscript nil "*hugo-github-deploy*" t)))
+       (unless (zerop ret)
+	 (switch-to-buffer (get-buffer "*hugo-github-deploy*"))
+	 (error "%s command does not end normally" deployscript)))
+     (when (get-buffer "*hugo-github-deploy*")
+       (kill-buffer "*hugo-github-deploy*"))
+     (message "Blog deployed")
+     (when hugo-url
+       (browse-url hugo-url))))
 
 
 ;; call windows exe to open file
@@ -195,6 +198,10 @@
 (wsl--open-with open-in-default-program "explorer.exe" buffer-file-name)
 (wsl--open-with reveal-in-explorer "explorer.exe" default-directory)
 (wsl--open-with open-in-vscode "Code.exe" buffer-file-name)
+
+(defun reveal-in-explorer ()
+  (interactive)
+    (shell-command (format "thunar %s" default-directory)))
 
 (defun my-delete-whole-line ()
   "Delete text from current position to end of line char.
@@ -301,11 +308,6 @@ Uses `current-date-time-format' for the formatting the date/time."
   "insert the current time (1-week scope) into the current buffer."
        (interactive)
        (insert (format-time-string current-date-format (current-time)))
-       (insert "\n")
-       )
-
-;; (with-eval-after-load 'alert-toast
-  ;; (require 'xs-org-clock-watch)
-  ;; (add-hook 'after-init-hook 'xs-org-clock-watch-toggle))
+       (insert "\n"))
 
 (provide 'personal)
