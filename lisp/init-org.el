@@ -394,6 +394,12 @@ will not be modified."
 		        ("REPEAT" :foreground "red" :weight bold)
 		        )))
 
+  ;; refile
+  (setq org-refile-targets '((nil :maxlevel . 9)
+                                (org-agenda-files :maxlevel . 9)))
+  (setq org-outline-path-complete-in-steps nil)         ; Refile in a single go
+  (setq org-refile-use-outline-path t)                  ; Show full paths for refiling
+
   ;; 在任务 clock in 后，将其从 TODO 状态切换到 DOING 状态
   (defun lxs/set-todo-state-next ()
     "Visit each parent task and change DOING states to TODO"
@@ -569,11 +575,11 @@ will not be modified."
            "#+title: %<%A, %d %B %Y>\n#+filetags: :private: :dailies:\n* Log\n* Review\n")))
      `(("r" "review" item
         "- %?"
-        :if-new (file+head+olp "%<%Y>/%<%B>/%<%Y-%m-%d>.org" ,head ("Review"))
+        :if-new (file+head+olp "%<%Y>/%<week_%V>/%<%Y-%m-%d>.org" ,head ("Review"))
         :unnarrowed t)
        ("l" "log" entry
         "* %U %?"
-        :if-new (file+head+olp "%<%Y>/%<%B>/%<%Y-%m-%d>.org" ,head ("Log")))
+        :if-new (file+head+olp "%<%Y>/%<week_%V>/%<%Y-%m-%d>.org" ,head ("Log")))
        )))
 
   (require 'org-roam-protocol)
@@ -743,8 +749,7 @@ will not be modified."
   (setq-default org-download-image-dir (concat lxs-home-dir "Documents/" "org/" "static/" "img/"))
   (setq org-download-screenshot-method "xfce4-screenshooter -r -o cat > %s")
   (defun org-download--dir-2 ()
-    (substring (buffer-name) 0 -4))
-  )
+    (file-name-base (buffer-file-name))))
 
 ;; 将 org buffer 中的图片复制到剪贴板
 (defun xs-org-img-to-clipboard-at-point ()
@@ -753,6 +758,19 @@ will not be modified."
 	 (current-name (file-name-nondirectory (org-element-property :path (org-element-context))))
 	 (img-path (concat dir-path "/" current-name)))
     (call-process-shell-command (format "cat %s | xclip -selection clipboard -target image/png -i" img-path) nil nil)))
+
+;TODO: 向前和向后查找
+(defun xs-toggle-code-block ()
+  (interactive)
+  (save-excursion
+    (beginning-of-line)
+    (if (org-in-src-block-p)
+	(progn
+	  (re-search-backward "#\\+begin_" nil t 1)
+	  (org-hide-block-toggle))
+      ;TODO: goto block
+      (re-search-forward "#\\+begin_" nil t 1)
+      (org-hide-block-toggle))))
 
 ;; save edicted org files every one hour
 (run-at-time "00:59" 3600 'org-save-all-org-buffers)
