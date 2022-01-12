@@ -58,12 +58,27 @@
     (add-hook 'lisp-interaction-mode-hook '@-enable-rainbow-delimiters)))
 
 ;; Nice writing
+;TODO: 有延迟加载的问题
 (use-package olivetti
   :diminish
   :bind ("<f8>" . olivetti-mode)
-  :init (setq olivetti-body-width 0.618))
+  :init
+  (setq olivetti-body-width 0.618)
+  (defun xs-toggle-olivetti-for-org ()
+    "if current buffer is org and only one visible buffer
+  enable olivetti mode"
+    (if (or (and (eq (length (window-list nil nil nil)) 1)
+		 (eq (buffer-local-value 'major-mode (current-buffer)) 'org-mode))
+	    (and (eq (buffer-local-value 'major-mode (current-buffer)) 'org-mode)
+		 (eq (buffer-local-value 'major-mode (window-buffer (frame-first-window))) 'org-mode)
+		 (window-at-side-p (frame-first-window) 'right))) ;; frame-first-window 的 mode 是 org-mode 并且没有右边 window
+	(olivetti-mode 1)
+      (olivetti-mode 0)))
+  (add-hook 'org-mode-hook #'xs-toggle-olivetti-for-org)
+  (add-hook 'window-configuration-change-hook #'xs-toggle-olivetti-for-org)
+  )
 
-;; Jump to things in Emacs tree-style
+;; jump to things in Emacs tree-style
 (use-package avy
   :bind (("C-:" . avy-goto-char)
          ("C-." . avy-goto-char-2)
