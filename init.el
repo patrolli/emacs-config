@@ -3,7 +3,7 @@
 ;; just comment it out by adding a semicolon to the start of the line.
 ;; You may delete these explanatory comments.(package-initialize) ;; You might already have this line
 
-(when (>= emacs-major-version 24)   
+(when (>= emacs-major-version 24)
    (require 'package)
      (package-initialize)
      (setq package-archives '(("gnu"   . "http://mirrors.tuna.tsinghua.edu.cn/elpa/gnu/")
