@@ -43,8 +43,8 @@
    )
   )
 
-(use-package thing-edit
-  :load-path "site-lisp/thing-edit/")
+;; (use-package thing-edit
+  ;; :load-path "site-lisp/thing-edit/")
 
 (use-package openwith
   :hook
@@ -56,12 +56,21 @@
 
 ;; 自动保存文件
 (use-package auto-save
+  :disabled t
   :load-path "site-lisp/auto-save"
   :config
   (auto-save-enable)
   (setq auto-save-silent t)   ; quietly save
   (setq auto-save-idle 2)
   )
+
+;; 试用 super-save 来自动保存
+;; super-save 没有 lazycat 的 auto-save 那样激进
+;; 它是在 buffer 切换或者失去焦点的时候自动保存
+(use-package super-save
+  :ensure t
+  :config
+  (super-save-mode +1))
 
 ;; 检测文件是否已经被导出 hugo
 (defun lxs-org-is-hugo-file-p (fPath)
