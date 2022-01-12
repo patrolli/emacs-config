@@ -129,16 +129,14 @@ end make each untitled buffer saved uniquely."
   (interactive)
   (let* ((untitled-dir "~/Documents/")
 	 ;; (save-name (concat (format-time-string "%Y-%m-%d") "-" (buffer-name)))
-	 (save-name (concat (format-time-string "%Y-%m-%d") "-" (replace-regexp-in-string "\\\(<\\\|>\\\|-\\\)" "_" (buffer-name))))
+	 (save-name (concat (format-time-string "%Y-%m-%d") "" (replace-regexp-in-string "\\\(<\\\|>\\\|-\\\)" "_" (buffer-name))))
 	 (postfix (cdr (assoc major-mode lxs-major-mode-to-file-postfix))))  
     (let ((target (concat untitled-dir save-name postfix))
 	  (num 1))
       (while (f-exists-p target)
 	(setq target (concat untitled-dir save-name "-" (number-to-string num) postfix))
 	(setq num (1+ num)))
-      (write-file target)
-      )
-))
+      (write-file target))))
 
 (defvar xah-recently-closed-buffers nil "alist of recently closed buffers. Each element is (buffer name, file path). The max number to track is controlled by the variable `xah-recently-closed-buffers-max'.")
 
@@ -183,7 +181,7 @@ Version 2018-06-11"
                 (cons (cons (buffer-name) (buffer-file-name)) xah-recently-closed-buffers))
           (when (> (length xah-recently-closed-buffers) xah-recently-closed-buffers-max)
             (setq xah-recently-closed-buffers (butlast xah-recently-closed-buffers 1))))
-        (kill-buffer-and-window)
+        ;; (kill-buffer-and-window)
 	(kill-buffer)
 	))))
 
