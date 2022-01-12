@@ -55,6 +55,7 @@
   ;; (after-init . pyim-indicator-stop-daemon)
   :config
   ;; (global-set-key (kbd "M-k") 'pyim-convert-string-at-point)
+  (pyim-indicator-stop-daemon)
   (pyim-default-scheme 'xiaohe-shuangpin)
   (if (posframe-workable-p)
     (setq pyim-page-tooltip 'posframe)
