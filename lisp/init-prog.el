@@ -113,7 +113,9 @@
 
 ;; leetcode
 (use-package leetcode
-  :defer t
+  ;; :hook
+  ;; (after-init . leetcode)
+  :load-path ("site-lisp/leetcode.el")
   :config
   (setq leetcode-prefer-language "python3"
 	leetcode-save-solutions t
