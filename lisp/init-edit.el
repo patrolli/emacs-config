@@ -34,7 +34,7 @@
   (("C-'" . imenu-list-smart-toggle))
   :config
   (setq imenu-list-position 'right)
-  (setq imenu-list-focus-after-activation t)   
+  (setq imenu-list-focus-after-activation t)
   )
 
 ;; (use-package iedit
@@ -67,16 +67,15 @@
   (defun xs-toggle-olivetti-for-org ()
     "if current buffer is org and only one visible buffer
   enable olivetti mode"
-    (if (or (and (eq (length (window-list nil nil nil)) 1)
-		 (eq (buffer-local-value 'major-mode (current-buffer)) 'org-mode))
-	    (and (eq (buffer-local-value 'major-mode (current-buffer)) 'org-mode)
-		 (eq (buffer-local-value 'major-mode (window-buffer (frame-first-window))) 'org-mode)
+    (if (and (eq (buffer-local-value 'major-mode (current-buffer)) 'org-mode)
+	     (or (eq (length (window-list nil nil nil)) 1)
 		 (window-at-side-p (frame-first-window) 'right))) ;; frame-first-window 的 mode 是 org-mode 并且没有右边 window
 	(olivetti-mode 1)
-      (olivetti-mode 0)))
+      (olivetti-mode 0)
+      (when (eq (buffer-local-value 'major-mode (current-buffer)) 'org-mode)
+	(visual-line-mode 1))))
   (add-hook 'org-mode-hook #'xs-toggle-olivetti-for-org)
-  (add-hook 'window-configuration-change-hook #'xs-toggle-olivetti-for-org)
-  )
+  (add-hook 'window-configuration-change-hook #'xs-toggle-olivetti-for-org))
 
 ;; jump to things in Emacs tree-style
 (use-package avy
@@ -117,7 +116,6 @@
   :init
   (global-page-break-lines-mode)
   )
-
 
 
 ;; auto-insert file headers
