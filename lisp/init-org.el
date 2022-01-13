@@ -545,12 +545,14 @@ will not be modified."
       (if (string= filetitle title)
           ""
         (format "%s > " filetitle))))
-
+  
   (cl-defmethod org-roam-node-my-tags ((node org-roam-node))
     (let ((tags (org-roam-node-tags node)))
-      (if (> (length tags) 0)
-	  (format "(%s) " (mapconcat (lambda (s) (concat "" s)) tags ","))
-	"")))
+      (propertize 
+       (if (> (length tags) 0)
+           (format "(%s) " (mapconcat (lambda (s) (concat "" s)) tags ","))
+	 "")
+       'font-lock-face '(:foreground "grey"))))
 
   (setq org-roam-capture-templates
         '(("d" "default" plain "%?"
