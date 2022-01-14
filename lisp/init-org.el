@@ -557,15 +557,15 @@ will not be modified."
   (setq org-roam-capture-templates
         '(("d" "default" plain "%?"
            :if-new (file+head "${slug}.org"
-            "#+TITLE: ${title}\n#+DATE: %<%Y-%m-%d>\n#+CREATED: %U\n#+LAST_MODIFIED: %U\n#+roam_alias: \n#+STARTUP: inlineimages latexpreview\n#+AUTHOR:Li Xunsong\n")
+            "#+title: ${title}\n#+date: %<%Y-%m-%d>\n#+CREATED: %U\n#+LAST_MODIFIED: %U\n#+roam_alias: \n#+startup: inlineimages latexpreview\n#+author: xunsong\n")
            :unnarrowed t)
           ("p" "private" plain
            "%?"
            :file-name "private-${slug}.org"
-           :head "#+TITLE: ${title}\n"
+           :head "#+title: ${title}\n"
            :unnarrowed t)
 	  ("r" "paper notes" plain "%?"
-	   :if-new (file+head "${citekey}.org" "#+TITLE: ${title}\n#+ROAM_KEY: ${ref}\n#+AUTHOR: Li Xunsong\n#+date: %<%Y-%m-%d>\n#+CREATED: %U\n#+LAST_MODIFIED: %U\n#+STARTUP: inlineimages\n\n* Motivation\n\n* Method\n\n* Comment\n\n* Ref\n")
+	   :if-new (file+head "${citekey}.org" "#+title: ${title}\n#+ROAM_KEY: ${ref}\n#+author: xunsong\n#+date: %<%Y-%m-%d>\n#+CREATED: %U\n#+LAST_MODIFIED: %U\n#+startup: inlineimages\n\n* Motivation\n\n* Method\n\n* Comment\n\n* Ref\n")
 	   :unnarrowed t)
 	  ))
 
@@ -588,7 +588,7 @@ will not be modified."
 	   :unnarrowed t)
 	  ("l" "leetcode" plain "%?"
 	   :if-new (file+head "${slug}.org"
-			      "#+TITLE: ${title}\n#+filetags: :leetcode:\n\n* My Solution\n\n* Notes\n")
+			      "#+title: ${title}\n#+filetags: :leetcode:\n\n* My Solution\n\n* Notes\n")
 	   :unnarrowed t)
 	  ))
 
