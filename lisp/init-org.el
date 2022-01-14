@@ -565,24 +565,18 @@ will not be modified."
            :head "#+TITLE: ${title}\n"
            :unnarrowed t)
 	  ("r" "paper notes" plain "%?"
-	   :if-new (file+head "${citekey}.org" "#+TITLE: ${title}\n#+ROAM_KEY: ${ref}\n#+AUTHOR: Li Xunsong\n#+DATE: %<%Y-%m-%d>\n#+CREATED: %U\n#+LAST_MODIFIED: %U\n#+STARTUP: inlineimages\n\n* Motivation\n\n* Method\n\n* Comment\n\n* Ref\n")
+	   :if-new (file+head "${citekey}.org" "#+TITLE: ${title}\n#+ROAM_KEY: ${ref}\n#+AUTHOR: Li Xunsong\n#+date: %<%Y-%m-%d>\n#+CREATED: %U\n#+LAST_MODIFIED: %U\n#+STARTUP: inlineimages\n\n* Motivation\n\n* Method\n\n* Comment\n\n* Ref\n")
 	   :unnarrowed t)
 	  ))
 
 	;; 设置 org-roam-dailies
   (setq org-roam-dailies-directory "daily/")
 
-  (setq org-roam-dailies-capture-templates (let ((head
-          (concat
-           "#+title: %<%A, %d %B %Y>\n#+filetags: :private: :dailies:\n* Log\n* Review\n")))
-     `(("r" "review" item
-        "- %?"
-        :if-new (file+head+olp "%<%Y>/%<week_%V>/%<%Y-%m-%d>.org" ,head ("Review"))
-        :unnarrowed t)
-       ("l" "log" entry
-        "* %U %?"
-        :if-new (file+head+olp "%<%Y>/%<week_%V>/%<%Y-%m-%d>.org" ,head ("Log")))
-       )))
+  (setq org-roam-dailies-capture-templates
+     `(("l" "log" plain
+        "- [%<%H:%M>]\n- %?"
+        :target (file+head+olp "%<%Y>/%<week_%V>.org" "#+title: %<week %V %B %Y>\n#+filetags: :private:dailies:" ("%<%m-%d, %a>"))
+        :unnarrowed t)))
 
   (require 'org-roam-protocol)
   ;; 设置 org-protocol 的 catpure 模板
