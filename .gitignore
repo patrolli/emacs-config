@@ -33,3 +33,5 @@ eaf
 eln-cache/
 rime/
 librime/
+*.png
+*.svg
