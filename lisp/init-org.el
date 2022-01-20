@@ -7,7 +7,6 @@
 (use-package org
   :ensure nil
   :commands (org-dynamic-block-define)
-  :defer t
   :bind
   (("C-c a" . org-agenda)
    ("C-c b" . org-switchb)
@@ -41,9 +40,9 @@
 			       (setq prettify-symbols-alist lxs-prettify-org-symbols-alist)
 			       (unless prettify-symbols-mode
 				 (prettify-symbols-mode 1))))
-  :hook
-  ((org-mode . org-hide-block-all)
-   (org-mode . org-content))
+  ;; :hook
+  ;; ((org-mode . org-hide-block-all)
+   ;; (org-mode . org-content))
   :pretty-hydra
   ((:title (pretty-hydra-title "Org Template" 'fileicon "org" :face 'all-the-icons-green :height 1.1 :v-adjust 0.0)
     :color blue :quit-key "q")
@@ -103,7 +102,7 @@ prepended to the element after the #+HEADER: tag."
       (when text (insert text))))
 
   (setq org-ellipsis (if (and (display-graphic-p) (char-displayable-p ?⏷)) "\t⏷" nil)
-	org-startup-indented t
+	;; org-startup-indented t
 	org-hide-emphasis-markers t
 	org-catch-invisible-edits 'smart
 	org-tags-column -77
@@ -144,14 +143,6 @@ prepended to the element after the #+HEADER: tag."
     ("u" outline-up-heading "up heading")
     ("g" org-goto "goto" :exit t))
 
-  ;; 在 org-mode 中流畅地翻阅图片
-  ;; (use-package iscroll
-    ;;
-    ;; :load-path "iscroll"
-    ;; :hook
-    ;; (org-mode . iscroll-mode)
-    ;; )
-
   (use-package valign
     :hook
     (org-mode . valign-mode))
@@ -175,10 +166,11 @@ prepended to the element after the #+HEADER: tag."
     :ensure nil)
   (add-to-list 'org-modules 'org-tempo)
   (add-to-list 'org-modules 'org-habit)
-  (setq org-habit-show-all-today t)
-  (setq org-habit-graph-column 40)
-  (setq org-habit-preceding-days 21)
-  (setq org-habit-following-days 1)
+  (setq org-habit-show-all-today t
+	org-habit-graph-column 40
+	org-habit-preceding-days 21
+	org-habit-following-days 1)
+  
   ;; org-protocol 设置
   (use-package org-protocol
     :ensure nil
@@ -336,28 +328,6 @@ will not be modified."
     (call-interactively 'org-toggle-inline-images)
     (call-interactively 'org-toggle-inline-images)))
 (add-hook 'before-save-hook #'lxs/org-show-recent-inserted-img)
-;; save
-(use-package org-pomodoro
-  :after org-agenda
-  :ensure t
-  :bind
-  (:map org-agenda-mode-map ("P" . org-pomodoro))
-  :hook
-  ((org-pomodoro-finished . (lambda ()
-                (alert-toast-notify '(:title "pomodoro" :message "Task finished !!!" :data (:long t)))
-                ))
-   (org-pomodoro-short-break-finished . (lambda ()
-                (alert-toast-notify '(:title "pomodoro" :message "A short break done, ready a new pomodoro !!!" :data (:long t)))
-                ))
-   (org-pomodoro-long-break-finished . (lambda ()
-					 (alert-toast-notify '(:title "pomodoro" :message "A long break done, ready a new pomodoro !!!" :data (:long t)))
-                )))
-  :config
-  (setq org-pomodoro-keep-killed-pomodoro-time t)
-  (setq org-pomodoro-length 25)
-  ;; (setq org-pomodoro-manual-break t)
-  (setq org-pomodoro-long-break-frequency 3)
-  (setq org-pomodoro-long-break-length 15))
 
 ;; org agenda and gtd setting
 (use-package org-agenda
@@ -405,7 +375,6 @@ will not be modified."
     "Visit each parent task and change DOING states to TODO"
     (org-todo "DOING"))
   (add-hook 'org-clock-in-hook 'lxs/set-todo-state-next 'append)
-
 
   ;; archive done and cancelled tasks
   (defun org-archive-done-tasks ()
@@ -535,8 +504,8 @@ will not be modified."
      ("q" hydra-pop "exit"))))
   :config
   (org-roam-setup)
-  ;; (setq org-roam-node-display-template "${my-tags}${filetitle}${olp}${title:*}")
-  (setq org-roam-node-display-template "${my-tags}${filetitle}${title:*}")
+  ;; (setq org-roam-node-display-template "${my-tags}${filetitle}${title:*}")
+  (setq org-roam-node-display-template "${my-tags}${title:*}")
 
   (cl-defmethod org-roam-node-filetitle ((node org-roam-node))
     "Return the file TITLE for the node."
@@ -545,10 +514,10 @@ will not be modified."
       (if (string= filetitle title)
           ""
         (format "%s > " filetitle))))
-  
+
   (cl-defmethod org-roam-node-my-tags ((node org-roam-node))
     (let ((tags (org-roam-node-tags node)))
-      (propertize 
+      (propertize
        (if (> (length tags) 0)
            (format "(%s) " (mapconcat (lambda (s) (concat "" s)) tags ","))
 	 "")
@@ -597,7 +566,7 @@ will not be modified."
     (interactive)
     (progn (org-id-get-create)
            (org-entry-put nil "CREATED" (format-time-string "[%Y-%m-%d %a %H:%M]"))))
-  
+
   (defun my/orb-init-node ()
     "init org-roam headline with REFS: for org-roam-bibxtex"
     (interactive)
@@ -664,23 +633,11 @@ will not be modified."
 	)
       )
     (ivy-bibtex-ivify-action bibtex-completion-create-roam-headline ivy-bibtex-create-headline)
-    (ivy-bibtex-ivify-action bibtex-completion-insert-headline ivy-bibtex-insert-headline)
-    )
+    (ivy-bibtex-ivify-action bibtex-completion-insert-headline ivy-bibtex-insert-headline))
 
 ;; 在 bibtex mode 下一些有用的函数
 (use-package bibtex-utils
   :load-path "site-lisp/bibtex-utils")
-
-(use-package org-crypt
-  ;; :defer t
-  :ensure nil
-  :config
-  (require 'epa-file)
-  (epa-file-enable)
-  (org-crypt-use-before-save-magic)
-  (setq org-tags-exclude-from-inheritance (quote ("crypt")))
-  (setq org-crypt-key nil)
-  )
 
 ;; export org to docx
 (defun org-export-docx ()
@@ -748,11 +705,23 @@ will not be modified."
     (file-name-base (buffer-file-name))))
 
 ;; 将 org buffer 中的图片复制到剪贴板
+;; [[file:../static/img/emacs_hacks/2022-01-16_23-25-08_screenshot.png]]
 (defun xs-org-img-to-clipboard-at-point ()
   (interactive)
   (let* ((dir-path (org-download--dir))
 	 (current-name (file-name-nondirectory (org-element-property :path (org-element-context))))
 	 (img-path (concat dir-path "/" current-name)))
+    (call-process-shell-command (format "cat %s | xclip -selection clipboard -target image/png -i" img-path) nil nil)))
+
+(defun xs-org-img-to-clipboard-at-line ()
+  (interactive)
+  (let* ((line-str (buffer-substring-no-properties (line-beginning-position) (line-end-position)))
+	 (dir-path (org-download--dir))	 
+	 (file-path (when (string-match "\\[\\[file:\\(.+\\)\\]\\]" line-str)
+		      (match-string 1 line-str)))
+	 (current-name (file-name-nondirectory file-path))
+	 (img-path (concat dir-path "/" current-name)))
+    (message img-path)
     (call-process-shell-command (format "cat %s | xclip -selection clipboard -target image/png -i" img-path) nil nil)))
 
 ;TODO: 向前和向后查找
@@ -767,6 +736,18 @@ will not be modified."
       ;TODO: goto block
       (re-search-forward "#\\+begin_" nil t 1)
       (org-hide-block-toggle))))
+
+(defun xs-next-code-block ()
+  (interactive)
+  (end-of-line)
+  (unless (re-search-forward "#\\+begin_" nil t 1)
+    (re-search-forward "#\\+end_" nil t 1)
+    (next-line)))
+
+(defun xs-prev-code-block ()
+  (interactive)
+  (beginning-of-line)
+  (re-search-backward "#\\+begin_" nil t 1))
 
 ;; save edicted org files every one hour
 (run-at-time "00:59" 3600 'org-save-all-org-buffers)
