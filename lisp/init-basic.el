@@ -118,35 +118,6 @@ to choose a directory"
 (add-hook 'org-mode-hook '(lambda () (setq visual-line-mode t)))
 (add-hook 'prog-mode-hook '(lambda () (setq visual-line-mode t)))
 
-(use-package keyfreq
-  :hook
-  (after-init . keyfreq-mode)
-  (after-init . keyfreq-autosave-mode)
-  :config
-  (setq keyfreq-excluded-commands
-      '(self-insert-command
-        forward-char
-        backward-char
-        previous-line
-        next-line
-	hydra-reading/next-line
-	hydra-reading/previous-line
-	hydra-reading/forward-char
-	hydra-reading/backward-char
-	hydra-reading/body
-	hydra-reading/nil
-	org-self-insert-command
-	mwheel-scroll
-	mouse-set-point
-	mouse-drag-region
-	iscroll-next-line
-	iscroll-previous-line
-	ivy-previous-line
-	ivy-next-line
-	helm-next-line
-	helm-previous-line
-	)))
-
 (use-package awesome-tab
   :load-path "site-lisp/awesome-tab"
   :config
