@@ -41,8 +41,8 @@
 			       (unless prettify-symbols-mode
 				 (prettify-symbols-mode 1))))
   ;; :hook
-  ;; ((org-mode . org-hide-block-all)
-   ;; (org-mode . org-content))
+  ((org-mode . org-hide-block-all)
+   (org-mode . org-content))
   :pretty-hydra
   ((:title (pretty-hydra-title "Org Template" 'fileicon "org" :face 'all-the-icons-green :height 1.1 :v-adjust 0.0)
     :color blue :quit-key "q")
@@ -102,7 +102,7 @@ prepended to the element after the #+HEADER: tag."
       (when text (insert text))))
 
   (setq org-ellipsis (if (and (display-graphic-p) (char-displayable-p ?⏷)) "\t⏷" nil)
-	;; org-startup-indented t
+	org-startup-indented t
 	org-hide-emphasis-markers t
 	org-catch-invisible-edits 'smart
 	org-tags-column -77
@@ -123,8 +123,8 @@ prepended to the element after the #+HEADER: tag."
   (use-package org-superstar
     :ensure t
     :hook (org-mode . org-superstar-mode)
-  :config
-  (add-hook 'org-mode-hook #'org-superstar-mode))
+    :config
+    (add-hook 'org-mode-hook #'org-superstar-mode))
 
   (use-package org-fancy-priorities
     :diminish
@@ -179,7 +179,7 @@ prepended to the element after the #+HEADER: tag."
     (add-to-list 'org-modules 'org-protocol))
 
   ;; org tracking time
-  '(org-clock-into-drawer "CLOCKING")
+  (setq org-clock-into-drawer "CLOCKING")
 
   ;; 设置 org-mode 显示图片大小
   (setq org-image-actual-width '(400))
@@ -534,9 +534,8 @@ will not be modified."
            :head "#+title: ${title}\n"
            :unnarrowed t)
 	  ("r" "paper notes" plain "%?"
-	   :if-new (file+head "${citekey}.org" "#+title: ${title}\n#+ROAM_KEY: ${ref}\n#+author: xunsong\n#+date: %<%Y-%m-%d>\n#+CREATED: %U\n#+LAST_MODIFIED: %U\n#+startup: inlineimages\n\n* Motivation\n\n* Method\n\n* Comment\n\n* Ref\n")
-	   :unnarrowed t)
-	  ))
+	   :if-new (file+head "${citekey}.org" "#+title: ${title}\n#+author: xunsong\n#+date: %<%Y-%m-%d>\n#+CREATED: %U\n#+LAST_MODIFIED: %U\n#+startup: inlineimages\n\n")
+	   :unnarrowed t)))
 
 	;; 设置 org-roam-dailies
   (setq org-roam-dailies-directory "daily/")
@@ -557,9 +556,8 @@ will not be modified."
 	   :unnarrowed t)
 	  ("l" "leetcode" plain "%?"
 	   :if-new (file+head "${slug}.org"
-			      "#+title: ${title}\n#+filetags: :leetcode:\n\n* My Solution\n\n* Notes\n")
-	   :unnarrowed t)
-	  ))
+			      "#+title: ${title}\n#+filetags: :leetcode:\n\n* Solution\n\n* Notes\n")
+	   :unnarrowed t)))
 
   (defun my/roam-init-node ()
     "init org-roam headline node"
@@ -647,6 +645,46 @@ will not be modified."
     ;; (message (format "pandoc %s -o %s --reference-doc=%s" (buffer-file-name) docx-file template-file))
     (shell-command (format "pandoc %s -o %s --reference-doc=%s" (buffer-file-name) docx-file template-file))
     (message "Convert finish: %s" docx-file)))
+
+;; export org to html
+(require 'ox-publish)
+(require 'org-roam-export)
+(setq org-publish-project-alist
+      '(
+       ("org-notes"
+	:base-directory "~/Documents/org/org-roam-files/"
+	:base-extension "org"
+	:publishing-directory "~/Documents/org/publish_html/"
+	:recursive t
+	:publishing-function org-html-publish-to-html
+	:headline-levels 4             ; Just the default for this project.
+	:auto-preamble t
+	:auto-sitemap t
+	:sitemap-filename  "sitemap.org"   ; ... 称它为 sitemap.org（它是默认的）... 
+	:sitemap-title  "Sitemap"          ; ...标题为“站点地图”。
+	)
+       ("org-static"
+	:base-directory "~/Documents/org/static/"
+	:base-extension "css\\|js\\|png\\|jpg\\|gif\\|pdf\\|mp3\\|ogg\\|swf"
+	:publishing-directory "~/public_html/"
+	:recursive t
+	:publishing-function org-publish-attachment
+	)
+       ("org" :components ("org-notes" "org-static"))))
+
+(setq org-export-use-babel nil)
+(setq org-export-with-broken-links 'mark)
+(setq org-html-htmlize-output-type 'css)
+(setq org-html-head-include-default-style nil)
+
+(defun toggle-org-html-export-on-save ()
+  (interactive)
+  (if (memq 'org-publish-current-file after-save-hook)
+      (progn
+        (remove-hook 'after-save-hook 'org-publish-current-file t)
+        (message "Disabled org html export on save for current buffer..."))
+    (add-hook 'after-save-hook 'org-publish-current-file nil t)
+    (message "Enabled org html export on save for current buffer...")))
 
 ;; Babel
 (setq org-confirm-babel-evaluate nil
