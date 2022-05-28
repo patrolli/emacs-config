@@ -1,22 +1,13 @@
-(defun lxs/startup-window ()
-  (tool-bar-mode -1)
-  (scroll-bar-mode -1)
-  (global-linum-mode -1)
-  (menu-bar-mode -1) ;; 默认不开启 menu-bar, 只在需要时手动打开
-  (setq initial-frame-alist (quote ((fullscreen . fullboth))))
-  (global-hl-line-mode 1)
-  )
-
 (scroll-bar-mode -1)
 (global-linum-mode -1)
-;; (setq initial-frame-alist (quote ((fullscreen . fullboth))))
 (global-hl-line-mode 1)
-;; (setq inhibit-splash-screen t)
-;; open emacs default full-screen
 
 ;; randomly pick my favourite themes
 ;; ref: https://github.com/redguardtoo/emacs.d/blob/5c0f5702eebc430363d05e058077f65c4d6c2a2d/lisp/init-theme.el#L10
-(defvar my-favourite-color-themes '(doom-gruvbox doom-one-light doom-zenburn modus-operandi doom-dracula)
+(defvar my-favourite-color-themes '(doom-gruvbox doom-one-light doom-zenburn
+						 modus-operandi doom-dracula
+						 doom-material-dark doom-manegarm
+						 doom-peacock)
   "A set of themes randomly picked when eamcs starts up")
 
 (defun random-choice (items)
@@ -34,8 +25,7 @@
 (defun lxs/pick-my-favorite-themes ()
   (interactive)
   (my-pick-random-theme (or my-favourite-color-themes
-			    (custom-available-themes)))
-  )
+			    (custom-available-themes))))
 
 (use-package doom-themes
        :ensure t
@@ -49,15 +39,12 @@
        (call-interactively 'lxs/pick-my-favorite-themes)
        (doom-themes-org-config)
        ;; (doom-themes-neotree-config)
-
      (setq org-src-fontify-natively t)
-
      (with-eval-after-load 'org 
        (custom-theme-set-faces
         'user
         `(org-latex-and-related ((t (:foreground ,(doom-color 'green))))))
-       (setq org-highlight-latex-and-related '(latex script entities)))
-     )
+       (setq org-highlight-latex-and-related '(latex script entities))))
 
 ;; use doom-modeline instead of spaceline
 (use-package doom-modeline
@@ -78,14 +65,6 @@
   :init
   :config
   :functions (all-the-icons-icon-for-buffer))
-
-
-(use-package all-the-icons-ivy
-  :init (add-hook 'after-init-hook 'all-the-icons-ivy-setup)
-  :config
-  (add-to-list 'all-the-icons-ivy-file-commands 'counsel-ibuffer))
-
-
 
 ;; automatically change the theme without be mess up
 (defcustom load-theme-before-hook nil
