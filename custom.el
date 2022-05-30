@@ -5,16 +5,11 @@
  ;; If there is more than one, they won't work right.
  '(TeX-command "tex")
  '(dogears-idle 10)
- '(elfeed-feeds
-   '("http://arxiv.org/rss/cs.CV" "https://oremacs.com/atom.xml" "https://emacs-china.org/latest.rss"
-     ("https://planet.emacslife.com/atom.xml" planet emacslife)
-     ("http://www.masteringemacs.org/feed/" mastering)
-     ("https://oremacs.com/atom.xml" oremacs)
-     ("https://pinecast.com/feed/emacscast" emacscast)
-     ("https://www.reddit.com/r/emacs.rss" reddit)))
  '(hl-sexp-background-color "#efebe9")
  '(org-agenda-files
-   '("/mnt/c/Users/lixun/Documents/org/gtd/next.org" "/mnt/c/Users/lixun/Documents/org/org-roam-files/paper_index.org" "/mnt/c/Users/lixun/Documents/org/gtd/inbox.org" "/mnt/c/Users/lixun/Documents/org/gtd/learning.org" "/mnt/c/Users/lixun/Documents/org/gtd/projects.org" "/mnt/c/Users/lixun/Documents/org/gtd/reading.org" "/mnt/c/Users/lixun/Documents/org/gtd/repeater.org" "/mnt/c/Users/lixun/Documents/org/gtd/review.org" "/mnt/c/Users/lixun/Documents/org/gtd/someday.org" "/mnt/c/Users/lixun/Documents/org/gtd/time-tracking.org" "/mnt/c/Users/lixun/Documents/org/gtd/webclips.org"))
+   '("/home/lixunsong/Documents/org/gtd/inbox.org" "/home/lixunsong/Documents/org/gtd/next.org" "/home/lixunsong/Documents/org/gtd/projects.org" "/home/lixunsong/Documents/org/gtd/review.org"))
+ '(org-clock-watch-auto-clock-out-p t)
+ '(session-use-package t nil (session))
  '(vc-annotate-background "#fafafa")
  '(vc-annotate-background-mode nil)
  '(vc-annotate-color-map
@@ -64,6 +59,7 @@
  '(flycheck-posframe-info-face ((t (:foreground "#50a14f"))))
  '(git-timemachine-minibuffer-author-face ((t (:inherit success))))
  '(git-timemachine-minibuffer-detail-face ((t (:inherit warning))))
+ '(macrostep-expansion-highlight-face ((t (:inherit tooltip :extend t))))
  '(org-latex-and-related ((t (:foreground "#98be65"))))
  '(symbol-overlay-default-face ((t (:inherit (region bold))))))
 

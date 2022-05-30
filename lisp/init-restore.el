@@ -32,7 +32,7 @@
    (setq desktop-file-modtime (file-attribute-modification-time
                                (file-attributes
 				(desktop-full-file-name)))
-         desktop-lazy-verbose t
+         desktop-lazy-verbose nil
          desktop-load-locked-desktop t
          desktop-restore-eager 1
          desktop-restore-frames nil

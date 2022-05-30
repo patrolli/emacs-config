@@ -1,4 +1,5 @@
 (require 'init-funcs)
+
 ;; Dashboard
 (use-package dashboard
   :ensure t
@@ -45,22 +46,9 @@
     "Wether recovers the layout.")
 
   (defun restore-previous-session ()
-      "Restore the previous session."
-      (interactive)
-      (when (bound-and-true-p persp-mode)
-        (restore-session persp-auto-save-fname)))
-
-    (defun restore-session (fname)
-      "Restore the specified session."
-      (interactive (list (read-file-name "Load perspectives from a file: "
-                                         persp-save-dir)))
-      (when (bound-and-true-p persp-mode)
-        (message "Restoring session...")
-        (quit-window t)
-        (condition-case-unless-debug err
-            (persp-load-state-from-file fname) 
-          (error "Error: Unable to restore session -- %s" err))
-        (message "Restoring session...done")))
+    (interactive)
+    (desktop-read)
+    (session-initialize))
 
   (defun dashboard-goto-recent-files ()
     "Go to recent files."

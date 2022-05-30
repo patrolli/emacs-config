@@ -30,12 +30,6 @@
 
 ;;; Code:
 
-;; Directional window-selection routines
-(use-package windmove
-  :disabled t
-  :ensure t
-  :hook (after-init . windmove-default-keybindings))
-
 ;; Restore old window configurations
 (use-package winner
   :ensure nil
@@ -280,7 +274,26 @@
 (use-package eyebrowse
   :ensure t
   :config
-  (eyebrowse-mode))
+  (eyebrowse-mode)
+  (setq eyebrowse-restore-dir (concat user-emacs-directory "eyebrowse-restore"))
+  (defun xs-eyebrowse-save ()
+    (interactive)
+    (let* ((name "default")
+	   (path (concat (file-name-as-directory eyebrowse-restore-dir) name))
+	   (window-configs (eyebrowse--get 'window-configs)))
+      (with-temp-file path
+	(prin1 window-configs (current-buffer)))))
+
+  (defun xs-eyebrowse-load ()
+    (interactive)
+    (let* ((name "default")
+	   (path (concat (file-name-as-directory eyebrowse-restore-dir) name))
+	   )
+      (with-temp-buffer
+        (insert-file-contents path)
+        (eyebrowse--set 'window-configs
+          (read (buffer-string))))))
+  )
 
 ;; from https://gist.github.com/3402786
 (defun toggle-maximize-window ()

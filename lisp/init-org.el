@@ -254,7 +254,7 @@ prepended to the element after the #+HEADER: tag."
 	  ("n" "notes" entry (file+headline ,(concat lxs-home-dir "Documents/" "org/" "org-roam-files/" "quick-notes.org") "Notes")
 	   "* %^{标题}\n%?" :create-id t)
 	  ("s" "code cookbook" entry (file+headline ,(concat lxs-home-dir "Documents/" "org/" "org-roam-files/" "quick-notes.org") "Cookbook")
-	   "* %^{描述}\n%?" :create-prev-id t :jump-to-captured t)
+	   "\n* %^{描述}\n%?" :create-prev-id t :jump-to-captured t)
 	  ("a" "code api" entry (file+headline ,(concat lxs-home-dir "Documents/" "org/" "org-roam-files/" "quick-notes.org") "Api")
 	   "* %?\n%i- Signature: ==\n描述: " :create-id t :jump-to-captured t)
 	  ))
@@ -505,7 +505,7 @@ will not be modified."
   :config
   (org-roam-setup)
   ;; (setq org-roam-node-display-template "${my-tags}${filetitle}${title:*}")
-  (setq org-roam-node-display-template "${my-tags}${title:*}")
+  (setq org-roam-node-display-template "${my-tags}${title:80}")
 
   (cl-defmethod org-roam-node-filetitle ((node org-roam-node))
     "Return the file TITLE for the node."
@@ -526,7 +526,7 @@ will not be modified."
   (setq org-roam-capture-templates
         '(("d" "default" plain "%?"
            :if-new (file+head "${slug}.org"
-            "#+title: ${title}\n#+date: %<%Y-%m-%d>\n#+CREATED: %U\n#+LAST_MODIFIED: %U\n#+roam_alias: \n#+startup: inlineimages latexpreview\n#+author: xunsong\n")
+            "#+title: ${title}\n#+filetags: :refile:\n#+date: %<%Y-%m-%d>\n#+CREATED: %U\n#+LAST_MODIFIED: %U\n#+roam_alias: \n#+startup: inlineimages latexpreview\n#+author: xunsong\n")
            :unnarrowed t)
           ("p" "private" plain
            "%?"
@@ -534,7 +534,7 @@ will not be modified."
            :head "#+title: ${title}\n"
            :unnarrowed t)
 	  ("r" "paper notes" plain "%?"
-	   :if-new (file+head "${citekey}.org" "#+title: ${title}\n#+author: xunsong\n#+date: %<%Y-%m-%d>\n#+CREATED: %U\n#+LAST_MODIFIED: %U\n#+startup: inlineimages\n\n")
+	   :if-new (file+head "${citekey}.org" "#+title: ${title}\n#+filetags: :refile:\n#+author: xunsong\n#+date: %<%Y-%m-%d>\n#+CREATED: %U\n#+LAST_MODIFIED: %U\n#+startup: inlineimages\n\n")
 	   :unnarrowed t)))
 
 	;; 设置 org-roam-dailies
@@ -556,7 +556,7 @@ will not be modified."
 	   :unnarrowed t)
 	  ("l" "leetcode" plain "%?"
 	   :if-new (file+head "${slug}.org"
-			      "#+title: ${title}\n#+filetags: :leetcode:\n\n* Solution\n\n* Notes\n")
+			      "#+title: ${title}\n#+filetags: :leetcode:refile:\n\n* Solution\n\n")
 	   :unnarrowed t)))
 
   (defun my/roam-init-node ()
@@ -625,9 +625,12 @@ will not be modified."
       )
     ;;
     (defun bibtex-completion-insert-headline (keys)
-      (let* ((entry (bibtex-completion-get-entry (car keys)))
+      (let* ((key (car keys))
+	     (venue (nth 1 (split-string key "-")))
+	     (year (substring (nth 2 (split-string key "-")) 2))
+	     (entry (bibtex-completion-get-entry key))
 	     (title (funcall orb-bibtex-entry-get-value-function "title" entry)))
-	(insert title)
+	(insert (format "%s (%s'%s)" title venue year))
 	)
       )
     (ivy-bibtex-ivify-action bibtex-completion-create-roam-headline ivy-bibtex-create-headline)
@@ -789,6 +792,47 @@ will not be modified."
 
 ;; save edicted org files every one hour
 (run-at-time "00:59" 3600 'org-save-all-org-buffers)
+
+;; org-sidebar
+(use-package org-sidebar
+  :config
+  (setq org-sidebar-tree-jump-fn #'org-sidebar-tree-jump-source))
+
+
+(cl-defun org-sidebar-tree-jump-source (&key children)
+  "Jump to the heading at point in its source buffer.
+If CHILDREN is non-nil (interactively, with prefix), also expand
+child entries.  Should be called from a tree-view buffer."
+  (interactive "P")
+  (unless (buffer-base-buffer)
+    (error "Must be in a tree buffer"))
+  (let* ((pos (point))
+         (base-buffer (buffer-base-buffer))
+         (window (get-buffer-window base-buffer)))
+    (if window
+        (progn
+          (select-window window)
+          (switch-to-buffer base-buffer))
+      (pop-to-buffer base-buffer
+                     (cons 'display-buffer-use-some-window
+                           (list (cons 'inhibit-same-window t)))))
+    (widen)
+    (goto-char pos)
+    (org-show-entry)
+    (org-show-children)
+    (when children
+      (org-show-subtree))
+    (org-narrow-to-subtree)))
+
+(defun xs-toggle-gtd-sidebar ()
+  (interactive)
+  (let* ((buf (find-file-noselect "~/Documents/org/gtd/next.org")))
+    (with-current-buffer buf
+      (if (buffer-narrowed-p)
+	    (narrow-to-region 1 (1+ (buffer-size))))
+      (switch-to-buffer buf)
+      (org-sidebar-tree-toggle))))
+(global-set-key (kbd "<f5>") #'xs-toggle-gtd-sidebar)
 
 (server-start)
 

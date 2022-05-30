@@ -23,15 +23,6 @@
     (vterm (concat "*vterm-" command "*")))
   )))
 
-(use-package shell-pop
-  :disabled t
-  :init (setq shell-pop-window-size 30
-              shell-pop-shell-type
-              (cond ((fboundp 'vterm) '("vterm" "*vterm*"  #'vterm))
-                    (sys/win32p '("eshell" "*eshell*" #'eshell))
-                    (t '("terminal" "*terminal*"
-                         (lambda () (term shell-pop-term-shell)))))))
-
 ;; HACK: 直接用 vterm-toggle 似乎有一些兼容性的问题，但用了它的两个函数来切换 vterm buffer
 (use-package vterm-toggle
   :bind

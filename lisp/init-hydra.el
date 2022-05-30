@@ -2,6 +2,23 @@
 (require 'xah-utils)
 (require 'personal)
 
+(use-package pretty-hydra
+  :init
+  (cl-defun pretty-hydra-title (title &optional icon-type icon-name
+                                      &key face height v-adjust)
+    "Add an icon in the hydra title."
+    (let ((face (or face `(:foreground ,(face-background 'highlight))))
+          (height (or height 1.0))
+          (v-adjust (or v-adjust 0.0)))
+      (concat
+       (when (and (icons-displayable-p) icon-type icon-name)
+         (let ((f (intern (format "all-the-icons-%s" icon-type))))
+           (when (fboundp f)
+             (concat
+              (apply f (list icon-name :face face :height height :v-adjust v-adjust))
+              " "))))
+       (propertize title 'face face)))))
+
 (defun hydra-indicator-f (&optional state bcolor)
   (cond
 	((string-equal bcolor "red") (propertize state
@@ -90,20 +107,6 @@ Version 2016-06-19"
 (defun hydra-insert-state-cursor()
   (setq-default cursor-type 'bar)
   (set-cursor-color "red"))
-
-(defun xah-user-buffer-q ()
-  "Return t if current buffer is a user buffer, else nil.
-Typically, if buffer name starts with *, it's not considered a user buffer.
-This function is used by buffer switching command and close buffer command, so that next buffer shown is a user buffer.
-You can override this function to get your idea of “user buffer”.
-version 2016-06-18"
-  (interactive)
-  (if (string-equal "*" (substring (buffer-name) 0 1))
-      nil
-    (if (string-equal major-mode "dired-mode")
-        nil
-      t
-      )))
 
 (defun joe-scroll-other-window()
   (interactive)
@@ -232,7 +235,7 @@ version 2016-06-18"
   (";r" counsel-rg)
   ("zj" xah-open-file-fast)
   ;; ("zl" counsel-bookmark)
-  ("zh" (lambda () (interactive) (hydra--set-bookmark (read-from-minibuffer "Name:"))))
+  ("zh" (lambda () (interactive) (xs-set-bookmark (read-from-minibuffer "Name:"))))
 
   (";d" dired-jump)
   ;; (";j" persp-prev)

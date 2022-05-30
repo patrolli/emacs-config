@@ -1,85 +1,3 @@
-;; scratch buffer 的代码有用的一定要记得保存，不然就找不回来了
-
-(defun lxs-copy-contents-under-headline ()
-  (save-excursion
-    (org-back-to-heading)
-    ;; (forward-line)
-    (unless (= (point) (point-max))
-      (let ((b (point))
-            (e (or (outline-next-heading) (point-max))))
-	(buffer-substring-no-properties b e))))
-  )
-
-(defun lxs/org-refile-headline-by-tag ()
-  (interactive)  
-  (save-excursion
-  (let ((tags (org-get-tags nil t))
-	(headline  (nth 4 (org-heading-components)))
-	(contents (lxs-copy-contents-under-headline))
-	remove-flag)
-    ;; if the headline has no tag and being under "Un-archieve"
-    (when (and (eq 0 (length tags))  (progn
-				       (save-excursion
-				       (outline-up-heading 1)
-				       (string-equal "Un-archieve" (nth 4 (org-heading-components))))))
-      (org-cut-subtree))
-    ;; process each tag
-    (while tags
-	(let* ((tag (nth 0 tags))
-	      (remove-flag nil))
-	  (save-excursion
-	    ;; if exist the level-1 headline of this tag
-	    ;;;; narrow region to search the title under this tag headline
-	    ;;;;;; if title exist
-	    ;;;;;;;; prepare for remove the tag of current entry (set remove-flag)
-	    ;;;;;; else
-	    ;;;;;;;; insert this title under the tag headline
-	    ;; else
-	    ;;;; insert this new tag headline
-	    ;;;; insert title under this new headline
-	    ;; if remove-tag
-	    ;;;; remove tag for current entry
-	  (if (org-ql-select (buffer-name)
-		`(and (level 1) (heading ,tag)))
-	      (progn
-		(let ((start (re-search-forward (concat "^* " tag "\n") nil t))
-		      (end (re-search-forward "^* .*\n" nil t)))
-		  (save-restriction
-		    (setq start (if start start 1))
-		    (setq end (if end end (point-max)))
-		    (narrow-to-region start end)
-		    (goto-char (point-min))
-		    (if (re-search-forward (format "^** %s" (regexp-quote headline)) nil t) ;; no such titles under this tag headline
-			;; remove the tag of current entry headline
-			(progn
-			  (setq remove-flag t)
-			  )
-		      (progn
-			(goto-char (point-max))
-			(forward-line -1)
-			;; (insert (format "** %s\n" headline))
-			(insert contents)
-			)
-		      )
-		    )
-		  ))
-	    (progn
-	      (end-of-buffer)
-	      (forward-line)
-	      (insert (format "* %s\n" tag))
-	      (forward-line 2)
-	      ;; (insert (format "** %s\n" headline))
-	      (insert contents)
-	      )
-	    )
-	  )
-	  (if remove-flag
-	      (org-toggle-tag tag 'off))
-	)
-	(setq tags (cdr tags))
-	)
-    )))
-
 (defun toggle-window-dedicated ()
   "Toggle whether the current active window is dedicated or not"
   (interactive)
@@ -171,7 +89,6 @@
      (when hugo-url
        (browse-url hugo-url))))
 
-
 ;; call windows exe to open file
 (defmacro wsl--open-with (id &optional app dir)
   `(defun ,(intern (format "wsl/%s" id)) ()
@@ -201,7 +118,16 @@
 
 (defun reveal-in-explorer ()
   (interactive)
-    (shell-command (format "thunar %s" default-directory)))
+  (shell-command (format "thunar %s" default-directory)))
+
+(defun browse-html-of-org-buffer ()
+  (interactive)
+  (let* ((html-dir-path (file-name-concat "/home/lixunsong" "Documents" "org" "publish_html"))
+	 (bn (file-name-base (buffer-name (current-buffer))))
+	 (html-path (file-name-concat html-dir-path (concat bn ".html"))))
+    (if (eq (buffer-local-value 'major-mode (current-buffer)) 'org-mode)
+	(org-publish-current-file))
+    (browse-url-of-file html-path)))
 
 (defun my-delete-whole-line ()
   "Delete text from current position to end of line char.
@@ -262,7 +188,6 @@ This command does not push text to `kill-ring'."
     )
   )
 
-
 ;; quick insert timestamp in texts
 (defvar current-date-time-format "%a %b %d %H:%M:%S %Z %Y"
   "Format of date to insert with `insert-current-date-time' func
@@ -290,24 +215,26 @@ Uses `current-date-time-format' for the formatting the date/time."
 (defun lxs/insert-current-date-time ()
   "insert the current date and time into current buffer.
 Uses `current-date-time-format' for the formatting the date/time."
-       (interactive)
-;       (insert (let () (comment-start)))
-       (insert (format-time-string current-date-time-format (current-time)))
-       (insert "\n")
-       )
+  (interactive)
+  (insert (let () (or comment-start "")))
+  (insert (concat "[" (format-time-string current-date-time-format (current-time))) "]"))
 
 
 (defun lxs/insert-current-time ()
   "insert the current time (1-week scope) into the current buffer."
-       (interactive)
-       (insert (format-time-string current-time-format (current-time)))
-       (insert "\n")
-       )
+  (interactive)
+  (insert (format-time-string current-time-format (current-time)))
+  (insert "\n"))
 
 (defun lxs/insert-current-date ()
   "insert the current time (1-week scope) into the current buffer."
        (interactive)
        (insert (format-time-string current-date-format (current-time)))
        (insert "\n"))
+
+(defun xs-set-bookmark (&optional name)
+  (interactive)
+  (let ((filename (or name (format "%s:%s" (buffer-name) (line-number-at-pos)))))
+    (bookmark-set filename)))
 
 (provide 'personal)

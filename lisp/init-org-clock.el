@@ -26,14 +26,27 @@
       (message "org clock idle watch started")
     (message "org clock idle watch stopped")))
 
-(xs-org-clock-idle-watch-toggle)
+(defun xs-org-clock-idle-watch-on ()
+  (if (and (not xs-org-clock-idle-watch-timer) (featurep 'org-clock))
+    (progn (setq xs-org-clock-idle-watch-timer (run-with-timer 5 1 'xs-org-clock-idle-watch))
+	   (message "org clock idle watch started"))))
 
+;; 把它放到 org-mode-hook 下
+(add-hook 'org-clock-in-hook #'xs-org-clock-idle-watch-on)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 					;           list doing tasks          ;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;; org-ql-select 在定义自己的 action function 的时候
 ;; 似乎还有一些问题，现在只能写成 lambda 的形式
+
+(defun xs-get-entry-marker (&optional pos buffer)
+  "Return the entry marker."
+  (let ((m (move-marker (make-marker)
+			(or pos (point)) (org-base-buffer
+					  (or buffer (current-buffer))))))
+    m))
+
 (defun xs-list-doing-tasks ()
   "get a list of DOING state entries
 return their headline and marker position"
@@ -44,13 +57,6 @@ return their headline and marker position"
 						 (marker (xs-get-entry-marker)))
 					    (cons heading marker)))))))
     headings))
-
-(defun xs-get-entry-marker (&optional pos buffer)
-  "Return the entry marker."
-  (let ((m (move-marker (make-marker)
-			(or pos (point)) (org-base-buffer
-					  (or buffer (current-buffer))))))
-    m))
 
 (defun xs-clock-in-doing-tasks ()
   (interactive)

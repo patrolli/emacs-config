@@ -1,13 +1,5 @@
-;; (electric-indent-mode 1)
-;;set open recent files
-
-;; (require 'recentf)
-;; (recentf-mode 1)
-;; (setq recentf-max-menu-item 10)
-
-
 (fset 'yes-or-no-p 'y-or-n-p)
-
+(setq make-backup-files nil)
 
 ;; 加载指定路径下的所有 .org 文件
 (defun my/load-org () (interactive)
@@ -99,23 +91,15 @@
 
 (global-auto-revert-mode t)
 
-;; TODO: 递归地 sort 
-(defun my/org-sort-by-prio ()
-  (interactive)
-  (org-sort-entries t ?p)
-  (org-sort-entries t ?o))
-
-
 (use-package watch-other-window
   :load-path "watch-other-window/"
+  :disabled t
   :bind
   (:map prog-mode-map
 	("M-n" . watch-other-window-up-line)
 	("M-p" . watch-other-window-down-line)
 	("M-o n" . watch-other-window-up)
-	("M-o p" . watch-other-window-down)
-	)
-  )
+	("M-o p" . watch-other-window-down)))
 
 ;; 跳转光标
 (defun xah-pop-local-mark-ring ()

@@ -37,10 +37,6 @@
   (setq imenu-list-focus-after-activation t)
   )
 
-;; (use-package iedit
-  ;; :hook (prog-mode . iedit-mode)
-  ;; :ensure t)
-
 (use-package rainbow-mode
   :ensure t
   :config
@@ -203,4 +199,10 @@
                             ".*\\(Email:\\)\\(.*\\)"
                             "youemail@gmail.com" 7)
 (add-hook 'before-save-hook 'maple/header-update-filename)
+
+;; jump between marker's position
+(use-package backward-forward
+  :config
+  (backward-forward-mode))
+
 (provide 'init-edit)

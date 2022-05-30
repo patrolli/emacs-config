@@ -1,3 +1,5 @@
+;; -*- lexical-binding: t -*-
+
 ;; (defun company-citre (-command &optional -arg &rest _ignored)
 ;;   "Completion backend of for citre.  Execute COMMAND with ARG and IGNORED."
 ;;   (interactive (list 'interactive))
@@ -103,20 +105,20 @@ window size"
   (interactive)
   ;; 读入一个 video id
   (let* ((video-id (read-from-minibuffer "输入 video 的 id:\n" nil nil))
-	 (video-fpath (format "/mnt/c/Users/lixun/Downloads/20bn-something-something-v2/%s.webm" video-id))
+	 (video-fpath (format "/run/media/lixunsong/Elements SE/20bn-something-something-v2/20bn-something-something-v2/%s.webm" video-id))
 	 (target-path (concat "~/Documents/sth-demos/" video-id "/"))
 	 (target-video-path (concat target-path video-id ".webm")))
     (if (not (f-directory-p target-path))
-	(make-directory target-path nil)
-      )
+	(make-directory target-path nil))
     (if (not (f-exists-p target-video-path))
 	(progn (message target-video-path)
 	       (copy-file video-fpath target-video-path))
-      (message "视频已经在路径中")
-      )
+      (message "视频已经在路径中"))
     (shell-command (format "ffmpeg -i %s %sframe_%%d.jpg" target-video-path target-path))
-    (message "转换完成")
-    ))
+    (message "转换完成")))
+
+(f-exists? "/run/media/lixunsong/Elements SE/")
+(f-exists? (format "/run/media/lixunsong/Elements SE/20bn-something-something-v2/20bn-something-something-v2/%s.webm" 99999))
 
 (defun ffmpeg-convert-webm-to-gif ()
   (interactive)
@@ -172,7 +174,7 @@ clock                             ^^^^effort             ^^watcher
 
 (replace-regexp-in-string "\\\(<\\\|>\\\|-\\\)" "_" "<untitled-1>")
 
-(use-package org-sidebar)
+
 
 (defun my/roam-init-node ()
   "init org-roam headline node"
@@ -250,67 +252,6 @@ clock                             ^^^^effort             ^^watcher
                 (let ((shr-use-fonts nil))
                   (apply fun r))))
 
-(setq org-roam-node-display-template "${my-tag}${filetitle}${olp}${title}")
-
-(defun org-roam-node--format-entry (node width)
-    "Formats NODE for display in the results list.
-WIDTH is the width of the results list.
-Uses `org-roam-node-display-template' to format the entry."
-    (let ((fmt (org-roam--process-display-format org-roam-node-display-template)))
-      (org-roam-format
-       (car fmt)
-       (lambda (field)
-         (let* ((field (split-string field ":"))
-                (field-name (car field))
-                (field-width (cadr field))
-                (getter (intern (concat "org-roam-node-" field-name)))
-                (field-value (or (funcall getter node) "")))
-           (when (and (equal field-name "tags")
-                      field-value)
-             (setq field-value (org-roam--tags-to-str field-value)))
-           (when (and (equal field-name "file")
-                      field-value)
-             (setq field-value (file-relative-name field-value org-roam-directory)))
-           (when (and (equal field-name "olp")
-                      field-value)
-             (setq field-value (if (> (length field-value) 0)
-                                   (format "%s > " (string-join field-value " > "))
-                                 "")))
-           (if (not field-width)
-               field-value
-             (setq field-width (string-to-number field-width))
-             (truncate-string-to-width
-              field-value
-              (if (> field-width 0)
-                  field-width
-                (- width (cdr fmt)))
-              0 ?\s)))))))
-
-(defun org-roam--tags-to-str (tags)
-  "Convert list of TAGS into a string."
-  (if (> (length tags) 0)
-      (format "(%s) " (mapconcat (lambda (s) (concat "" s)) tags ","))
-    ""))
-
-(cl-defmethod org-roam-node-filetitle ((node org-roam-node))
-  "Return the file TITLE for the node."
-  (let ((filetitle (org-roam-get-keyword "TITLE" (org-roam-node-file node)))
-        (title (org-roam-node-title node)))
-    (if (string= filetitle title)
-        ""
-      (format "%s > " filetitle))))
-
-(cl-defmethod org-roam-node-backlinkscount ((node org-roam-node))
-  (let* ((count (caar (org-roam-db-query
-                       [:select (funcall count source)
-                                :from links
-                                :where (= dest $s1)
-                                :and (= type "id")]
-                       (org-roam-node-id node)))))
-    (format "[%d]" count)))
-
-(setq org-roam-node-display-template "${my-tag}${filetitle}${olp}${title}")
-
 ;; 将 bibtex 文件的 entry 中的 keyword 值，同步到 org-roam 的 filetags 里面
 (defun bu-make-field-keywords (&optional arg)
   "Make a keywords field.
@@ -365,17 +306,8 @@ the body of this command."
 
 (defun my/test ()
   (interactive)
-  ;; 如果当前行不是 begin_src 行，那么向后查找到这行
-  ;; 否则，直接执行 toggle 操作
-  (save-excursion
-    (beginning-of-line)
-    (if (looking-at "#\\+begin_src")
-	(progn
-	  (message "在 begin_src 行")
-	  (org-hide-block-toggle)
-	  )
-      (re-search-backward "#\\+begin_src")
-      (org-hide-block-toggle))))
+  (with-output-to-temp-buffer "*lxs*"
+    (print  (org-in-src-block-p))))
 
 (defun lxs-parse-bib-keywords (cite-key)
   (with-temp-buffer
@@ -486,14 +418,6 @@ Org-mode properties drawer already, keep the headline and don’t insert
   (re-search-forward "CLOCK: \\[[^]]*\\] *$")
   )
 
-(use-package sort-tab
-  :load-path "~/.emacs.d/site-lisp/sort-tab"
-  :config
-  (sort-tab-mode 1))
-
-(add-to-list 'load-path "~/.emacs.d/site-lisp/org-roam-ui")
-(load-library "org-roam-ui")
-
 ;; 将 wsl 的文件前缀转成 windows 的文件前缀
 ;; 例如: /mnt/c/Users/lixun/Documents -> C:\\Users\\lixun\\Documents
 (defun lxs/convert-wsl-prefix-path ()
@@ -507,81 +431,11 @@ Org-mode properties drawer already, keep the headline and don’t insert
 	     (win-prefix "C:\\\\Users\\\\lixun\\\\")
 	     (win-fpath (replace-regexp-in-string wsl-prefix win-prefix fpath)))
 	(end-of-line)
-	(insert (format "\n%s" (replace-regexp-in-string "/" "\\\\" win-fpath)))
-	)
-      )
-    )
-  )
+	(insert (format "\n%s" (replace-regexp-in-string "/" "\\\\" win-fpath)))))))
 
-;; 运行 hugo 文件夹下面的 deploy.sh, 发布博客
-;; 把 easy-hugo 的 `easy-hugo-github-deploy' 拿过来改的
-(defun lxs/deploy-hugo ()
-  (interactive)
-  (let* ((hugo-url "https://patrolli.github.io/xssq/")
-	 (github-deploy-script "deploy.sh")
-	 (hugo-base-dir "/mnt/c/Users/lixun/Documents/xssq-blog/")
-	 (default-directory hugo-basedir)
-	 (deployscript (file-truename (expand-file-name
-				       github-deploy-script
-				       hugo-base-dir))))
-    (print deployscript)
-    (unless (executable-find deployscript)
-      (error "%s do not execute" deployscript))
-    (let ((ret (call-process deployscript nil "*hugo-github-deploy*" t)))
-       (unless (zerop ret)
-	 (switch-to-buffer (get-buffer "*hugo-github-deploy*"))
-	 (error "%s command does not end normally" deployscript)))
-     ;; (when (get-buffer "*hugo-github-deploy*")
-       ;; (kill-buffer "*hugo-github-deploy*"))
-     (message "Blog deployed")
-     (when hugo-url
-       (browse-url hugo-url))
-    ))
-
-(use-package grammatical-edit
-  :load-path "~/.emacs.d/site-lisp/grammatical-edit"
-  :config
-  (dolist (hook (list
-               'c-mode-common-hook
-               'c-mode-hook
-               'c++-mode-hook
-               'java-mode-hook
-               'emacs-lisp-mode-hook
-               'lisp-interaction-mode-hook
-               'lisp-mode-hook
-               'python-mode-hook
-               ))
-    (add-hook hook '(lambda () (grammatical-edit-mode 1))))
-
-  (define-key grammatical-edit-mode-map (kbd "(") 'grammatical-edit-open-round)
-  (define-key grammatical-edit-mode-map (kbd "[") 'grammatical-edit-open-bracket)
-  (define-key grammatical-edit-mode-map (kbd "{") 'grammatical-edit-open-curly)
-  (define-key grammatical-edit-mode-map (kbd ")") 'grammatical-edit-close-round)
-  (define-key grammatical-edit-mode-map (kbd "]") 'grammatical-edit-close-bracket)
-  (define-key grammatical-edit-mode-map (kbd "}") 'grammatical-edit-close-curly)
-  (define-key grammatical-edit-mode-map (kbd "=") 'grammatical-edit-equal)
-
-  (define-key grammatical-edit-mode-map (kbd "%") 'grammatical-edit-match-paren)
-  (define-key grammatical-edit-mode-map (kbd "\"") 'grammatical-edit-double-quote)
- 
-  (define-key grammatical-edit-mode-map (kbd "SPC") 'grammatical-edit-space)
-  (define-key grammatical-edit-mode-map (kbd "RET") 'grammatical-edit-newline)
-
-  (define-key grammatical-edit-mode-map (kbd "M-o") 'grammatical-edit-backward-delete)
-  (define-key grammatical-edit-mode-map (kbd "C-d") 'grammatical-edit-forward-delete)
-  (define-key grammatical-edit-mode-map (kbd "C-k") 'grammatical-edit-kill)
-
-  (define-key grammatical-edit-mode-map (kbd "M-\"") 'grammatical-edit-wrap-double-quote)
-  (define-key grammatical-edit-mode-map (kbd "M-[") 'grammatical-edit-wrap-bracket)
-  (define-key grammatical-edit-mode-map (kbd "M-{") 'grammatical-edit-wrap-curly)
-  (define-key grammatical-edit-mode-map (kbd "M-(") 'grammatical-edit-wrap-round)
-  (define-key grammatical-edit-mode-map (kbd "M-)") 'grammatical-edit-unwrap)
-
-  (define-key grammatical-edit-mode-map (kbd "M-p") 'grammatical-edit-jump-right)
-  (define-key grammatical-edit-mode-map (kbd "M-n") 'grammatical-edit-jump-left)
-  (define-key grammatical-edit-mode-map (kbd "M-:") 'grammatical-edit-jump-out-pair-and-newline)
-  )
-
+					; dogears ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(use-package dogears
+  :ensure t)
 
 ;; custom dogears with counsel completing backend
 (defun counsel-dogears ()
@@ -599,7 +453,7 @@ Org-mode properties drawer already, keep the headline and don’t insert
   ;; (ivy-read "Complete roam tags: "
 	    ;; (org-roam-tag-completions)
 	    ;; )
-  ;; :action 
+  ;; :action
   ;; )
 
 (defun lxs/org-roam-tag-add (tags)
@@ -618,7 +472,6 @@ Org-mode properties drawer already, keep the headline and don’t insert
         (org-set-tags (seq-uniq (append tags (org-get-tags)))))
       tags)))
 
-
 (defun my/test ()
   (interactive)
   (with-output-to-temp-buffer "*lxs*"
@@ -635,7 +488,7 @@ Org-mode properties drawer already, keep the headline and don’t insert
   )
 
 (use-package taxy
-  :load-path "~/.emacs.d/site-lisp/")
+  :load-path "site-lisp/taxy")
 
 (require 'taxy)
 
@@ -695,41 +548,807 @@ Org-mode properties drawer already, keep the headline and don’t insert
       (taxy (taxy-emptied numbery)))
   (taxy-plain (taxy-fill (reverse numbers) taxy)))
 
-(use-package eglot
+ ;; At this point the desktop.el hook in after-init-hook was
+  ;; executed, so (desktop-read) is avoided.
+  (when (not (eq (emacs-pid) (desktop-owner))) ; Check that emacs did not load a desktop yet
+    ;; Here we activate the desktop mode
+    (desktop-save-mode 1)
+
+    ;; The default desktop is saved always
+    (setq desktop-save t)
+
+    ;; The default desktop is loaded anyway if it is locked
+    (setq desktop-load-locked-desktop t)
+
+    ;; Set the location to save/load default desktop
+    (setq desktop-dirname user-emacs-directory)
+
+    ;; Make sure that even if emacs or OS crashed, emacs
+    ;; still have last opened files.
+    ;; (add-hook 'find-file-hook
+     ;; (lambda ()
+       ;; (run-with-timer 5 nil
+          ;; (lambda ()
+            ;; Reset desktop modification time so the user is not bothered
+            ;; (setq desktop-file-modtime (nth 5 (file-attributes (desktop-full-file-name))))
+            ;; (desktop-save user-emacs-directory)))))
+
+    ;; Read default desktop
+    (if (file-exists-p (concat desktop-dirname desktop-base-file-name))
+        (desktop-read desktop-dirname))
+
+    ;; Add a hook when emacs is closed to we reset the desktop
+    ;; modification time (in this way the user does not get a warning
+    ;; message about desktop modifications)
+    (add-hook 'kill-emacs-hook
+              (lambda ()
+                ;; Reset desktop modification time so the user is not bothered
+                (setq desktop-file-modtime (nth 5 (file-attributes (desktop-full-file-name))))))
+    )
+
+(use-package helpful
+  :commands (helpful-callable
+             helpful-variable
+             helpful-key
+             helpful-at-point)
+  :config
+  (setq helpful-max-buffers 5)
+  ;; don't pop new window
+  (setq helpful-switch-buffer-function
+        (lambda (buf) (if-let ((window (display-buffer-reuse-mode-window buf '((mode . helpful-mode)))))
+                          ;; ensure the helpful window is selected for `helpful-update'.
+                          (select-window window)
+                        ;; line above returns nil if no available window is found
+                        (pop-to-buffer buf))))
+  (defvar moon-helpful-history () "History of helpful, a list of buffers.")
+  (advice-add #'helpful-update :around #'moon-helpful@helpful-update)
+  (advice-add #'helpful--buffer :around (lambda (oldfunc &rest _)
+                                          (let ((buf (apply oldfunc _)))
+                                            (push buf moon-helpful-history)
+                                            buf))))
+
+(defun moon-helpful@helpful-update (oldfunc)
+  "Insert back/forward buttons."
+  (funcall oldfunc)
+  (let ((inhibit-read-only t))
+    (goto-char (point-min))
+    (insert-text-button "Back"
+                        'action (lambda (&rest _)
+                                  (interactive)
+                                  (lxs-helpful-cycle-buffer (current-buffer) 1)))
+    (insert " / ")
+    (insert-text-button "Forward"
+                        'action (lambda (&rest _)
+                                  (interactive)
+                                  (lxs-helpful-cycle-buffer (current-buffer)  -1)))
+    (insert "\n\n")))
+;; 这里没有必要自己维护一个 helpful buffer 的历史，只需要 cycle
+;; helpful buffer 就可以了。
+
+(defvar lxs-helpful-cur-bufs nil
+  "记录当前有哪些 helpful buffers")
+
+(defun lxs-helpful-cycle-buffer (buffer &optional offset)
+  (interactive)
+  (let* ((buffers (or lxs-helpful-cur-bufs (buffer-list)))
+	 (helpful-bufs (--filter (with-current-buffer it
+                                   (eq major-mode 'helpful-mode))
+				 buffers))
+	 (idx (+ (or offset 0) (-elem-index buffer helpful-bufs)))
+	 )
+    (setq lxs-helpful-cur-bufs helpful-bufs)
+    (if (< idx 0)
+	(switch-to-buffer (nth (+ idx helpful-max-buffers) helpful-bufs))
+      (switch-to-buffer (nth idx helpful-bufs))
+      )
+    )
+  )
+
+(setq tab-bar-border nil
+      tab-bar-close-button nil
+      tab-bar-back-button nil
+      tab-bar-new-button nil
+      tab-bar-format '(tab-bar-format-tabs +tab-bar-right)
+      tab-bar-tab-name-format-function '+tab-bar-tab-format-function)
+
+(defun +tab-bar-right ()
+  (let* ((p (cdr (project-current)))
+         (vc (+vc-branch-name))
+         (w (string-width (concat p " " vc))))
+    (concat (propertize " " 'display `((space :align-to (- (+ right right-fringe right-margin) ,w 1))))
+            p
+            " "
+            vc)))
+
+(defun +tab-bar-switch-project ()
+  "Switch to project in a new tab, project name will be used as tab name.
+No tab will created if the command is cancelled."
+  (interactive)
+  (let (succ)
+    (unwind-protect
+        (progn
+          (tab-bar-new-tab)
+          (call-interactively #'project-switch-project)
+          (when-let ((proj (project-current)))
+            (tab-bar-rename-tab (format "%s" (file-name-nondirectory (directory-file-name (cdr proj)))))
+            (setq succ t)))
+      (unless succ
+        (tab-bar-close-tab)))))
+
+(defun +tab-bar-tab-format-function (tab i)
+  (let ((current-p (eq (car tab) 'current-tab)))
+    (concat
+     (propertize (concat
+                  " "
+                  (alist-get 'name tab)
+                  " ")
+                 'face
+                 (funcall tab-bar-tab-face-function tab))
+     " ")))
+
+(tab-bar-mode 1)
+(org-time-since '(25014 61524 800003 174000))
+(org-time-since 174000)
+(time-since 174000)
+(time-subtract nil 25014)
+
+(setq ivy-dispatching-done-hydra-exit-keys '(("M-o" hydra-pop "back")
+ ("C-g" hydra-pop)))
+
+(require 'tab-line)
+
+;; 指定函数返回一个 list 的 tabs
+;; 要么是 buffer 的 list, 要么是要显示的 string 的 list
+tab-line-tabs-function
+
+(let ((group (toki-tabs/buffer-group))
+      bufs
+      collection)
+  (dolist (b (buffer-list))
+    (when (equal (toki-tabs/buffer-group b) group)
+      (push b bufs)))
+  bufs
+  )
+
+(buffer-local-value 'toki-tabs/buffer-group (get-buffer"*Completions*"))
+(car (buffer-list))
+
+(aref (buffer-name (get-buffer"*Completions*")) 0)
+
+(project-current (get-buffer"*Completions*"))
+
+(with-current-buffer "*Completions*"
+  (setq toki-tabs/buffer-group
+                              (funcall toki-tabs-project-root-function)))
+
+;; 用 taxy 给 org-roam 的 tag 进行分类展示
+(require 'taxy)
+(use-package taxy-magit-section
+  :load-path "site-lisp/taxy")
+
+(defun buffery-major-mode (buffer)
+  (buffer-local-value 'major-mode buffer))
+
+(defvar buffery
+  (make-taxy
+   :name "Buffers"
+   :taxys (list
+           (make-taxy
+            :name "Modes"
+            :take (apply-partially #'taxy-take-keyed (list #'buffery-major-mode))))))
+
+;; Note the use of `taxy-emptied' to avoid mutating the original taxy definition.
+(taxy-plain
+ (taxy-fill (buffer-list)
+            (taxy-emptied buffery)))
+
+;; 使用 make-taxy 来定义一个分类 (taxy)
+(defvar numbery
+  (make-taxy :name "Numbery"
+	     :description "A silly taxonomy of numbers."
+             :predicate #'(lambda (x) (> x 2))
+             :then #'ignore
+    ))
+
+;; taxy-plain 用于渲染显示 taxy 的结果
+;; taxy-fill 接受两个参数，第一个是我们输入的列表，第二个是我们定义的分类
+;; 分类实际上就是作用到了每个列表中的每个元素上
+(taxy-plain
+ (taxy-fill (list 1 2 3 4) (taxy-emptied numbery)))
+
+;; 使用 emacsql 去查找指定 tag 的 node
+(org-roam-db-query [:select [title] :from tags :join nodes :on (= tags:node_id nodes:id) :where (= tag "双指针")])
+
+(setq elfeed-show-entry-switch #'elfeed-display-buffer)
+
+(defun elfeed-display-buffer (buf &optional act)
+  (pop-to-buffer buf)
+  (set-window-text-height (get-buffer-window) (round (* 0.7 (frame-height)))))
+
+(defun elfeed-search-show-entry-pre (&optional lines)
+  "Returns a function to scroll forward or back in the Elfeed
+  search results, displaying entries without switching to them."
+      (lambda (times)
+        (interactive "p")
+        (forward-line (* times (or 1 0)))
+        (recenter)
+        (call-interactively #'elfeed-search-show-entry)
+        (select-window (previous-window))
+        (unless elfeed-search-remain-on-entry (forward-line -1))))
+
+  (define-key elfeed-search-mode-map (kbd "n") (elfeed-search-show-entry-pre +1))
+  (define-key elfeed-search-mode-map (kbd "p") (elfeed-search-show-entry-pre -1))
+  (define-key elfeed-search-mode-map (kbd "M-RET") (elfeed-search-show-entry-pre))
+
+;; 在阅读 elfeed 的时候，将当前光标之前的 entry 都标记为已读
+;; 直接选择区域从当前光标到最开始的位置，然后调用 `elfeed-search-selected' 获得
+;; 区域中所有的 entry, 然后标记为已读
+(defun elfeed-mark-read-before-cursor ()
+  (interactive)
+  (save-excursion
+    ;; select region
+    (set-mark (point))
+    (goto-char (point-min))
+    (let ((entries (elfeed-search-selected))
+	  (buffer (current-buffer)))
+      (cl-loop for entry in entries
+	       do (elfeed-untag entry 'unread)
+	       )
+      ;; update display buffer
+      (with-current-buffer buffer
+	(mapc #'elfeed-search-update-entry entries))))
+  (forward-line))
+
+;; 设置这个参数，保证 ox-hugo 在导出带 id 的 link 时
+;; 不会出现 unresolve 的问题
+(require 'find-lisp)
+(setq org-id-extra-files (find-lisp-find-files org-roam-directory "\.org$"))
+
+;; (setq ivy-dispatching-done-hydra-exit-keys '(("M-o" '(lambda () (pop hydra-stack)))
+                                             ;; ("C-g" '(lambda () (pop hydra-stack)))))
+
+;; 根据 roam tag 设置 hugo tag
+(defun insert-hugo-tag-from-roam ()
+  (interactive)
+
+  (goto-char (point-min))
+
+  ;; 得到当前 buffer/node 的 tags
+  ;; 这里只是得到了 filetag, 参考 `org-roam-tag-add'
+  (let ((tags (split-string (or (cadr (assoc "FILETAGS"
+					     (org-collect-keywords '("filetags")))) "")
+			    ":" 'omit-nulls))
+	(match (re-search-forward "^#\\+HUGO_TAGS.+$" nil t)))
+    (goto-char match)
+    (message tags))
+  )
+
+;; 这个 slugify 函数有一些问题
+;; 如果题目是 Two Sum II - Input... (167)
+;; 会把 II 中间的两个空格给补成下划线
+;; 而 lc 发送的请求里面是只有中间一个下划线的
+(defun leetcode--slugify-title (title)
+  "Make TITLE a slug title.
+Such as 'Two Sum' will be converted to 'two-sum'."
+  (let* ((str1 (replace-regexp-in-string "\s-\s" "-" (downcase title)))
+	 (str2 (replace-regexp-in-string "\s+" "-" str1))
+         (res (replace-regexp-in-string "[(),]" "" str2)))
+    res))
+
+(leetcode--slugify-title (plist-get (leetcode--get-problem-by-id 167) :title))
+(plist-get (leetcode--get-problem-by-id 167) :title)
+
+(leetcode--fetch-problem "two-sum-ii-input-array-is-sorted")
+
+;; 用 org-ql 来做 org mode 文件的查询接口
+(require 'org-ql)
+(nth 0 (org-ql-query
+  :select #'org-get-heading
+  :from "~/Documents/org/gtd/next.org"
+  :where '(todo "DOING")))
+
+(require 'org-roam-ui)
+
+;; self bootrap quelpa
+;; (unless (package-installed-p 'quelpa)
+  ;; (with-temp-buffer
+    ;; (url-insert-file-contents "https://raw.githubusercontent.com/quelpa/quelpa/master/quelpa.el")
+    ;; (eval-buffer)
+    ;; (quelpa-self-upgrade)))
+
+;; (quelpa
+ ;; '(quelpa-use-package
+   ;; :fetcher git
+   ;; :url "https://github.com/quelpa/quelpa-use-package.git"))
+;; (require 'quelpa-use-package)
+
+;; eyebrowse 是保存每个 frame 的所有 window-configs
+;; xs-eyebrowse-save, 保存当前 frame 的所有 window-configs
+;; xs-eyebrowse-load, 加载一个保存的 window-configs, 或者某一个 slot
+
+;; 将 chrome 的书签同步的 org 文件中
+
+(defvar chrome-bookmarks-file
+  (cl-find-if
+   #'file-exists-p
+   ;; Base on `helm-chrome-file'
+   (list
+    "~/Library/Application Support/Google/Chrome/Profile 1/Bookmarks"
+    "~/Library/Application Support/Google/Chrome/Default/Bookmarks"
+    "~/AppData/Local/Google/Chrome/User Data/Default/Bookmarks"
+    "~/.config/google-chrome/Default/Bookmarks"
+    "~/.config/chromium/Default/Bookmarks"
+    (substitute-in-file-name
+     "$LOCALAPPDATA/Google/Chrome/User Data/Default/Bookmarks")
+    (substitute-in-file-name
+     "$USERPROFILE/Local Settings/Application Data/Google/Chrome/User Data/Default/Bookmarks")))
+  "Path to Google Chrome Bookmarks file (it's JSON).")
+
+(defun chrome-bookmarks-insert-as-org ()
+  "Insert Chrome Bookmarks as org-mode headings."
+  (interactive)
+  (require 'json)
+  (require 'org)
+  (let ((data (let ((json-object-type 'alist)
+                    (json-array-type  'list)
+                    (json-key-type    'symbol)
+                    (json-false       nil)
+                    (json-null        nil))
+                (json-read-file chrome-bookmarks-file)))
+        level)
+    (cl-labels ((fn
+                 (al)
+                 (pcase (alist-get 'type al)
+                   ("folder"
+                    (insert
+                     (format "%s %s\n"
+                             (make-string level ?*)
+                             (alist-get 'name al)))
+                    (cl-incf level)
+                    (mapc #'fn (alist-get 'children al))
+                    (cl-decf level))
+                   ("url"
+                    (insert
+                     (format "%s %s\n"
+                             (make-string level ?*)
+                             (org-make-link-string
+                              (alist-get 'url al)
+                              (alist-get 'name al))))))))
+      (setq level 1)
+      (fn (alist-get 'bookmark_bar (alist-get 'roots data)))
+      (setq level 1)
+      (fn (alist-get 'other (alist-get 'roots data))))))
+
+(orb--new-note "Herzig-iclr-2021-object" '(:keys r))
+
+(defun get-window-mode ()
+  (let* ((windows (window-list-1))
+	 (l '()))
+    (dolist (w windows)
+      (push (format "%s" (buffer-local-value 'major-mode (window-buffer w))) l))
+    (message (mapconcat 'identity l ", "))))
+
+;; (cancel-timer xs-org-clock-idle-watch-timer)
+(setq print-idle-timer (run-with-timer 5 1 'get-window-mode))
+(setq print-idle-timer (run-with-timer 5 1 '(lambda () (message "%s" (window-at-side-p (frame-first-window) 'right)))))
+(setq print-idle-timer (run-with-timer 5 1 '(lambda () (message "%s" (window-in-direction 'right (frame-first-window))))))
+(cancel-timer print-idle-timer)
+
+;; 定义 worf 的 hydra
+(use-package worf
+  :pretty-hydra
+  ((:title (pretty-hydra-title "worf move" 'faicon "wheelchair-alt" :height 1.1 :v-adjust -0.1 ) :color blue)
+   ("Move"
+    (("h" worf-left "left" :color red)
+     ("j" worf-down "down" :color red)
+     ("k" worf-up "up" :color red)
+     ("l" worf-right "right" :color red)
+     ("g" worf-goto "goto")
+     ("[?\\t]" worf-tab "cycle" :color red))
+    "refile"
+    (("t" worf-refile-this "this" :color red)
+     ("o" worf-refile-other "other" :color red)
+     ("a" org-archive-subtree "archive" :color red))
+    "Others"
+    (("q" hydra-pop "exit")
+     ("e" org-set-effort "effort" :color red)
+     ("c" org-clock-in "clock in" :color red)
+     ("M-l" nil)))))
+(define-key org-mode-map (kbd "M-l") 'worf-hydra/body)
+
+(defun xs-get-entry-title-marker ()
+  (interactive)
+  (let* ((heading (nth 4 (org-heading-components)))
+	 (marker (xs-get-entry-marker))
+	 (res (cons heading marker)))
+    (with-output-to-temp-buffer "lxs"
+      (print res))))
+
+;; hugo blog tag
+;; 由于我都是 file-based 的用法，所以只提取 file tag.
+;; 如果已经有 hugo_tag 了，应该怎么处理？增量增加？
+(defun xs-hugo-init-tag ()
+  (interactive)
+  "Set hugo tag as the same with roam node tag"
+  (let* ((tags (split-string (or (cadr (assoc "FILETAGS"
+					      (org-collect-keywords '("filetags")))) "") ":" 'omit-nulls)))
+    (save-excursion
+      (beginning-of-buffer)
+      (re-search-forward "#\\+HUGO_TAGS:")
+      (dolist (tag tags)
+	(insert (format " \"%s\"" tag))))))
+
+;; All opened org buffers will be org refile targets
+(defun +org/opened-buffer-files ()
+  "Return the list of files currently opened in emacs"
+  (delq nil
+        (mapcar (lambda (x)
+                  (if (and (buffer-file-name x)
+                           (string-match "\\.org$"
+                                         (buffer-file-name x)))
+                      (buffer-file-name x)))
+                (buffer-list))))
+
+(setq org-refile-targets '((+org/opened-buffer-files :maxlevel . 4)))
+(setq org-refile-use-outline-path 'file)
+
+(defun xs-org-log-delete ()
+  (interactive)
+  (save-excursion
+    (goto-char (org-log-beginning))
+      (org-mark-element)
+      (delete-region (region-beginning) (region-end))
+      (org-remove-empty-drawer-at (point))))
+
+(defun swint-dired-rsync (action)
+  (interactive)
+  (let ((remote (completing-read "Remote repo: "
+                                 (split-string
+                                  (shell-command-to-string
+                                   "cat ~/.ssh/config | grep \"^Host \" | awk '{print $2}'"))))
+        (path (abbreviate-file-name default-directory))
+        (is-push (equal action "push"))
+        (is-pull (equal action "pull"))
+        (string-to-escape "\\( \\|(\\|)\\|\\[\\|\\]\\|{\\|}\\)")
+        rsync-command)
+    ;; 对于rsync，escape本地路径用\，远程路径用\\\。
+    (cl-flet ((escape-local (x)
+                            (replace-regexp-in-string string-to-escape
+                                                      "\\\\\\1" x))
+              (escape-remote (x)
+                             (replace-regexp-in-string string-to-escape
+                                                       "\\\\\\\\\\\\\\1" x)))
+      (let ((files (cond (is-push
+                          (cl-loop for f in (dired-get-marked-files)
+                                   collect (escape-local f)))
+                         (is-pull
+                          (let ((remote-files (helm-comp-read "Remote files: "
+                                                              (split-string (shell-command-to-string
+                                                                             ;; 连接remote列出path下文件绝对路径，并不显示错误信息。
+                                                                             (format "proxychains4 ssh %s '(cd %s && ls -A | sed \"s:^:`pwd`/:\") 2>/dev/null'"
+                                                                                     remote (escape-local path))) "\n")
+                                                              :marked-candidates t
+                                                              :buffer (format "*ivy rsync %s*" remote))))
+                            (cl-loop for f in remote-files
+                                     collect (concat remote ":" (escape-remote (if (directory-name-p f)
+                                                                                   (directory-file-name f)
+                                                                                 f))))))))
+            (dest (cond (is-pull (escape-local path))
+                        (is-push (escape-remote (concat remote ":" path))))))
+        (setq rsync-command "proxychains4 rsync -arv --progress ")
+        (dolist (file files)
+          (setq rsync-command
+                (concat rsync-command file " ")))
+        (setq rsync-command (concat rsync-command dest))))
+    (let ((process (start-process-shell-command "rsync" "*rsync*" rsync-command)))
+      (lexical-let ((pos (memq 'mode-line-modes mode-line-format))
+                    (mode-string action))
+        (setcdr pos (cons (concat "Rsync/Unison " mode-string " ") (cdr pos)))
+        (set-process-sentinel
+         process
+         (lambda (process signal)
+           (when (memq (process-status process) '(exit signal))
+             (message "Rsync/Unison %s done." mode-string)
+             (setcdr pos (remove (concat "Rsync/Unison " mode-string " ") (cdr pos))))))))))
+
+(defun swint-dired-rsync-push ()
+  (interactive)
+  (swint-dired-rsync "push"))
+
+;TODO: disable hydra for this mode
+(use-package dirvish
+  :custom
+  (dirvish-attributes '(vscode-icon file-size))
+  ;; (dirvish-bookmarks-alist
+   ;; '(("h" "~/"                          "Home")
+     ;; ("d" "~/Downloads/"                "Downloads")
+     ;; ("m" "/mnt/"                       "Drives")
+     ;; ("t" "~/.local/share/Trash/files/" "TrashCan")))
+  :config
+  (dirvish-override-dired-mode)
+  (dirvish-peek-mode)
+  ;; In case you want the details at startup like `dired'
+  ;; :hook
+  ;; (dirvish-mode . (lambda () (dired-hide-details-mode -1)))
+  :bind
+  (:map dired-mode-map
+        ("SPC" . dirvish-show-history)
+        ("r"   . dirvish-roam)
+        ("b"   . dirvish-goto-bookmark)
+        ("f"   . dirvish-file-info-menu)
+        ("M-a" . dirvish-mark-actions-menu)
+        ("M-s" . dirvish-setup-menu)
+        ("M-f" . dirvish-toggle-fullscreen)
+        ([remap dired-summary] . dirvish-dispatch)
+        ([remap dired-do-copy] . dirvish-yank)
+        ([remap mode-line-other-buffer] . dirvish-other-buffer)))
+
+(defun replace-id-quick ()
+  (interactive)
+  (let* ((num (completing-read "num:" nil)))
+    (re-search-forward "\"id\": ")
+    (save-excursion
+      (delete-region (point) (progn (forward-word) (point))))
+    (insert num)
+    (other-window 1)
+    (next-line)))
+
+
+;; 固定一个侧边栏，这里面可以存放 file, roam node (org headlines or files), directory
+
+(defun xs-org-sidebar-follow-mode ()
+  (interactive)
+  ;; 如果开启的话，每次打开 org mode buffer 的时候，都在侧边栏显示其 sidebar
+  )
+
+(use-package delve
+  :load-path "site-lisp/delve"
+  :bind
+  ;; the main entry point, offering a list of all stored collections
+  ;; and of all open Delve buffers:
+  (("<f12>" . delve))
+  :config
+  ;; set meaningful tag names for the dashboard query
+  (setq delve-dashboard-tags '("leetcode"))
+ ;; turn on delve-minor-mode when org roam file is opened:
+  (delve-global-minor-mode))
+
+(use-package maple-explorer
+  :load-path "site-lisp/emacs-maple-explorer"
+  :commands (maple-explorer-file maple-explorer-buffer maple-explorer-imenu maple-explorer-recentf)
+  :config
+  (setq maple-explorer-file-display-alist '((side . left) (slot . -1)))
+  (setq maple-explorer-buffer-display-alist '((side . left) (slot . -1)))
+  (setq maple-explorer-recentf-display-alist '((side . left) (slot . -1))))
+
+(defun maple-explorer-dashboard-list(&optional isroot)
+  "Get recentf file list ISROOT mean first call."
+  (list
+   :name "dashboard"
+   :value "dashboard"
+   :face 'font-lock-constant-face
+   :click 'maple-explorer-fold
+   :status 'open
+   :children
+   (list
+    (list :name "gtd"
+          :face 'font-lock-keyword-face
+          :click (lambda() (interactive) (message "bbb")))
+    (list :name "bookmark"
+          :face 'font-lock-keyword-face
+          :click 'maple-explorer-fold
+	  :status 'open
+	  :children (list (maple-explorer-bm-list))
+      ))))
+(maple-explorer-define dashboard)
+
+(defun bm-list ()
+  (cl-loop
+   for b in bookmark-alist
+   for name = (car b)
+   for location = (treemacs-canonical-path (bookmark-location b))
+   collect (cons name location)))
+
+
+(defun maple-explorer-bm-list ()
+  (maple-explorer-list
+   (bm-list)
+   'maple-explorer-buffer-face
+   'maple-explorer-bookmark-info))
+
+(defun maple-explorer-bookmark-info (bm)
+  (list :name (car bm)
+	:face  'maple-explorer-buffer-item-face
+	:click 'maple-explorer-bm-click
+	:value (cdr bm)))
+
+(defun maple-explorer-bm-click ()
+  (interactive)
+  (maple-explorer-with  (switch-to-buffer-other-window (find-file-noselect (plist-get info :value)))))
+
+
+(bookmark-location "1-next")
+(treemacs-canonical-path (bookmark-location "1-next"))
+
+
+(use-package moldable-emacs
+  ;; :init (if (f-directory-p "~/.emacs.d/site-lisp/moldable-emacs")
+  ;;           (shell-command "cd ~/.emacs.d/site-lisp/moldable-emacs; git pull;")
+  ;;         (shell-command "cd ~/.emacs.d/site-lisp/; git clone git@github.com:ag91/moldable-emacs.git"))
+  :load-path "~/.emacs.d/site-lisp/moldable-emacs/"
+  :bind (("C-c m m" . me-mold)
+         ("C-c m f" . me-go-forward)
+         ("C-c m b" . me-go-back)
+         ("C-c m o" . me-open-at-point)
+         ("C-c m d" . me-mold-docs)
+         ("C-c m g" . me-goto-mold-source)
+         ("C-c m e a" . me-mold-add-last-example)
+         )
+  :config
+  (require 'moldable-emacs)
+  ;; (add-to-list 'me-files-with-molds (concat (file-name-directory (symbol-file 'me-mold)) "molds/experiments.el")) ;; TODO this is relevant only if you have private molds
+  (me-setup-molds))
+
+(use-package "xeft"
+  :load-path "site-lisp/xeft"
+  :ensure nil
+  :defer t
+  :custom
+  (xeft-directory "~/Documents/org/org-roam-files")
+  :commands (xeft))
+
+
+(defvar org-theme-css-dir "~/Documents/org/css")
+
+(defun toggle-org-custom-inline-style ()
+  (interactive)
+  (let ((hook 'org-export-before-parsing-hook)
+        (fun 'set-org-html-style))
+    (if (memq fun (eval hook))
+        (progn
+          (remove-hook hook fun 'buffer-local)
+          (message "Removed %s from %s" (symbol-name fun) (symbol-name hook)))
+      (add-hook hook fun nil 'buffer-local)
+      (message "Added %s to %s" (symbol-name fun) (symbol-name hook)))))
+ 
+(defun org-theme ()
+  (interactive)
+  (let* ((cssdir org-theme-css-dir)
+         (css-choices (directory-files cssdir nil ".css$"))
+         (css (completing-read "theme: " css-choices nil t)))
+    (concat cssdir css)))
+ 
+(defun set-org-html-style (&optional backend)
+  (interactive)
+  (when (or (null backend) (eq backend 'html))
+    (let ((f (or (and (boundp 'org-theme-css) org-theme-css) (org-theme))))
+      (if (file-exists-p f)
+          (progn
+            (set (make-local-variable 'org-theme-css) f)            
+            (set (make-local-variable 'org-html-head)
+                 (with-temp-buffer
+                   (insert "<style type=\"text/css\">\n<!--/*--><![CDATA[/*><!--*/\n")
+                   (insert-file-contents f)
+                   (goto-char (point-max))
+                   (insert "\n/*]]>*/-->\n</style>\n")
+                   (buffer-string)))
+            (set (make-local-variable 'org-html-head-include-default-style)
+                 nil)
+            (message "Set custom style from %s" f))
+        (message "Custom header file %s doesnt exist")))))
+; 使用
+(use-package recursive-search-references
+  :load-path "site-lisp/recursive-search-references")
+
+
+(defun xs/choose-insert-index-name ()
+  "选择 roam 中 tag 为 index 的文件名，在导出 org 文件到 html 时，可能需要设置当前页面的上一级
+页面，通常上一级页面是按相同 topic 维护的 org 笔记索引，这个函数弹出选择 index 页面，然后插入页面的文件名
+到 org 文件的 file header."
+  (interactive)
+  (let* ((inds (mapcar #'car (org-roam-db-query [:select [file] :from tags :join nodes :on (= tags:node_id nodes:id) :where (= tag "index")])))
+	 (names (mapcar #'file-name-base inds))
+	 (name (completing-read "choose the index html:\n" names)))
+    (insert (concat name ".html"))))
+
+(use-package embark
   :ensure t
+  :bind
+  (("C-." . embark-act)         ;; pick some comfortable binding
+   ("C-;" . embark-dwim)        ;; good alternative: M-.
+   ("M-n" . embark-next-symbol)
+   ("M-p" . embark-previous-symbol)
+   ("C-h B" . embark-bindings)) ;; alternative for `describe-bindings'
+  :init
+  ;; Optionally replace the key help with a completing-read interface
+  (setq prefix-help-command #'embark-prefix-help-command)
   :config
-  (add-to-list 'eglot-server-programs '(python-mode . ("pyright-langserver" "--stdio")))
-  (setq read-process-output-max (* 1024 1024))
-  ;; (push :documentHighlightProvider eglot-ignored-server-capabilities)
-  (setq eldoc-echo-area-use-multiline-p nil)
-)
+  ;; Hide the mode line of the Embark live/completions buffers
+  (add-to-list 'display-buffer-alist
+               '("\\`\\*Embark Collect \\(Live\\|Completions\\)\\*"
+                 nil
+                 (window-parameters (mode-line-format . none)))))
 
-(use-package lsp-pyright
-       :preface
-       ;; Use yapf to format
-       (defun lsp-pyright-format-buffer ()
-         (interactive)
-         (when (and (executable-find "yapf") buffer-file-name)
-           (call-process "yapf" nil nil nil "-i" buffer-file-name)))
-       ;; :hook (python-mode . (lambda ()
-       ;;                        (require 'lsp-pyright)
-       ;;                        (add-hook 'after-save-hook #'lsp-pyright-format-buffer t t)))
-       :init (when (executable-find "python3")
-               (setq lsp-pyright-python-executable-cmd "python3")))
+(defun my-select-tab-by-name (tab)
+  (interactive
+   (list
+    (let ((tab-list (or (mapcar (lambda (tab) (cdr (assq 'name tab)))
+                                (tab-bar-tabs))
+                        (user-error "No tabs found"))))
+      (consult--read tab-list
+                     :prompt "Tabs: "
+                     :category 'tab))))
+  (tab-bar-select-tab-by-name tab))
 
-;; pixel precision scroll
-;; (setq pixel-scroll-precision-large-scroll-height 60)
-;; (setq pixel-scroll-precision-interpolation-factor 8.0)
-;; (setq scroll-preserve-screen-position t
-      ;; scroll-margin 0
-      ;; scroll-conservatively 97)
-;; (setq make-cursor-line-fully-visible nil)
+(embark-define-keymap embark-bib-actions
+  "Keymap for actions for tab-bar tabs (when mentioned by name)."
+  ("i" my/insert-bib-headline))
+
+(defun my/insert-bib-headline ()
+  (interactive)
+  (let* ((entry (bibtex-completion-get-entry (car keys)))
+	     (title (funcall orb-bibtex-entry-get-value-function "title" entry))
+	     (key (funcall orb-bibtex-entry-get-value-function "key" entry)))
+	(insert (concat title key))))
+
+(defun test ()
+  (interactive)
+  (message (bibtex-completion-get-value "key" entry)))
 
 
-;; org-clock-watch
-(use-package org-clock-watch
-  :load-path "site-lisp/org-clock-watch"
-  :config
-  (setq org-clock-watch-work-plan-file-path (concat lxs-home-dir "Documents/" "org/" "gtd/" "next.org")))
+(require 'worf)
+(defun bjm/worf-insert-internal-link ()
+  "Use ivy to insert a link to a heading in the current `org-mode' document. Code is based on `worf-goto'."
+  (interactive)
+  (let ((cands (worf--goto-candidates)))
+    (ivy-read "Heading: " cands
+              :action 'bjm/worf-insert-internal-link-action)))
 
+
+(defun bjm/worf-insert-internal-link-action (x)
+  "Insert link for `bjm/worf-insert-internal-link'"
+  ;; go to heading
+  (save-excursion
+    (goto-char (cdr x))
+    ;; store link
+    (call-interactively 'org-store-link)
+    )
+  ;; return to original point and insert link
+  (org-insert-last-stored-link 1)
+  ;; org-insert-last-stored-link adds a newline so delete this
+  (delete-backward-char 1)
+  )
+
+
+
+(defun update-load-path (&rest _)
+  "Update `load-path'."
+  (dolist (dir '("site-lisp" "lisp"))
+    (push (expand-file-name dir user-emacs-directory) load-path)))
+
+(defun add-subdirs-to-load-path (&rest _)
+  "Add subdirectories to `load-path'."
+  (let ((default-directory (expand-file-name "site-lisp" user-emacs-directory)))
+    (normal-top-level-add-subdirs-to-load-path)))
+
+(advice-add #'package-initialize :after #'update-load-path)
+(advice-add #'package-initialize :after #'add-subdirs-to-load-path)
+
+(update-load-path)
+(add-to-list 'load-path "~/.emacs.d/site-lisp/")
+
+(require 'yasnippet)
+(require 'lsp-bridge)
+(require 'lsp-bridge-icon)        ;; show icons for completion items, optional
+(require 'lsp-bridge-jdtls)       ;; provide Java third-party library jump and -data directory support, optional
+(yas-global-mode 1)
+
+(setq lsp-bridge-completion-provider 'corfu)
+(require 'corfu)
+(require 'corfu-info)
+(require 'corfu-history)
+(require 'lsp-bridge-orderless)   ;; make lsp-bridge support fuzzy match, optional
+(corfu-history-mode t)
+(global-lsp-bridge-mode)
+(when (> (frame-pixel-width) 3000) (custom-set-faces '(corfu-default ((t (:height 1.3))))))  ;; adjust default font height when running in HiDPI screen.
 

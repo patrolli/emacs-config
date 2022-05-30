@@ -55,23 +55,6 @@ mermaid.initialize({
   :config
   (add-to-list 'markdown-code-lang-modes '("mermaid" . mermaid-mode))
 
-  ;; Preview via `grip'
-  ;; Install: pip install grip
-  (use-package grip-mode
-    :ensure t
-    :bind (:map markdown-mode-command-map
-           ("g" . grip-mode))
-    :init
-    (setq grip-update-after-change nil)
-    (setq grip-github-user "lixunsonghcl@126.com")
-    (setq grip-github-password "043c3f957780226db2b3c30cc9345139298d387a")
-    ;; (when-let ((credential (auth-source-user-and-password "api.github.com")))
-    ;;   (setq grip-github-user (car credential)
-    ;;         grip-github-password (cadr credential)))
-    :config
-    (setq grip-binary-path "~/anaconda3/bin/grip")
-    (setq grip-preview-use-webkit nil))
-
   ;; Table of contents
   (use-package markdown-toc
     :ensure t

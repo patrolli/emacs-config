@@ -120,6 +120,7 @@ to choose a directory"
 
 (use-package awesome-tab
   :load-path "site-lisp/awesome-tab"
+  :disable t
   :config
   (setq awesome-tab-height 120)
   (awesome-tab-mode)
@@ -175,8 +176,7 @@ Other buffer group by `awesome-tab-get-group-name' with project name."
     ((derived-mode-p 'eaf-mode)
      "EAF")
     (t
-     (awesome-tab-get-group-name (current-buffer))))))
-  )
+     (awesome-tab-get-group-name (current-buffer)))))))
 
 (use-package exec-path-from-shell
   :ensure t
