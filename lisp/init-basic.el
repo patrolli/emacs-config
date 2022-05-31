@@ -118,66 +118,6 @@ to choose a directory"
 (add-hook 'org-mode-hook '(lambda () (setq visual-line-mode t)))
 (add-hook 'prog-mode-hook '(lambda () (setq visual-line-mode t)))
 
-(use-package awesome-tab
-  :load-path "site-lisp/awesome-tab"
-  :disable t
-  :config
-  (setq awesome-tab-height 120)
-  (awesome-tab-mode)
-  (defun awesome-tab-hide-tab (x)
-    (let ((name (format "%s" x)))
-      (or
-       ;; Hide tab if current window is not dedicated window.
-       (window-dedicated-p (selected-window))
-       ;; Hide sdcv tab.
-       (string-prefix-p "*sdcv" name)
-       ;; Hide tab if current buffer is helm buffer.
-       (string-prefix-p "*helm" name)
-       ;; Hide tab if current buffer is flycheck buffer.
-       (string-prefix-p "*flycheck" name)
-       ;; Hide blacklist if emacs version < 27 (use header-line).
-       (and (eq awesome-tab-display-line 'header-line)
-            (or (string-prefix-p "*Compile-Log*" name)
-		(string-prefix-p "*Flycheck" name)))
-       ;; my custom hide rules
-       (string-suffix-p ".org_archive" name)
-       )))
-  (defun awesome-tab-buffer-groups ()
-  "`awesome-tab-buffer-groups' control buffers' group rules.
-
-Group awesome-tab with mode if buffer is derived from `eshell-mode' `emacs-lisp-mode' `dired-mode' `org-mode' `magit-mode'.
-All buffer name start with * will group to \"Emacs\".
-Other buffer group by `awesome-tab-get-group-name' with project name."
-  (list
-   (cond
-    ((derived-mode-p 'vterm-mode) ;; vterm 的 buffer 带有了 * 号，所以需要放到 Emacs group 的前面
-     "Term")
-    ((string-match-p (regexp-quote "*elfeed") (buffer-name))
-     "Elfeed")
-    ((or (string-equal "*" (substring (buffer-name) 0 1))
-         (memq major-mode '(magit-process-mode
-                            magit-status-mode
-                            magit-diff-mode
-                            magit-log-mode
-                            magit-file-mode
-                            magit-blob-mode
-                            magit-blame-mode
-                            )))
-     "Emacs")
-    ((derived-mode-p 'eshell-mode)
-     "EShell")
-    
-    ((derived-mode-p 'emacs-lisp-mode)
-     "Elisp")
-    ((derived-mode-p 'dired-mode)
-     "Dired")
-    ((memq major-mode '(org-mode org-agenda-mode diary-mode))
-     "OrgMode")
-    ((derived-mode-p 'eaf-mode)
-     "EAF")
-    (t
-     (awesome-tab-get-group-name (current-buffer)))))))
-
 (use-package exec-path-from-shell
   :ensure t
   :config

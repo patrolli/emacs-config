@@ -40,7 +40,7 @@
 			       (setq prettify-symbols-alist lxs-prettify-org-symbols-alist)
 			       (unless prettify-symbols-mode
 				 (prettify-symbols-mode 1))))
-  ;; :hook
+  :hook
   ((org-mode . org-hide-block-all)
    (org-mode . org-content))
   :pretty-hydra

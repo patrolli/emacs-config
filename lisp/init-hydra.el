@@ -136,12 +136,12 @@ Version 2016-06-19"
   (:pre (progn
 	  (setq hydra-is-helpful nil)
 	  (overwrite-mode -1)
-	  ;; (hydra-refresh-mode-line "[N]" "green" )
+	  (hydra-refresh-mode-line "[N]" "green" )
 	  (hydra-normal-state-cursor)
 	       )
    :before-exit (progn
 		  (setq hydra-is-helpful t)
-		  ;; (hydra-refresh-mode-line "[I]" "red")
+		  (hydra-refresh-mode-line "[I]" "red")
 		  (hydra-insert-state-cursor)
 		  )
 	:foreign-keys run

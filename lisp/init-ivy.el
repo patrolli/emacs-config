@@ -28,6 +28,9 @@
   (use-package ivy-yasnippet
     :bind ("C-c C-y" . ivy-yasnippet)))
 
+(use-package counsel
+  :ensure t)
+
 ;; smex 用于将 M-x 命令按使用频率排序
 (use-package smex
   :ensure t)

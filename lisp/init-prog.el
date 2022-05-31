@@ -24,11 +24,10 @@
 (use-package pyvenv
   :ensure t
   :hook (python-mode . pyvenv-mode)
-  ;; :init
+  :init
   (setenv "WORKON_HOME" "~/.pyenv/versions")
   :config
-  (pyvenv-workon "py39")
-  )
+  (pyvenv-workon "py39"))
 
 (add-hook 'prog-mode-hook 'show-paren-mode)
 
