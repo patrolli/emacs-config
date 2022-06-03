@@ -90,6 +90,7 @@ decrease this. If you experience stuttering, increase this.")
 (require 'personal)
 (require 'init-abbrev)
 (require 'init-flycheck)
+(require 'init-term-cursor)
 ;; (require 'init-restore)
 
 ;; 暂时停用 desktop mode
