@@ -1352,3 +1352,4 @@ Such as 'Two Sum' will be converted to 'two-sum'."
 (global-lsp-bridge-mode)
 (when (> (frame-pixel-width) 3000) (custom-set-faces '(corfu-default ((t (:height 1.3))))))  ;; adjust default font height when running in HiDPI screen.
 
+

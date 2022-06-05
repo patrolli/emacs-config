@@ -45,18 +45,12 @@ decrease this. If you experience stuttering, increase this.")
 
 (update-load-path)
 
-(defun font-installed-p (font-name)
-  "Check if font with FONT-NAME is available."
-  (find-font (font-spec :name font-name)))
-  ;; Specify font for all unicode characters
-(cl-loop for font in '("Apple Color Emoji" "Segoe UI Symbol" "Symbola" "Symbol")
-         when (font-installed-p font)
-         return(set-fontset-font t 'unicode font nil 'prepend))
 
 (require 'init-packages)
 
 (require 'init-basic)
 (require 'init-locales)
+(require 'init-font)
 (require 'init-input-method)
 (require 'init-utils)
 
@@ -81,7 +75,7 @@ decrease this. If you experience stuttering, increase this.")
 (require 'init-elisp)
 
 (require 'init-org)
-(require 'init-org-clock)
+;; (require 'init-org-clock)
 (require 'init-org-utils)
 (require 'init-markdown)
 (require 'init-reader)
@@ -92,34 +86,18 @@ decrease this. If you experience stuttering, increase this.")
 (require 'init-flycheck)
 ;; (require 'init-restore)
 
-;; 暂时停用 desktop mode
-;; 在启动时选择手动恢复会话，而不是自动恢复
-;; 现在还不支持手动，后面在 dashboard 加入 restore 的选项
-;; (require 'init-restore)
 
+(setq native-comp-async-report-warnings-errors nil)
+(put 'dired-find-alternate-file 'disabled nil)
 
-(set-face-attribute
- 'default nil
- :font (font-spec :name "-WenQ-WenQuanYi Zen Hei Mono-medium-normal-normal-*-19-*-*-*-*-0-iso10646-1"
-                  :weight 'normal
-                  :slant 'normal
-                  :size 14.5))
-;; -WQYF-WenQuanYi Micro Hei Mono-regular-normal-normal-*-17-*-*-*-*-0-iso10646-1
-;; (set-face-attribute
-;;  'default nil
-;;  :font (font-spec :name "Iosevka"
-;;                   :weight 'normal
-;;                   :slant 'normal
-;;                   :size 14.5))
-
+;; 放到最后以确保 icon 字体能够正确显示
+;; 问题在于设置英文字体时，会覆盖正确的 icon 显示
+(centaur-setup-fonts)
 (dolist (charset '(kana han symbol cjk-misc bopomofo))
   (set-fontset-font
    (frame-parameter nil 'font)
    charset
-   (font-spec :name "-ADBO-思源宋体 CN-normal-normal-normal-*-*-*-*-*-*-0-iso10646-1"
+   (font-spec :name "-outline-思源宋体-bold-normal-normal-serif-24-*-*-*-p-*-iso10646-1"
               :weight 'normal
               :slant 'normal
-              :size 12.5)))
-
-(put 'dired-find-alternate-file 'disabled nil)
-(setq native-comp-async-report-warnings-errors nil)
+              :size 9.5)));; 中文

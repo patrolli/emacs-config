@@ -1,8 +1,6 @@
+
 (require 'init-custom)
 (require 'init-const)
-
-(use-package alert-toast
-  :load-path "alert-toast")
 
 (use-package org
   :ensure nil
@@ -40,9 +38,6 @@
 			       (setq prettify-symbols-alist lxs-prettify-org-symbols-alist)
 			       (unless prettify-symbols-mode
 				 (prettify-symbols-mode 1))))
-  ;; :hook
-  ((org-mode . org-hide-block-all)
-   (org-mode . org-content))
   :pretty-hydra
   ((:title (pretty-hydra-title "Org Template" 'fileicon "org" :face 'all-the-icons-green :height 1.1 :v-adjust 0.0)
     :color blue :quit-key "q")
@@ -638,6 +633,7 @@ will not be modified."
 
 ;; 在 bibtex mode 下一些有用的函数
 (use-package bibtex-utils
+  :disabled t
   :load-path "site-lisp/bibtex-utils")
 
 ;; export org to docx
@@ -690,26 +686,23 @@ will not be modified."
     (message "Enabled org html export on save for current buffer...")))
 
 ;; Babel
-(setq org-confirm-babel-evaluate nil
-      org-src-fontify-natively t
-      org-src-tab-acts-natively t)
+;; (setq org-confirm-babel-evaluate nil
+;;       org-src-fontify-natively t
+;;       org-src-tab-acts-natively t)
 
-(use-package ob-ipython
-  :ensure t)
+;; (defvar load-language-list '((emacs-lisp . t)
+;; 			     (perl . t)
+;; 			     (python . t)
+;; 			     (ipython . t)
+;; 			     (ruby . t)
+;; 			     (js . t)
+;; 			     (css . t)
+;; 			     (sass . t)
+;; 			     (C . t)
+;; 			     (plantuml . t)))
 
-(defvar load-language-list '((emacs-lisp . t)
-			     (perl . t)
-			     (python . t)
-			     (ipython . t)
-			     (ruby . t)
-			     (js . t)
-			     (css . t)
-			     (sass . t)
-			     (C . t)
-			     (plantuml . t)))
-
-(org-babel-do-load-languages 'org-babel-load-languages
-			     load-language-list)
+;; (org-babel-do-load-languages 'org-babel-load-languages
+;; 			     load-language-list)
 
 (defun org-hide-properties ()
   "Hide all org-mode headline property drawers in buffer. Could be slow if it has a lot of overlays."
@@ -741,7 +734,10 @@ will not be modified."
   :config
   (org-download-enable)
   (setq-default org-download-image-dir (concat lxs-home-dir "Documents/" "org/" "static/" "img/"))
-  (setq org-download-screenshot-method "xfce4-screenshooter -r -o cat > %s")
+  (if sys/win32p
+      (setq org-download-screenshot-method "imagema")
+    (setq org-download-screenshot-method "xfce4-screenshooter -r -o cat > %s")
+      )
   (defun org-download--dir-2 ()
     (file-name-base (buffer-file-name))))
 

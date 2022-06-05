@@ -120,7 +120,7 @@ to choose a directory"
 
 (use-package awesome-tab
   :load-path "site-lisp/awesome-tab"
-  :disable t
+  :disabled t
   :config
   (setq awesome-tab-height 120)
   (awesome-tab-mode)
@@ -180,9 +180,18 @@ Other buffer group by `awesome-tab-get-group-name' with project name."
 
 (use-package exec-path-from-shell
   :ensure t
+  :disabled t
   :config
   (exec-path-from-shell-initialize))
 ;; (setq global-visual-line-mode t)
 ;; (setq truncate-lines nil)
+
+(when (fboundp 'set-charset-priority)
+  (set-charset-priority 'unicode))
+
+;; Explicitly set the prefered coding systems to avoid annoying prompt
+;; from emacs (especially on Microsoft Windows)
+(prefer-coding-system 'utf-8)
+(setq system-time-locale "C")
 
 (provide 'init-basic)

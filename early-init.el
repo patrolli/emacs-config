@@ -15,3 +15,6 @@
 (push '(vertical-scroll-bars) default-frame-alist)
 (when (featurep 'ns)
   (push '(ns-transparent-titlebar . t) default-frame-alist))
+
+;; Set default coding system
+(set-language-environment "UTF-8")

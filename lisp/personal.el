@@ -1,3 +1,5 @@
+(require 'init-const)
+
 (defun toggle-window-dedicated ()
   "Toggle whether the current active window is dedicated or not"
   (interactive)
@@ -118,7 +120,10 @@
 
 (defun reveal-in-explorer ()
   (interactive)
-  (shell-command (format "thunar %s" default-directory)))
+  (if sys/linuxp
+      (shell-command (format "thunar %s" default-directory))
+    ;; In windows, we need to convert / into \\
+    (shell-command-to-string (format "explorer.exe %s"  (subst-char-in-string ?/ ?\\ default-directory)))))
 
 (defun browse-html-of-org-buffer ()
   (interactive)

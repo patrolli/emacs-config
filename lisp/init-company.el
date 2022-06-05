@@ -3,7 +3,6 @@
 (require 'init-funcs)
 
 (use-package company
-  :disabled t
   :init
   (setq   company-idle-delay 0.1
 	  company-minimum-prefix-length 2
