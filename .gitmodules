@@ -40,3 +40,6 @@
 [submodule "site-lisp/lsp-bridge"]
 	path = site-lisp/lsp-bridge
 	url = https://github.com/manateelazycat/lsp-bridge.git
+[submodule "site-lisp/rsync-project"]
+	path = site-lisp/rsync-project
+	url = ./site-lisp/rsync-project/
