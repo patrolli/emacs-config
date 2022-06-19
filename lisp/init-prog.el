@@ -1,14 +1,12 @@
-(use-package lsp-bridge
-  :load-path "site-lisp/lsp-bridge"
-  :config
-  (setq lsp-bridge-completion-provider 'corfu)
-  (require 'corfu)
-  (require 'corfu-info)
-  (require 'corfu-history)
-  (require 'lsp-bridge-orderless)   ;; make lsp-bridge support fuzzy match, optional
-  (corfu-history-mode t)
-  (global-lsp-bridge-mode)
-  (when (> (frame-pixel-width) 3000) (custom-set-faces '(corfu-default ((t (:height 1.3)))))))
+;; (use-package lsp-bridge
+;;   :load-path "site-lisp/lsp-bridge"
+;;   :config
+;;   (global-lsp-bridge-mode)
+;;   )
+(add-to-list 'load-path "~/.emacs.d/site-lisp/lsp-bridge")
+(require 'lsp-bridge)
+(global-lsp-bridge-mode)
+
 
 (use-package lsp-bridge-icon
   :load-path "site-lisp/lsp-bridge")
