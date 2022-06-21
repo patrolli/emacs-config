@@ -15,8 +15,8 @@
   (set-charset-priority 'unicode))
 (prefer-coding-system 'utf-8)
 (setq locale-coding-system 'utf-8)
-(set-default-coding-systems 'utf-8)
-(setq buffer-file-coding-system 'utf-8)
-(set-selection-coding-system 'utf-8)
+(set-default-coding-systems 'utf-8-unix)
+(setq buffer-file-coding-system 'utf-8-unix)
+(set-selection-coding-system 'utf-8-unix)
 
 (provide 'init-locales)

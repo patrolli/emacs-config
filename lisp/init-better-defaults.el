@@ -116,8 +116,7 @@ Version 2016-04-04"
 ;; 使用 color-rg 来对 org 文件进行检索
 (defun lxs/search-org ()
   (interactive)
-  (color-rg-search-input (color-rg-read-input) (concat lxs-home-dir "Documents/" "org/"))
-  )
+  (color-rg-search-input (color-rg-read-input) (expand-file-name (concat lxs-home-dir "Documents/" "org/"))))
 
 ;; 使用 windows 的程序来打开文件
 ;; 将这个命令绑定到 dired mode 的 C-c C-o

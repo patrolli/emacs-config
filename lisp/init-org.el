@@ -1,4 +1,3 @@
-
 (require 'init-custom)
 (require 'init-const)
 
@@ -246,13 +245,16 @@ prepended to the element after the #+HEADER: tag."
 	   )
 	  ("c" "web bookmarks" entry (file ,(concat lxs/org-agenda-directory "webclips.org"))
 	   "* [[%:link][%:description]]\n " :prepend t :empty-lines-after 1 :immediate-finish t)
+	  ("d" "link list" item (file "~/dms_link.org") "- %:link" :immediate-finish t)
 	  ("n" "notes" entry (file+headline ,(concat lxs-home-dir "Documents/" "org/" "org-roam-files/" "quick-notes.org") "Notes")
-	   "* %^{标题}\n%?" :create-id t)
+	   "* %^{标题} %(org-set-tags \"refile\")\n%?" :create-id t)
 	  ("s" "code cookbook" entry (file+headline ,(concat lxs-home-dir "Documents/" "org/" "org-roam-files/" "quick-notes.org") "Cookbook")
 	   "\n* %^{描述}\n%?" :create-prev-id t :jump-to-captured t)
 	  ("a" "code api" entry (file+headline ,(concat lxs-home-dir "Documents/" "org/" "org-roam-files/" "quick-notes.org") "Api")
 	   "* %?\n%i- Signature: ==\n描述: " :create-id t :jump-to-captured t)
+	  ("x" "log task" plain (function xs-locate-doing-headlines) "# %U\n%i%?")
 	  ))
+
   (add-hook 'org-capture-before-finalize-hook #'org-set-created-property)
 
   ;; 为 org 的 header 的 created 和 last_modified 两个属性设置自动检测时间戳

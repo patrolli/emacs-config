@@ -45,7 +45,6 @@ decrease this. If you experience stuttering, increase this.")
 
 (update-load-path)
 
-
 (require 'init-packages)
 
 (require 'init-basic)
@@ -86,7 +85,6 @@ decrease this. If you experience stuttering, increase this.")
 (require 'init-flycheck)
 ;; (require 'init-restore)
 
-
 (setq native-comp-async-report-warnings-errors nil)
 (put 'dired-find-alternate-file 'disabled nil)
 
@@ -100,4 +98,4 @@ decrease this. If you experience stuttering, increase this.")
    (font-spec :name "-outline-思源宋体-bold-normal-normal-serif-24-*-*-*-p-*-iso10646-1"
               :weight 'normal
               :slant 'normal
-              :size 9.5)));; 中文
+              :size 10.5)));; 中文

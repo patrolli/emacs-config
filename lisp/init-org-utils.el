@@ -19,11 +19,12 @@
     (add-text-properties
      (match-beginning 1) (match-end 1)
      '(display "∙"))
-    (when (match-beginning 2)
-      (pcase (match-string-no-properties 2)
-        ("[-] " (gkroam--fontify-org-checkbox "□"))
-        ("[ ] " (gkroam--fontify-org-checkbox "□"))
-        ("[X] " (gkroam--fontify-org-checkbox "🗹"))))))
+    ;; (when (match-beginning 2)
+    ;;   (pcase (match-string-no-properties 2)
+    ;;     ("[-] " (gkroam--fontify-org-checkbox "□"))
+    ;;     ("[ ] " (gkroam--fontify-org-checkbox "□"))
+    ;;     ("[X] " (gkroam--fontify-org-checkbox "🗹"))))
+    ))
 
 (defun gkroam-org-list-fontify (beg end)
   "Highlight org list bullet between BEG and END."
@@ -57,6 +58,74 @@
 
 (add-hook 'org-mode-hook #'org-list-prettify)
 
+(defun xs-locate-doing-headlines ()
+  (interactive)
+  "列出 next.org 中的 headline, 选择之后，跳到 headline 区域的最后位置"
+  (let* ((entry-info (xs-list-doing-tasks))
+	 (i 0)
+	 (headlines (mapcar #'(lambda (x) (setq i (+ 1 i))
+				(format "%s-%s" i (car x))) entry-info))
+	 (chosen (completing-read "choose headline: " headlines))
+	 (idx (-elem-index chosen headlines))
+	 (marker (cdr (nth idx entry-info))))
+    (set-buffer (org-base-buffer (marker-buffer marker)))
+    (goto-char marker)
+    (goto-char (org-entry-end-position))))
+
+(defun xs-org-roam-remove-refile-tag ()
+  "移出当前 roam node 的 refile tag"
+  (interactive)
+  (org-roam-tag-remove '("refile"))
+  (save-buffer))
+
+(defun iso-week-from-date (month day year)
+  "从日期转换为ISO时间标准周"
+  (calendar-iso-from-absolute
+   (calendar-absolute-from-gregorian (list month day year))))
+
+(defun xs-archive-subtree-to-daily ()
+  "archive DONE tasks into dailies according to its CLOSED time
+;[2022-06-17 Fri 15:06] first version"
+  (interactive)
+  (let* ((datetree-date (or (org-entry-get nil "CLOSED" t)
+                            (org-read-date t nil "now")))
+         (date (org-date-to-gregorian datetree-date))
+         (year (nth 2 date))
+         (month (nth 0 date))
+         (day (nth 1 date))
+         (week (nth 0 (apply #'iso-week-from-date date)))
+         (buf (find-file-noselect (format "~/Documents/org/org-roam-files/daily/%s/week_%s.org" year week)))
+         (tgt (format "%02d-%s, %s" month day (format-time-string "%a" (date-to-time datetree-date))))
+         )
+    (org-copy-subtree)
+    (let* ((head-info (nth 0 (org-ql-select buf
+                               `(heading ,tgt)
+                               :action #'(lambda () (progn
+                                                      (let* ((heading (nth 4 (org-heading-components)))
+                                                             (marker (xs-get-entry-marker)))
+                                                        (cons heading marker))))))))
+      (if head-info
+          ;; paste current entry under this headline
+          (progn
+            (with-current-buffer (org-base-buffer (marker-buffer (cdr head-info)))
+              (goto-char (cdr head-info))
+	      (setq lvl (org-current-level))
+              (goto-char (org-entry-end-position))
+              (org-paste-subtree (+ lvl 1))))
+        ;; if this headline does not exits, create and then paste under it
+        (with-current-buffer buf
+	  (setq lvl (org-current-level))
+          (end-of-buffer)
+	  (insert "\n\n")
+          (org-insert-heading)
+          (insert (format "%s\n" tgt))
+          (org-paste-subtree (+ lvl 1))
+          )
+        )
+      )
+    ))
+
+(advice-add #'org-archive-subtree :before #'xs-archive-subtree-to-daily)
 
 
 (provide 'init-org-utils)

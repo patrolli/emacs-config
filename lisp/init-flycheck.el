@@ -2,6 +2,7 @@
 (require 'init-funcs)
 (use-package flycheck
   :diminish
+  :disabled t
   :hook (after-init . global-flycheck-mode)
   :init (setq flycheck-global-modes
               '(not text-mode outline-mode fundamental-mode lisp-interaction-mode

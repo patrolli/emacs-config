@@ -30,7 +30,6 @@
    )
   )
 
-
 (defun lxs-org-is-hugo-file-p (fPath)
   "Predict if the org file has been converted into hugo"
   (with-temp-buffer
@@ -194,7 +193,7 @@ This command does not push text to `kill-ring'."
   )
 
 ;; quick insert timestamp in texts
-(defvar current-date-time-format "%a %b %d %H:%M:%S %Z %Y"
+(defvar current-date-time-format "%F %a %H:%M"
   "Format of date to insert with `insert-current-date-time' func
 See help of `format-time-string' for possible replacements")
 
@@ -224,7 +223,6 @@ Uses `current-date-time-format' for the formatting the date/time."
   (insert (let () (or comment-start "")))
   (insert (concat "[" (format-time-string current-date-time-format (current-time))) "]"))
 
-
 (defun lxs/insert-current-time ()
   "insert the current time (1-week scope) into the current buffer."
   (interactive)
@@ -243,3 +241,4 @@ Uses `current-date-time-format' for the formatting the date/time."
     (bookmark-set filename)))
 
 (provide 'personal)
+

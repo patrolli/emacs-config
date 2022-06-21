@@ -174,8 +174,6 @@ clock                             ^^^^effort             ^^watcher
 
 (replace-regexp-in-string "\\\(<\\\|>\\\|-\\\)" "_" "<untitled-1>")
 
-
-
 (defun my/roam-init-node ()
   "init org-roam headline node"
   (interactive)
@@ -1093,7 +1091,6 @@ Such as 'Two Sum' will be converted to 'two-sum'."
     (other-window 1)
     (next-line)))
 
-
 ;; 固定一个侧边栏，这里面可以存放 file, roam node (org headlines or files), directory
 
 (defun xs-org-sidebar-follow-mode ()
@@ -1149,7 +1146,6 @@ Such as 'Two Sum' will be converted to 'two-sum'."
    for location = (treemacs-canonical-path (bookmark-location b))
    collect (cons name location)))
 
-
 (defun maple-explorer-bm-list ()
   (maple-explorer-list
    (bm-list)
@@ -1166,10 +1162,8 @@ Such as 'Two Sum' will be converted to 'two-sum'."
   (interactive)
   (maple-explorer-with  (switch-to-buffer-other-window (find-file-noselect (plist-get info :value)))))
 
-
 (bookmark-location "1-next")
 (treemacs-canonical-path (bookmark-location "1-next"))
-
 
 (use-package moldable-emacs
   ;; :init (if (f-directory-p "~/.emacs.d/site-lisp/moldable-emacs")
@@ -1197,7 +1191,6 @@ Such as 'Two Sum' will be converted to 'two-sum'."
   (xeft-directory "~/Documents/org/org-roam-files")
   :commands (xeft))
 
-
 (defvar org-theme-css-dir "~/Documents/org/css")
 
 (defun toggle-org-custom-inline-style ()
@@ -1210,21 +1203,21 @@ Such as 'Two Sum' will be converted to 'two-sum'."
           (message "Removed %s from %s" (symbol-name fun) (symbol-name hook)))
       (add-hook hook fun nil 'buffer-local)
       (message "Added %s to %s" (symbol-name fun) (symbol-name hook)))))
- 
+
 (defun org-theme ()
   (interactive)
   (let* ((cssdir org-theme-css-dir)
          (css-choices (directory-files cssdir nil ".css$"))
          (css (completing-read "theme: " css-choices nil t)))
     (concat cssdir css)))
- 
+
 (defun set-org-html-style (&optional backend)
   (interactive)
   (when (or (null backend) (eq backend 'html))
     (let ((f (or (and (boundp 'org-theme-css) org-theme-css) (org-theme))))
       (if (file-exists-p f)
           (progn
-            (set (make-local-variable 'org-theme-css) f)            
+            (set (make-local-variable 'org-theme-css) f)
             (set (make-local-variable 'org-html-head)
                  (with-temp-buffer
                    (insert "<style type=\"text/css\">\n<!--/*--><![CDATA[/*><!--*/\n")
@@ -1240,7 +1233,6 @@ Such as 'Two Sum' will be converted to 'two-sum'."
 (use-package recursive-search-references
   :load-path "site-lisp/recursive-search-references")
 
-
 (defun xs/choose-insert-index-name ()
   "选择 roam 中 tag 为 index 的文件名，在导出 org 文件到 html 时，可能需要设置当前页面的上一级
 页面，通常上一级页面是按相同 topic 维护的 org 笔记索引，这个函数弹出选择 index 页面，然后插入页面的文件名
@@ -1254,8 +1246,8 @@ Such as 'Two Sum' will be converted to 'two-sum'."
 (use-package embark
   :ensure t
   :bind
-  (("C-." . embark-act)         ;; pick some comfortable binding
-   ("C-;" . embark-dwim)        ;; good alternative: M-.
+  (("C-;" . embark-act)         ;; pick some comfortable binding
+   ;; ("C-;" . embark-dwim)        ;; good alternative: M-.
    ("M-n" . embark-next-symbol)
    ("M-p" . embark-previous-symbol)
    ("C-h B" . embark-bindings)) ;; alternative for `describe-bindings'
@@ -1295,7 +1287,6 @@ Such as 'Two Sum' will be converted to 'two-sum'."
   (interactive)
   (message (bibtex-completion-get-value "key" entry)))
 
-
 (require 'worf)
 (defun bjm/worf-insert-internal-link ()
   "Use ivy to insert a link to a heading in the current `org-mode' document. Code is based on `worf-goto'."
@@ -1303,7 +1294,6 @@ Such as 'Two Sum' will be converted to 'two-sum'."
   (let ((cands (worf--goto-candidates)))
     (ivy-read "Heading: " cands
               :action 'bjm/worf-insert-internal-link-action)))
-
 
 (defun bjm/worf-insert-internal-link-action (x)
   "Insert link for `bjm/worf-insert-internal-link'"
@@ -1318,8 +1308,6 @@ Such as 'Two Sum' will be converted to 'two-sum'."
   ;; org-insert-last-stored-link adds a newline so delete this
   (delete-backward-char 1)
   )
-
-
 
 (defun update-load-path (&rest _)
   "Update `load-path'."
@@ -1352,4 +1340,68 @@ Such as 'Two Sum' will be converted to 'two-sum'."
 (global-lsp-bridge-mode)
 (when (> (frame-pixel-width) 3000) (custom-set-faces '(corfu-default ((t (:height 1.3))))))  ;; adjust default font height when running in HiDPI screen.
 
+;;; On Windows, commands run by flycheck may have CRs (\r\n line endings).
+;;; Strip them out before parsing.
+(defun flycheck-parse-output (output checker buffer)
+  "Parse OUTPUT from CHECKER in BUFFER.
 
+OUTPUT is a string with the output from the checker symbol
+CHECKER.  BUFFER is the buffer which was checked.
+
+Return the errors parsed with the error patterns of CHECKER."
+  (let ((sanitized-output (replace-regexp-in-string "\r" "" output))
+        )
+    (funcall (flycheck-checker-get checker 'error-parser) sanitized-output checker buffer)))
+
+(add-to-list 'load-path "~/.emacs.d/site-lisp/emacs-application-framework/")
+(add-to-list 'load-path "~/.emacs.d/site-lisp/emacs-application-framework/eaf-git")
+(require 'eaf)
+(require 'eaf-git)
+
+(defun org-ask-location ()
+  (let* ((org-refile-targets '((nil :maxlevel . 9)))
+         (hd (condition-case nil
+                 (car (org-refile-get-location "Headline" nil t))
+               (error (car org-refile-history)))))
+    (goto-char (point-min))
+    (outline-next-heading)
+    (if (re-search-forward
+         (format org-complex-heading-regexp-format (regexp-quote hd))
+         nil t)
+        (goto-char (point-at-bol))
+      (goto-char (point-max))
+      (or (bolp) (insert "\n"))
+      (insert "* " hd "\n")))
+    (end-of-line))
+
+(setq org-capture-templates
+ '(("l" "Log" entry
+    (function org-ask-location)
+    "\n\n** %?\n<%<%Y-%m-%d %a %T>>"
+    :empty-lines 1)))
+
+(add-to-list 'org-capture-templates '("x" "test" plain (function (lambda () (find-file-noselect "~/Documents/org/gtd/next.org"))) "%U %i?"))
+
+(defun xs-locate-doing-headlines ()
+  (interactive)
+  "列出 next.org 中的 headline, 选择之后，跳到 headline 区域的最后位置"
+  (let* ((entry-info (xs-list-doing-tasks))
+	 (i 0)
+	 (headlines (mapcar #'(lambda (x) (setq i (+ 1 i))
+				(format "%s-%s" i (car x))) entry-info))
+	 (chosen (completing-read "choose headline: " headlines))
+	 (idx (-elem-index chosen headlines))
+	 (marker (cdr (nth idx entry-info))))
+    (set-buffer (org-base-buffer (marker-buffer marker)))
+    (goto-char marker)
+    (goto-char (org-entry-end-position))))
+
+(start-process-shell-command "when-changed" "*lxs*" "when-changed")
+
+(flymake-mode 1)
+
+(defun xs-org-roam-remove-refile-tag ()
+  "移出当前 roam node 的 refile tag"
+  (interactive)
+  (org-roam-tag-remove '("refile"))
+  (save-buffer))

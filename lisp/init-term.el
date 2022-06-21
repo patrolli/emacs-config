@@ -1,4 +1,8 @@
-(use-package vterm
+(when (and module-file-suffix           ; dynamic module
+           (executable-find "cmake")
+           (executable-find "libtool")
+           (executable-find "make"))
+  (use-package vterm
   :ensure t
   :bind (:map vterm-mode-map
 	 ([f4] . vterm-toggle)
@@ -20,11 +24,9 @@
       (with-current-buffer (vterm (concat "*" command "*"))
         (vterm-send-string (format "ssh %s" command))
          (vterm-send-return))
-    (vterm (concat "*vterm-" command "*")))
-  )))
+    (vterm (concat "*vterm-" command "*"))))))
 
-;; HACK: 直接用 vterm-toggle 似乎有一些兼容性的问题，但用了它的两个函数来切换 vterm buffer
-(use-package vterm-toggle
+  (use-package vterm-toggle
   :bind
   ([f4] . vterm-toggle)
   :config
@@ -42,5 +44,6 @@
   (define-key vterm-mode-map (kbd "M-n")   'vterm-toggle-forward)
 					;Switch to previous vterm buffer
   (define-key vterm-mode-map (kbd "M-p")   'vterm-toggle-backward))
+)
 
 (provide 'init-term)

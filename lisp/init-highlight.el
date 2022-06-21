@@ -79,7 +79,6 @@
 			
 ;; Highlight symbols
 (use-package symbol-overlay
-  :disabled t
   :diminish
   :functions (turn-off-symbol-overlay turn-on-symbol-overlay)
   :custom-face (symbol-overlay-default-face ((t (:inherit (region bold)))))

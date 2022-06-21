@@ -56,8 +56,8 @@
 
 ;; 自动保存文件
 (use-package auto-save
-  :disabled t
   :load-path "site-lisp/auto-save"
+  :disabled t
   :config
   (auto-save-enable)
   (setq auto-save-silent t)   ; quietly save
@@ -67,10 +67,16 @@
 ;; 试用 super-save 来自动保存
 ;; super-save 没有 lazycat 的 auto-save 那样激进
 ;; 它是在 buffer 切换或者失去焦点的时候自动保存
+;[Fri Jun 10 16:35:08 中国标准时间 2022] 在 windows 下面不能使用
 (use-package super-save
   :ensure t
   :config
-  (super-save-mode +1))
+  (super-save-mode +1)
+  (setq super-save-auto-save-when-idle t)
+  ;; add integration with ace-window
+  (add-to-list 'super-save-triggers 'ace-window)
+  ;; save on find-file
+  (add-to-list 'super-save-hook-triggers 'find-file-hook))
 
 ;; 检测文件是否已经被导出 hugo
 (defun lxs-org-is-hugo-file-p (fPath)

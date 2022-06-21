@@ -6,10 +6,8 @@
  '(TeX-command "tex")
  '(dogears-idle 10)
  '(hl-sexp-background-color "#efebe9")
- '(org-agenda-files
-   '("/home/lixunsong/Documents/org/gtd/inbox.org" "/home/lixunsong/Documents/org/gtd/next.org" "/home/lixunsong/Documents/org/gtd/projects.org" "/home/lixunsong/Documents/org/gtd/review.org"))
  '(org-clock-watch-auto-clock-out-p t)
- '(session-use-package t nil (session))
+ '(session-use-package t)
  '(vc-annotate-background "#fafafa")
  '(vc-annotate-background-mode nil)
  '(vc-annotate-color-map
