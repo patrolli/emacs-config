@@ -18,7 +18,7 @@
   (with-silent-modifications
     (add-text-properties
      (match-beginning 1) (match-end 1)
-     '(display "∙"))
+     '(display "◦"))
     ;; (when (match-beginning 2)
     ;;   (pcase (match-string-no-properties 2)
     ;;     ("[-] " (gkroam--fontify-org-checkbox "□"))
@@ -95,7 +95,7 @@
          (day (nth 1 date))
          (week (nth 0 (apply #'iso-week-from-date date)))
          (buf (find-file-noselect (format "~/Documents/org/org-roam-files/daily/%s/week_%s.org" year week)))
-         (tgt (format "%02d-%s, %s" month day (format-time-string "%a" (date-to-time datetree-date))))
+         (tgt (format "%02d-%02d, %s" month day (format-time-string "%a" (date-to-time datetree-date))))
          )
     (org-copy-subtree)
     (let* ((head-info (nth 0 (org-ql-select buf
@@ -114,18 +114,22 @@
               (org-paste-subtree (+ lvl 1))))
         ;; if this headline does not exits, create and then paste under it
         (with-current-buffer buf
-	  (setq lvl (org-current-level))
           (end-of-buffer)
-	  (insert "\n\n")
+	  (insert "\n")
           (org-insert-heading)
+	  (if (and (org-current-level) (> (org-current-level) 1))
+	    (org-promote-subtree))
           (insert (format "%s\n" tgt))
-          (org-paste-subtree (+ lvl 1))
-          )
-        )
-      )
-    ))
+	  (setq lvl (org-current-level))
+          (org-paste-subtree (+ lvl 1)))))))
 
 (advice-add #'org-archive-subtree :before #'xs-archive-subtree-to-daily)
 
+(defun xs/org-set-agenda-group ()
+  "Set AGENDA-GROUP property for a headline under the cursor.
+AGENDA-GROUP is used for displaying org ql dynamic block"
+  (interactive)
+  (let* ((value (org-read-property-value "AGENDA-GROUP")))
+    (org-set-property "AGENDA-GROUP" value)))
 
 (provide 'init-org-utils)

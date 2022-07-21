@@ -16,7 +16,9 @@
                       (org-hydra/body)
                     (self-insert-command 1))))
   ("C-c m" . hydra-org-movement/body)
-  ("C-c ]" . nil)))
+  ("C-c ]" . nil)
+  ("C-'" . nil)
+  ("C-," . nil)))
   :custom
   (org-src-block-faces 'nil)
   (org-file-apps
@@ -245,7 +247,7 @@ prepended to the element after the #+HEADER: tag."
 	   )
 	  ("c" "web bookmarks" entry (file ,(concat lxs/org-agenda-directory "webclips.org"))
 	   "* [[%:link][%:description]]\n " :prepend t :empty-lines-after 1 :immediate-finish t)
-	  ("d" "link list" item (file "~/dms_link.org") "- %:link" :immediate-finish t)
+	  ("d" "link list" item (file+function "~/dms_link.org" (lambda () (end-of-buffer))) "- %:link" :immediate-finish t)
 	  ("n" "notes" entry (file+headline ,(concat lxs-home-dir "Documents/" "org/" "org-roam-files/" "quick-notes.org") "Notes")
 	   "* %^{标题} %(org-set-tags \"refile\")\n%?" :create-id t)
 	  ("s" "code cookbook" entry (file+headline ,(concat lxs-home-dir "Documents/" "org/" "org-roam-files/" "quick-notes.org") "Cookbook")
@@ -761,7 +763,11 @@ will not be modified."
 	 (current-name (file-name-nondirectory file-path))
 	 (img-path (concat dir-path "/" current-name)))
     (message img-path)
-    (call-process-shell-command (format "cat %s | xclip -selection clipboard -target image/png -i" img-path) nil nil)))
+    (if sys/win32p
+	(call-process-shell-command (s-concat "powershell " (file-truename "~/.emacs.d/to_clipboard.ps1") " -filename " (file-truename img-path)))
+	(shell-command-to-string (format "cat %s | xclip -selection clipboard -target image/png -i" img-path) nil nil)
+	)
+    ))
 
 ;TODO: 向前和向后查找
 (defun xs-toggle-code-block ()
@@ -831,6 +837,19 @@ child entries.  Should be called from a tree-view buffer."
       (switch-to-buffer buf)
       (org-sidebar-tree-toggle))))
 (global-set-key (kbd "<f5>") #'xs-toggle-gtd-sidebar)
+
+;; org-protocol for clicking html to org buffer
+(setq org-protocol-project-alist
+      '(
+        ("My local Org-notes"
+         :base-url "file://C:/Users/xunsong.li/Documents/org/publish_html/"
+         :working-directory "~/Documents/org/org-roam-files/"
+         :online-suffix ".html"
+         :working-suffix ".org")))
+(defun my-docode-uri-as-utf8 (uri)
+  (decode-coding-string (url-unhex-string uri) 'utf-8)
+  )
+(advice-add 'org-protocol-sanitize-uri :filter-return #'my-docode-uri-as-utf8)
 
 (server-start)
 

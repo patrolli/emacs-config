@@ -74,7 +74,7 @@ decrease this. If you experience stuttering, increase this.")
 (require 'init-elisp)
 
 (require 'init-org)
-;; (require 'init-org-clock)
+(require 'init-org-clock)
 (require 'init-org-utils)
 (require 'init-markdown)
 (require 'init-reader)

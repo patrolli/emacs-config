@@ -1,27 +1,29 @@
-;; highlight todo related keywords 
+;; highlight todo related keywords
 (use-package hl-todo
   :ensure t
-  :custom
-  (hl-todo-keyword-faces '(("TODO"   . "#FF0000")
+  :init
+  (setq hl-todo-keyword-faces '(("TODO"   . "#FF0000")
 			   ("FIXME"  . "#FF0000")
 			   ("DEBUG"  . "#A020F0")
 			   ("GOTCHA" . "#FF4500")
 			   ("STUB"   . "#1E90FF")
 			   ("NOTE" . "#b1951d")
-			   ("QUES" . "DarkMagenta")))
+			   ("QUES" . "DarkMagenta")
+			   ("xs" . "#FF0000")))
   :config
   (add-hook 'prog-mode-hook 'hl-todo-mode)
-  ;; (setq hl-todo-keyword-faces
-      ;; '(("TODO"   . "#FF0000")
-        ;; ("FIXME"  . "#FF0000")
-        ;; ("DEBUG"  . "#A020F0")
-        ;; ("GOTCHA" . "#FF4500")
-        ;; ("STUB"   . "#1E90FF")
-	;; ("NOTE" . "#b1951d")
-	;; ("QUES" . "DarkMagenta")))	
+  (setq hl-todo-keyword-faces
+      '(("TODO"   . "#FF0000")
+        ("FIXME"  . "#FF0000")
+        ("DEBUG"  . "#A020F0")
+        ("GOTCHA" . "#FF4500")
+        ("STUB"   . "#1E90FF")
+	("NOTE" . "#b1951d")
+	("QUES" . "DarkMagenta")
+	("xs" . "#FF0000")))
   (define-key hl-todo-mode-map (kbd "C-c b") 'hl-todo-previous)
   (define-key hl-todo-mode-map (kbd "C-c f") 'hl-todo-next)
-  (define-key hl-todo-mode-map (kbd "C-c o") 'hl-todo-occur)) 
+  (define-key hl-todo-mode-map (kbd "C-c o") 'hl-todo-occur))
 
 ;; Highlight uncommitted changes using VC
 (use-package diff-hl
@@ -76,7 +78,7 @@
     (with-eval-after-load 'magit
       (add-hook 'magit-pre-refresh-hook #'diff-hl-magit-pre-refresh)
       (add-hook 'magit-post-refresh-hook #'diff-hl-magit-post-refresh))))
-			
+
 ;; Highlight symbols
 (use-package symbol-overlay
   :diminish

@@ -1,0 +1,17 @@
+# -*- mode: snippet -*-
+# name: mxnet doc
+# key: mxd
+# --
+
+"""${1:Descriptions}
+
+Parameters
+----------
+${2:arg} : type
+  Meaning.  
+
+Returns
+-------
+${3:var} : type
+  Meaning.
+"""

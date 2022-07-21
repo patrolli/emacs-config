@@ -38,6 +38,7 @@
          desktop-restore-frames nil
          desktop-save t
 	 desktop-path (list user-emacs-directory)
-	 desktop-auto-save-timeout 120))
+	 desktop-auto-save-timeout 120
+	 desktop-dirname `,(file-name-directory user-init-file)))
 
 (provide 'init-restore)

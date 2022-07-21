@@ -126,7 +126,7 @@
 
 (defun browse-html-of-org-buffer ()
   (interactive)
-  (let* ((html-dir-path (file-name-concat "/home/lixunsong" "Documents" "org" "publish_html"))
+  (let* ((html-dir-path (file-name-concat (file-truename "~") "Documents" "org" "publish_html"))
 	 (bn (file-name-base (buffer-name (current-buffer))))
 	 (html-path (file-name-concat html-dir-path (concat bn ".html"))))
     (if (eq (buffer-local-value 'major-mode (current-buffer)) 'org-mode)

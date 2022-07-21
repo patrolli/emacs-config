@@ -33,7 +33,8 @@
   :bind
   (("C-'" . imenu-list-smart-toggle))
   :config
-  (setq imenu-list-position 'right)
+  (setq imenu-list-position 'left)
+  (setq imenu-list-size 0.15)
   (setq imenu-list-focus-after-activation t)
   )
 

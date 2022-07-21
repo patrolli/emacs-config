@@ -6,11 +6,14 @@
   :init
   ;; Disable readline based native completion
   (setq python-shell-completion-native-enable nil)
+  (setq python-shell-interpreter "python")
+  )
+
+(use-package python-black
+  :demand t
+  :after python
   :config
-  (defun my-yapf-format-buffer ()
-       (interactive)
-       (when (and (executable-find "yapf") buffer-file-name)
-         (call-process "yapf" nil nil nil "-i" "--style" "google" buffer-file-name)))
+  (setq python-black-command "C:\\Users\\xunsong.li\\AppData\\Roaming\\Python\\Python310\\Scripts\\black.exe")
   )
 
 (provide 'init-python)

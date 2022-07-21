@@ -1246,7 +1246,7 @@ Such as 'Two Sum' will be converted to 'two-sum'."
 (use-package embark
   :ensure t
   :bind
-  (("C-;" . embark-act)         ;; pick some comfortable binding
+  (("C-," . embark-act)         ;; pick some comfortable binding
    ;; ("C-;" . embark-dwim)        ;; good alternative: M-.
    ("M-n" . embark-next-symbol)
    ("M-p" . embark-previous-symbol)
@@ -1326,12 +1326,9 @@ Such as 'Two Sum' will be converted to 'two-sum'."
 (add-to-list 'load-path "~/.emacs.d/site-lisp/")
 
 (require 'yasnippet)
-(require 'lsp-bridge)
-(require 'lsp-bridge-icon)        ;; show icons for completion items, optional
-(require 'lsp-bridge-jdtls)       ;; provide Java third-party library jump and -data directory support, optional
-(yas-global-mode 1)
 
-(setq lsp-bridge-completion-provider 'corfu)
+
+
 (require 'corfu)
 (require 'corfu-info)
 (require 'corfu-history)
@@ -1382,26 +1379,177 @@ Return the errors parsed with the error patterns of CHECKER."
 
 (add-to-list 'org-capture-templates '("x" "test" plain (function (lambda () (find-file-noselect "~/Documents/org/gtd/next.org"))) "%U %i?"))
 
-(defun xs-locate-doing-headlines ()
-  (interactive)
-  "列出 next.org 中的 headline, 选择之后，跳到 headline 区域的最后位置"
-  (let* ((entry-info (xs-list-doing-tasks))
-	 (i 0)
-	 (headlines (mapcar #'(lambda (x) (setq i (+ 1 i))
-				(format "%s-%s" i (car x))) entry-info))
-	 (chosen (completing-read "choose headline: " headlines))
-	 (idx (-elem-index chosen headlines))
-	 (marker (cdr (nth idx entry-info))))
-    (set-buffer (org-base-buffer (marker-buffer marker)))
-    (goto-char marker)
-    (goto-char (org-entry-end-position))))
-
 (start-process-shell-command "when-changed" "*lxs*" "when-changed")
 
 (flymake-mode 1)
 
-(defun xs-org-roam-remove-refile-tag ()
-  "移出当前 roam node 的 refile tag"
+(setq org-id-extra-files (directory-files-recursively org-roam-directory "\.org$"))
+
+(defun run-powershell ()
+  "Run powershell"
   (interactive)
-  (org-roam-tag-remove '("refile"))
-  (save-buffer))
+  (async-shell-command "C:/Windows/system32/WindowsPowerShell/v1.0/powershell.exe -Command -"
+               nil
+               nil))
+
+(defun xs-insert-two-space ()
+  (interactive)
+  (insert "  ")
+  (beginning-of-line (next-line)))
+
+(defun set-frame-size-according-to-resolution ()
+  (interactive)
+  (if (display-graphic-p)
+  (progn
+    ;; use 120 char wide window for largeish displays
+    ;; and smaller 80 column windows for smaller displays
+    ;; pick whatever numbers make sense for you
+    (if (> (x-display-pixel-width) 1280)
+           (add-to-list 'default-frame-alist (cons 'width 220))
+           (add-to-list 'default-frame-alist (cons 'width 80)))
+    ;; for the height, subtract a couple hundred pixels
+    ;; from the screen height (for panels, menubars and
+    ;; whatnot), then divide by the height of a char to
+    ;; get the height we want
+    (add-to-list 'default-frame-alist
+         (cons 'height (/ (- (x-display-pixel-height) 200)
+                             (frame-char-height)))))))
+
+(set-frame-size-according-to-resolution)
+
+(when (f-exists-p "~/plantuml.jar")
+  (org-babel-do-load-languages
+   'org-babel-load-languages
+   '((emacs-lisp . t)
+     (plantuml . t)
+     ))
+  (use-package plantuml-mode
+    :config
+    (setq org-plantuml-jar-path "~/plantuml.jar")
+    ))
+
+(shell-command-to-string "black")
+(shell-command-to-string "wsl echo -e \"\\033[31;1;4m$(date)\\033[0m\n\"")
+(eshell-command "C:\\Users\\xunsong.li\\AppData\\Roaming\\Python\\Python310\\Scripts\\black.exe")
+(setenv "PATH"
+	(concat
+	 "C:\\Users\\xunsong.li\\AppData\\Roaming\\Python\\Python310\\Scripts\\" ";"
+	 (getenv "PATH")))
+(setq eshell-path-env (concat "C:\\Users\\xunsong.li\\AppData\\Roaming\\Python\\Python310\\Scripts\\" ";" eshell-path-env))
+
+
+(defun tt-print-items ()
+  "print all headings in current buffer (of org mode).
+2019-01-14"
+  (interactive)
+  (with-output-to-temp-buffer "*xah temp out*"
+    (org-element-map (org-element-parse-buffer) 'link
+      (lambda (x)
+        (princ (org-element-property :raw-link x))
+        (terpri )))))
+
+(setq flycheck-flake8rc ".flake8")
+
+
+
+(add-to-list 'load-path "~/.emacs.d/site-lisp/lsp-bridge")
+(require 'lsp-bridge)
+(add-hook 'prog-mode-hook #'lsp-bridge-mode)
+;; (global-lsp-bridge-mode)
+
+(define-key acm-mode-map "\M-j" #'hydra-reading/nil)
+(define-key acm-mode-map "\M-k" #'pyim-convert-string-at-point)
+
+
+(define-key prog-mode-map "\M-." #'lsp-bridge-find-def)
+(define-key prog-mode-map "\M-," #'lsp-bridge-return-from-def)
+
+
+;; add time display for rsync command
+;; this command can run in cmd
+;; wsl ~/.local/bin/when-changed -r -v -1 -s /mnt/c/users/xunsong.li/Bridge/ -c "sshpass -p \"Lxs1183236604@\" rsync -auvz --timeout=15 $(git rev-parse --show-toplevel) dev013:~/; echo \"\\033[31;1;4m$(date)\\033[0m\n\""
+
+
+(defvar acm-mode-map
+  (let ((map (make-sparse-keymap)))
+    (define-key map [remap next-line] #'acm-select-next)
+    (define-key map [remap previous-line] #'acm-select-prev)
+    (define-key map [down] #'acm-select-next)
+    (define-key map [up] #'acm-select-prev)
+    (define-key map "\M-n" #'acm-select-next)
+    (define-key map "\M-p" #'acm-select-prev)
+    (define-key map "\M-," #'acm-select-last)
+    (define-key map "\M-." #'acm-select-first)
+    (define-key map "\C-m" #'acm-complete)
+    (define-key map "\t" #'acm-complete)
+    (define-key map "\n" #'acm-complete)
+    (define-key map "\C-g" #'acm-hide)
+    map)
+  "Keymap used when popup is shown.")
+
+(defun xs/org-ql-dblock-move-to-headline ()
+  "Quick move to the headline as the line that the cursor being
+in the dynamic table"
+  (interactive)
+  (goto-char (line-beginning-position))
+  (let* (
+	 (end (line-end-position))
+	 (link-regex "\\[\\[.*+\\]\\[.*+\\]\\]")
+	 (pos (- (re-search-forward link-regex end t) 1)))
+    (goto-char pos)
+    (org-open-at-point)))
+
+
+;; 读取 node tag, 根据 tag 找对应的 index node name
+(setq org-tag-to-index-node '(("python" "python 编程指南")))
+
+(defun xs-insert-node-to-index-file ()
+  (interactive)
+  (let* ((node (org-roam-node-at-point))
+	 (tags (org-roam-node-tags node))
+	 )
+    (dolist (tag tags)
+      (if-let ((ind-file (xs--get-index-node-from-tag tag)))
+	  ; TODO before insert, check if this ind-file has this node link
+	  (xs--insert-node-into-file ind-file node)
+	))))
+
+(defun xs--get-index-node-from-tag (tag)
+  (let* ((node-title (cadr (assoc tag org-tag-to-index-node)))
+	 (ind-file (caar (org-roam-db-query [:select [file] :from nodes :where (= title $s1)] node-title)))
+	 )
+    ind-file))
+
+(defun xs--insert-node-into-file (file node)
+  (let* ((description (org-roam-node-formatted node))
+	 (id (org-roam-node-id node))
+	 )
+    (with-current-buffer (find-file-noselect file)
+      (end-of-buffer)
+      (insert "- ")
+      (insert (org-link-make-string
+               (concat "id:" id)
+               description)))))
+
+
+
+(defun xs/lsp-bridge-not-in-comment ()
+  "Hide completion if cursor in comment area."
+  (interactive)
+  (if (lsp-bridge-in-comment-p)
+      (message "in comment")
+    (message "no")
+      ))
+
+(use-package consult)
+
+(setq treemacs-follow-mode nil
+      )
+(with-eval-after-load 'treemacs
+    (define-key treemacs-mode-map [mouse-1] #'treemacs-single-click-expand-action))
+(setq lsp-bridge-enable-signature-help nil)
+
+;; 每次保存时，如果当前 buffer 在 sync 的 proj 里面，那么看对应的 buffer 长度是否发生了变化。需要注册 (sync-buffer-name, prev-length)
+(defun syp-check-sync-state ()
+  ()
+  )

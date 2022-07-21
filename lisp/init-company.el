@@ -22,7 +22,7 @@
 	("<backtab>" . my-company-yasnippet)
 	:map company-mode-map
          ("<backtab>" . company-yasnippet))
-  :hook (after-init . global-company-mode)
+  :hook (org-mode . company-mode)
   :config
   ;; company-dabbrev 不要补全中文
   (setq company-dabbrev-char-regexp "[-_A-Za-z0-9]")

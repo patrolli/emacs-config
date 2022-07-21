@@ -1,3 +1,14 @@
+(use-package lsp-bridge
+  :load-path "site-lisp/lsp-bridge"
+  ;; :disabled t
+  :config
+  (define-key prog-mode-map "\M-." #'lsp-bridge-find-def)
+  (define-key prog-mode-map "\M-," #'lsp-bridge-return-from-def)
+  (setq lsp-bridge-enable-diagnostics nil)
+  (add-hook 'python-mode-hook #'lsp-bridge-mode)
+  (define-key acm-mode-map "\M-j" #'(lambda () (interactive) (acm-hide) (hydra-reading/body)))
+  (define-key acm-mode-map "\M-k" #'(lambda () (interactive) (acm-hide) (pyim-convert-string-at-point))))
+
 (use-package eglot
   :ensure t
   :config

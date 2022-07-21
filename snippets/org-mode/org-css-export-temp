@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+# name: org-css-export-temp
+# key: css
+# --
+#+HTML_HEAD_EXTRA: <link rel="stylesheet" type="text/css" href="../css/worg.css"></link>
+#+HTML_LINK_UP: index.html

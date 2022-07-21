@@ -1,3 +1,5 @@
+(require 'init-const)
+
 (defun sanityinc/locale-var-encoding (v)
   "Return the encoding portion of the locale string V, or nil if missing."
   (when v
@@ -18,5 +20,10 @@
 (set-default-coding-systems 'utf-8-unix)
 (setq buffer-file-coding-system 'utf-8-unix)
 (set-selection-coding-system 'utf-8-unix)
+
+(when sys/win32p
+    (set-clipboard-coding-system 'utf-16-le)
+    (set-selection-coding-system 'utf-16-le)
+    (set-next-selection-coding-system 'utf-16-le))
 
 (provide 'init-locales)
