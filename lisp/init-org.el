@@ -522,10 +522,37 @@ will not be modified."
 	 "")
        'font-lock-face '(:foreground "grey"))))
 
+(use-package dendroam
+  :load-path "site-lisp/dendroam"
+  :config
+  (setq org-roam-node-display-template "${hierarchy}:${title}")
+  (setq org-roam-slug-trim-chars '(;; Combining Diacritical Marks https://www.unicode.org/charts/PDF/U0300.pdf
+                                   768 ; U+0300 COMBINING GRAVE ACCENT
+                                   769 ; U+0301 COMBINING ACUTE ACCENT
+                                   770 ; U+0302 COMBINING CIRCUMFLEX ACCENT
+                                   771 ; U+0303 COMBINING TILDE
+                                   772 ; U+0304 COMBINING MACRON
+                                   774 ; U+0306 COMBINING BREVE
+                                   775 ; U+0307 COMBINING DOT ABOVE
+                                   776 ; U+0308 COMBINING DIAERESIS
+                                   777 ; U+0309 COMBINING HOOK ABOVE
+                                   778 ; U+030A COMBINING RING ABOVE
+                                   780 ; U+030C COMBINING CARON
+                                   795 ; U+031B COMBINING HORN
+                                   803 ; U+0323 COMBINING DOT BELOW
+                                   804 ; U+0324 COMBINING DIAERESIS BELOW
+                                   805 ; U+0325 COMBINING RING BELOW
+                                   807 ; U+0327 COMBINING CEDILLA
+                                   813 ; U+032D COMBINING CIRCUMFLEX ACCENT BELOW
+                                   814 ; U+032E COMBINING BREVE BELOW
+                                   816 ; U+0330 COMBINING TILDE BELOW
+                                   817 ; U+0331 COMBINING MACRON BELOW
+                                   )))
+
   (setq org-roam-capture-templates
         '(("d" "default" plain "%?"
            :if-new (file+head "${slug}.org"
-            "#+title: ${title}\n#+filetags: :refile:\n#+date: %<%Y-%m-%d>\n#+CREATED: %U\n#+LAST_MODIFIED: %U\n#+roam_alias: \n#+startup: inlineimages latexpreview\n#+author: xunsong\n")
+            "#+title: ${hierarchy-title}\n#+filetags: :refile:\n#+date: %<%Y-%m-%d>\n#+CREATED: %U\n#+LAST_MODIFIED: %U\n#+roam_alias: \n#+startup: inlineimages latexpreview\n#+author: xunsong\n")
            :unnarrowed t)
           ("p" "private" plain
            "%?"
@@ -650,35 +677,7 @@ will not be modified."
     (message "Convert finish: %s" docx-file)))
 
 ;; export org to html
-(require 'ox-publish)
-(require 'org-roam-export)
-(setq org-publish-project-alist
-      '(
-       ("org-notes"
-	:base-directory "~/Documents/org/org-roam-files/"
-	:base-extension "org"
-	:publishing-directory "~/Documents/org/publish_html/"
-	:recursive t
-	:publishing-function org-html-publish-to-html
-	:headline-levels 4             ; Just the default for this project.
-	:auto-preamble t
-	:auto-sitemap t
-	:sitemap-filename  "sitemap.org"   ; ... 称它为 sitemap.org（它是默认的）... 
-	:sitemap-title  "Sitemap"          ; ...标题为“站点地图”。
-	)
-       ("org-static"
-	:base-directory "~/Documents/org/static/"
-	:base-extension "css\\|js\\|png\\|jpg\\|gif\\|pdf\\|mp3\\|ogg\\|swf"
-	:publishing-directory "~/public_html/"
-	:recursive t
-	:publishing-function org-publish-attachment
-	)
-       ("org" :components ("org-notes" "org-static"))))
-
-(setq org-export-use-babel nil)
-(setq org-export-with-broken-links 'mark)
-(setq org-html-htmlize-output-type 'css)
-(setq org-html-head-include-default-style nil)
+(require 'init-org-wiki)
 
 (defun toggle-org-html-export-on-save ()
   (interactive)
