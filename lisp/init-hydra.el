@@ -275,7 +275,7 @@ Version 2016-06-19"
   ("<SPC>f" python-black-buffer)
   ;; ("<SPC>f" counsel-dogears)
   ("<SPC>d" dogears-remember)
-  ("<SPC>s" save-buffer)
+  ("<SPC>s" xs/save-buffer)
   ("<SPC>h" eyebrowse-prev-window-config)
   ("<SPC>l" eyebrowse-next-window-config)
   ;; ("<SPC>g" eyebrowse-switch-to-window-config)

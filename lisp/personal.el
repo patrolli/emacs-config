@@ -100,13 +100,13 @@
   "Send PATH to APP-NAME on WSL."
   (interactive)
   (let* ((path (expand-file-name
-                (replace-regexp-in-string
-                 "'" "\\'"
-                 (or path (if (derived-mode-p 'dired-mode)
-                              (dired-get-file-for-visit)
-                            (buffer-file-name)))
-                 nil t)))
-         (command (format "%s `wslpath -w \"%s\"`" (shell-quote-argument app-name) path)))
+		(replace-regexp-in-string
+		 "'" "\\'"
+		 (or path (if (derived-mode-p 'dired-mode)
+			      (dired-get-file-for-visit)
+			    (buffer-file-name)))
+		 nil t)))
+	 (command (format "%s `wslpath -w \"%s\"`" (shell-quote-argument app-name) path)))
     (shell-command-to-string command)))
 
 ;; (format "%s `wslpath -w %s`" (shell-quote-argument "explorer.exe") (shell-quote-argument (buffer-file-name)))
@@ -240,5 +240,9 @@ Uses `current-date-time-format' for the formatting the date/time."
   (let ((filename (or name (format "%s:%s" (buffer-name) (line-number-at-pos)))))
     (bookmark-set filename)))
 
-(provide 'personal)
+(defun xs/save-buffer ()
+  (interactive)
+  (whitespace-cleanup)
+  (save-buffer))
 
+(provide 'personal)
