@@ -10,11 +10,11 @@
    ("C-c c" . org-capture)
   (:map org-mode-map
   ("<" . (lambda ()
-                  "Insert org template."
-                  (interactive)
-                  (if (or (region-active-p) (looking-back "^\s*" 1))
-                      (org-hydra/body)
-                    (self-insert-command 1))))
+		  "Insert org template."
+		  (interactive)
+		  (if (or (region-active-p) (looking-back "^\s*" 1))
+		      (org-hydra/body)
+		    (self-insert-command 1))))
   ("C-c m" . hydra-org-movement/body)
   ("C-c ]" . nil)
   ("C-'" . nil)
@@ -71,8 +71,8 @@
     (("u" (hot-expand "<s" "plantuml :file CHANGE.png") "plantuml")
      ("Y" (hot-expand "<s" "ipython :session :exports both :results raw drawer\n$0") "ipython")
      ("P" (progn
-            (insert "#+HEADERS: :results output :exports both :shebang \"#!/usr/bin/env perl\"\n")
-            (hot-expand "<s" "perl")) "Perl tangled")
+	    (insert "#+HEADERS: :results output :exports both :shebang \"#!/usr/bin/env perl\"\n")
+	    (hot-expand "<s" "perl")) "Perl tangled")
      ("<" self-insert-command "ins"))))
 
   :config
@@ -85,15 +85,15 @@ structure element. HEADER string includes more parameters that are
 prepended to the element after the #+HEADER: tag."
     (let (text)
       (when (region-active-p)
-        (setq text (buffer-substring (region-beginning) (region-end)))
-        (delete-region (region-beginning) (region-end)))
+	(setq text (buffer-substring (region-beginning) (region-end)))
+	(delete-region (region-beginning) (region-end)))
       (insert str)
       (if (fboundp 'org-try-structure-completion)
-          (org-try-structure-completion) ; < org 9
-        (progn
-          ;; New template expansion since org 9
-          (require 'org-tempo nil t)
-          (org-tempo-complete-tag)))
+	  (org-try-structure-completion) ; < org 9
+	(progn
+	  ;; New template expansion since org 9
+	  (require 'org-tempo nil t)
+	  (org-tempo-complete-tag)))
       (when mod (insert mod) (forward-line))
       (when text (insert text))))
 
@@ -103,8 +103,8 @@ prepended to the element after the #+HEADER: tag."
 	org-catch-invisible-edits 'smart
 	org-tags-column -77
 	org-priority-faces '((?A . error)
-                             (?B . warning)
-                             (?C . success))
+			     (?B . warning)
+			     (?C . success))
 	org-log-done t
 	org-clock-x11idle-program-name "xprintidle")
 
@@ -126,9 +126,9 @@ prepended to the element after the #+HEADER: tag."
     :diminish
     :hook (org-mode . org-fancy-priorities-mode)
     :init (setq org-fancy-priorities-list
-                (if (and (display-graphic-p) (char-displayable-p ?⯀))
-                    '("⯀" "⯀" "⯀" "⯀")
-                  '("HIGH" "MEDIUM" "LOW" "OPTIONAL"))))
+		(if (and (display-graphic-p) (char-displayable-p ?⯀))
+		    '("⯀" "⯀" "⯀" "⯀")
+		  '("HIGH" "MEDIUM" "LOW" "OPTIONAL"))))
 
   (defhydra hydra-org-movement (:color red :columns 3)
     "Org Mode Movements"
@@ -166,7 +166,7 @@ prepended to the element after the #+HEADER: tag."
 	org-habit-graph-column 40
 	org-habit-preceding-days 21
 	org-habit-following-days 1)
-  
+
   ;; org-protocol 设置
   (use-package org-protocol
     :ensure nil
@@ -190,14 +190,14 @@ prepended to the element after the #+HEADER: tag."
   (when (looking-back "=[[:ascii:]]+$")
     (let (cands)
       (save-match-data
-        (save-excursion
-          (goto-char (point-min))
-          (while (re-search-forward "=\\([[:ascii:]]+\\)=$" nil t)
-            (cl-pushnew
-             (match-string-no-properties 0) cands :test 'equal))
-          cands))
+	(save-excursion
+	  (goto-char (point-min))
+	  (while (re-search-forward "=\\([[:ascii:]]+\\)=$" nil t)
+	    (cl-pushnew
+	     (match-string-no-properties 0) cands :test 'equal))
+	  cands))
       (when cands
-        (list (match-beginning 0) (match-end 0) cands :exclusive 'no)))))
+	(list (match-beginning 0) (match-end 0) cands :exclusive 'no)))))
 
   (defun my-org-register-completion-functions-h ()
       (add-hook 'completion-at-point-functions #'org-completion-symbols -100 t))
@@ -209,22 +209,22 @@ prepended to the element after the #+HEADER: tag."
   (defun find-month-tree ()
     "配合 journal 的 capture"
     (let* ((path (get-year-and-month))
-           (level 1)
-           end)
+	   (level 1)
+	   end)
       (unless (derived-mode-p 'org-mode)
 	(error "Target buffer \"%s\" should be in Org mode" (current-buffer)))
       (goto-char (point-min))             ;移动到 buffer 的开始位置
       ;; 先定位表示年份的 headline，再定位表示月份的 headline
       (dolist (heading path)
 	(let ((re (format org-complex-heading-regexp-format
-                          (regexp-quote heading)))
-              (cnt 0))
-          (if (re-search-forward re end t)
-              (goto-char (point-at-bol))  ;如果找到了 headline 就移动到对应的位置
-            (progn                        ;否则就新建一个 headline
-              (or (bolp) (insert "\n"))
-              (if (/= (point) (point-min)) (org-end-of-subtree t t))
-              (insert (make-string level ?*) " " heading "\n"))))
+			  (regexp-quote heading)))
+	      (cnt 0))
+	  (if (re-search-forward re end t)
+	      (goto-char (point-at-bol))  ;如果找到了 headline 就移动到对应的位置
+	    (progn                        ;否则就新建一个 headline
+	      (or (bolp) (insert "\n"))
+	      (if (/= (point) (point-min)) (org-end-of-subtree t t))
+	      (insert (make-string level ?*) " " heading "\n"))))
 	(setq level (1+ level))
 	(setq end (save-excursion (org-end-of-subtree t t))))
       (org-end-of-subtree)))
@@ -241,10 +241,9 @@ prepended to the element after the #+HEADER: tag."
   (add-hook 'org-capture-prepare-finalize-hook #'my/org-capture-maybe-prev-create-id)
   (setq org-capture-templates
 	`(("i" "待办" entry (file+headline ,(concat lxs/org-agenda-directory "next.org") "待办")
-           "* TODO %?\nCaptured %<%Y-%m-%d %H:%M>")
+	   "* TODO [#B] %? %^g\nCaptured %<%Y-%m-%d %H:%M>")
 	  ("h" "之后" entry (file+headline ,(concat lxs/org-agenda-directory "next.org") "Inbox")
-	   "* %?\nCaptured %<%Y-%m-%d %H:%M>"
-	   )
+	   "* %?\nCaptured %<%Y-%m-%d %H:%M>")
 	  ("c" "web bookmarks" entry (file ,(concat lxs/org-agenda-directory "webclips.org"))
 	   "* [[%:link][%:description]]\n " :prepend t :empty-lines-after 1 :immediate-finish t)
 	  ("d" "link list" item (file+function "~/dms_link.org" (lambda () (end-of-buffer))) "- %:link" :immediate-finish t)
@@ -255,9 +254,10 @@ prepended to the element after the #+HEADER: tag."
 	  ("a" "code api" entry (file+headline ,(concat lxs-home-dir "Documents/" "org/" "org-roam-files/" "quick-notes.org") "Api")
 	   "* %?\n%i- Signature: ==\n描述: " :create-id t :jump-to-captured t)
 	  ("x" "log task" plain (function xs-locate-doing-headlines) "# %U\n%i%?")
+	  ("l" "logseq daily" entry (function logseq-find-today) "* [[refile]] %?")
 	  ))
 
-  (add-hook 'org-capture-before-finalize-hook #'org-set-created-property)
+  ;; (add-hook 'org-capture-before-finalize-hook #'org-set-created-property)
 
   ;; 为 org 的 header 的 created 和 last_modified 两个属性设置自动检测时间戳
   (defun zp/org-find-time-file-property (property &optional anywhere)
@@ -266,12 +266,12 @@ When ANYWHERE is non-nil, search beyond the preamble."
     (save-excursion
       (goto-char (point-min))
       (let ((first-heading
-             (save-excursion
-               (re-search-forward org-outline-regexp-bol nil t))))
-        (when (re-search-forward (format "^#\\+%s:" property)
-                                 (if anywhere nil first-heading)
-                                 t)
-          (point)))))
+	     (save-excursion
+	       (re-search-forward org-outline-regexp-bol nil t))))
+	(when (re-search-forward (format "^#\\+%s:" property)
+				 (if anywhere nil first-heading)
+				 t)
+	  (point)))))
 
   (defun zp/org-has-time-file-property-p (property &optional anywhere)
     "Return the position of time file PROPERTY if it is defined.
@@ -279,27 +279,27 @@ As a special case, return -1 if the time file PROPERTY exists but
 is not defined."
     (when-let ((pos (zp/org-find-time-file-property property anywhere)))
       (save-excursion
-        (goto-char pos)
-        (if (and (looking-at-p " ")
-                 (progn (forward-char)
-                        (org-at-timestamp-p 'lax)))
-            pos
-          -1))))
+	(goto-char pos)
+	(if (and (looking-at-p " ")
+		 (progn (forward-char)
+			(org-at-timestamp-p 'lax)))
+	    pos
+	  -1))))
   (defun zp/org-set-time-file-property (property &optional anywhere pos)
     "Set the time file PROPERTY in the preamble.
 When ANYWHERE is non-nil, search beyond the preamble.
 If the position of the file PROPERTY has already been computed,
 it can be passed in POS."
     (when-let ((pos (or pos
-                        (zp/org-find-time-file-property property))))
+			(zp/org-find-time-file-property property))))
       (save-excursion
-        (goto-char pos)
-        (if (looking-at-p " ")
-            (forward-char)
-          (insert " "))
-        (delete-region (point) (line-end-position))
-        (let* ((now (format-time-string "[%Y-%m-%d %a %H:%M]")))
-          (insert now)))))
+	(goto-char pos)
+	(if (looking-at-p " ")
+	    (forward-char)
+	  (insert " "))
+	(delete-region (point) (line-end-position))
+	(let* ((now (format-time-string "[%Y-%m-%d %a %H:%M]")))
+	  (insert now)))))
   (defvar org-created-property-name "CREATED"
     "The name of the org-mode property that stores the creation date of the entry")
 
@@ -310,8 +310,8 @@ argument will be used instead. If the property already exists, it
 will not be modified."
   (interactive)
   (let* ((created (or NAME org-created-property-name))
-         (fmt (if active "<%s>" "[%s]"))
-         (now  (format fmt (format-time-string "%Y-%m-%d %a %H:%M"))))
+	 (fmt (if active "<%s>" "[%s]"))
+	 (now  (format fmt (format-time-string "%Y-%m-%d %a %H:%M"))))
     (unless (org-entry-get (point) created nil)
       (org-set-property created now))))
 
@@ -352,20 +352,20 @@ will not be modified."
   ;; 设置 TODO state and faces
   (setq org-todo-keywords
 	    '((sequence "TODO(t)" "DOING(n)" "|" "DONE(d)")
-          (sequence "HOLD(h@/!)" "|" "CANCELLED(c@/!)")))
+	  (sequence "HOLD(h@/!)" "|" "CANCELLED(c@/!)")))
 
   (setq org-todo-keyword-faces
 	    (quote (("TODO" :foreground "red" :weight bold)
-		        ("DOING" :inherit warning)
-		        ("DONE" :foreground "forest green" :weight bold)
-		        ("HOLD" :foreground "magenta" :weight bold)
-		        ("CANCELLED" :foreground "forest green" :weight bold)
-		        ("REPEAT" :foreground "red" :weight bold)
-		        )))
+			("DOING" :inherit warning)
+			("DONE" :foreground "forest green" :weight bold)
+			("HOLD" :foreground "magenta" :weight bold)
+			("CANCELLED" :foreground "forest green" :weight bold)
+			("REPEAT" :foreground "red" :weight bold)
+			)))
 
   ;; refile
   (setq org-refile-targets '((nil :maxlevel . 9)
-                                (org-agenda-files :maxlevel . 9)))
+				(org-agenda-files :maxlevel . 9)))
   (setq org-outline-path-complete-in-steps nil)         ; Refile in a single go
   (setq org-refile-use-outline-path t)                  ; Show full paths for refiling
 
@@ -398,8 +398,8 @@ will not be modified."
   :ensure nil
   :config
   (add-to-list 'org-latex-classes
-           '("note"
-         "
+	   '("note"
+	 "
 % default
 \\documentclass[colorlinks]{article}
 \\usepackage[utf8]{inputenc}
@@ -439,17 +439,17 @@ will not be modified."
 \\definecolor{light-gray}{gray}{0.89}
 \\renewcommand{\\texttt}[1]{{\\colorbox{light-gray}{\\small\\menlo #1}}}
 "
-           ("\\section{%s}" . "\\section*{%s}")
-           ("\\subsection{%s}" . "\\subsection*{%s}")
-           ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
-           ("\\paragraph{%s}" . "\\paragraph*{%s}")
-           ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
+	   ("\\section{%s}" . "\\section*{%s}")
+	   ("\\subsection{%s}" . "\\subsection*{%s}")
+	   ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
+	   ("\\paragraph{%s}" . "\\paragraph*{%s}")
+	   ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
   ;; (setq org-latex-default-class "ctexart")
   (setq org-latex-compiler "xelatex")
   (setq org-latex-pdf-process '("xelatex -shell-escape -interaction=nonstopmode -8bit -output-directory %o %f"
-                        "bibtex %b"
-                        "xelatex -shell-escape -interaction=nonstopmode -8bit -output-directory %o %f"
-                        "xelatex -shell-escape -interaction=nonstopmode -8bit -output-directory %o %f"))
+			"bibtex %b"
+			"xelatex -shell-escape -interaction=nonstopmode -8bit -output-directory %o %f"
+			"xelatex -shell-escape -interaction=nonstopmode -8bit -output-directory %o %f"))
   )
 
 (use-package ox-hugo
@@ -500,6 +500,7 @@ will not be modified."
     "Others"
     (("v t" org-tags-view "filt buffer tags")
      ("a" org-roam-buffer-toggle "backlinks")
+     ("k" org-kanban/shift "kanban shift")
      ("q" hydra-pop "exit"))))
   :config
   (org-roam-setup)
@@ -509,16 +510,16 @@ will not be modified."
   (cl-defmethod org-roam-node-filetitle ((node org-roam-node))
     "Return the file TITLE for the node."
     (let ((filetitle (org-roam-get-keyword "TITLE" (org-roam-node-file node)))
-          (title (org-roam-node-title node)))
+	  (title (org-roam-node-title node)))
       (if (string= filetitle title)
-          ""
-        (format "%s > " filetitle))))
+	  ""
+	(format "%s > " filetitle))))
 
   (cl-defmethod org-roam-node-my-tags ((node org-roam-node))
     (let ((tags (org-roam-node-tags node)))
       (propertize
        (if (> (length tags) 0)
-           (format "(%s) " (mapconcat (lambda (s) (concat "" s)) tags ","))
+	   (format "(%s) " (mapconcat (lambda (s) (concat "" s)) tags ","))
 	 "")
        'font-lock-face '(:foreground "grey"))))
 
@@ -527,38 +528,38 @@ will not be modified."
   :config
   (setq org-roam-node-display-template "${hierarchy}:${title}")
   (setq org-roam-slug-trim-chars '(;; Combining Diacritical Marks https://www.unicode.org/charts/PDF/U0300.pdf
-                                   768 ; U+0300 COMBINING GRAVE ACCENT
-                                   769 ; U+0301 COMBINING ACUTE ACCENT
-                                   770 ; U+0302 COMBINING CIRCUMFLEX ACCENT
-                                   771 ; U+0303 COMBINING TILDE
-                                   772 ; U+0304 COMBINING MACRON
-                                   774 ; U+0306 COMBINING BREVE
-                                   775 ; U+0307 COMBINING DOT ABOVE
-                                   776 ; U+0308 COMBINING DIAERESIS
-                                   777 ; U+0309 COMBINING HOOK ABOVE
-                                   778 ; U+030A COMBINING RING ABOVE
-                                   780 ; U+030C COMBINING CARON
-                                   795 ; U+031B COMBINING HORN
-                                   803 ; U+0323 COMBINING DOT BELOW
-                                   804 ; U+0324 COMBINING DIAERESIS BELOW
-                                   805 ; U+0325 COMBINING RING BELOW
-                                   807 ; U+0327 COMBINING CEDILLA
-                                   813 ; U+032D COMBINING CIRCUMFLEX ACCENT BELOW
-                                   814 ; U+032E COMBINING BREVE BELOW
-                                   816 ; U+0330 COMBINING TILDE BELOW
-                                   817 ; U+0331 COMBINING MACRON BELOW
-                                   )))
+				   768 ; U+0300 COMBINING GRAVE ACCENT
+				   769 ; U+0301 COMBINING ACUTE ACCENT
+				   770 ; U+0302 COMBINING CIRCUMFLEX ACCENT
+				   771 ; U+0303 COMBINING TILDE
+				   772 ; U+0304 COMBINING MACRON
+				   774 ; U+0306 COMBINING BREVE
+				   775 ; U+0307 COMBINING DOT ABOVE
+				   776 ; U+0308 COMBINING DIAERESIS
+				   777 ; U+0309 COMBINING HOOK ABOVE
+				   778 ; U+030A COMBINING RING ABOVE
+				   780 ; U+030C COMBINING CARON
+				   795 ; U+031B COMBINING HORN
+				   803 ; U+0323 COMBINING DOT BELOW
+				   804 ; U+0324 COMBINING DIAERESIS BELOW
+				   805 ; U+0325 COMBINING RING BELOW
+				   807 ; U+0327 COMBINING CEDILLA
+				   813 ; U+032D COMBINING CIRCUMFLEX ACCENT BELOW
+				   814 ; U+032E COMBINING BREVE BELOW
+				   816 ; U+0330 COMBINING TILDE BELOW
+				   817 ; U+0331 COMBINING MACRON BELOW
+				   )))
 
   (setq org-roam-capture-templates
-        '(("d" "default" plain "%?"
-           :if-new (file+head "${slug}.org"
-            "#+title: ${hierarchy-title}\n#+filetags: :refile:\n#+date: %<%Y-%m-%d>\n#+CREATED: %U\n#+LAST_MODIFIED: %U\n#+roam_alias: \n#+startup: inlineimages latexpreview\n#+author: xunsong\n")
-           :unnarrowed t)
-          ("p" "private" plain
-           "%?"
-           :file-name "private-${slug}.org"
-           :head "#+title: ${title}\n"
-           :unnarrowed t)
+	'(("d" "default" plain "%?"
+	   :if-new (file+head "${slug}.org"
+	    "#+title: ${hierarchy-title}\n#+filetags: :refile:\n#+date: %<%Y-%m-%d>\n#+CREATED: %U\n#+LAST_MODIFIED: %U\n#+roam_alias: \n#+startup: inlineimages latexpreview\n#+author: xunsong\n")
+	   :unnarrowed t)
+	  ("p" "private" plain
+	   "%?"
+	   :file-name "private-${slug}.org"
+	   :head "#+title: ${title}\n"
+	   :unnarrowed t)
 	  ("r" "paper notes" plain "%?"
 	   :if-new (file+head "${citekey}.org" "#+title: ${title}\n#+filetags: :refile:\n#+author: xunsong\n#+date: %<%Y-%m-%d>\n#+CREATED: %U\n#+LAST_MODIFIED: %U\n#+startup: inlineimages\n\n")
 	   :unnarrowed t)))
@@ -568,9 +569,9 @@ will not be modified."
 
   (setq org-roam-dailies-capture-templates
      `(("l" "log" plain
-        "- [%<%H:%M>]\n- %?"
-        :target (file+head+olp "%<%Y>/%<week_%V>.org" "#+title: %<week %V %B %Y>\n#+filetags: :private:dailies:" ("%<%m-%d, %a>"))
-        :unnarrowed t)))
+	"- [%<%H:%M>]\n- %?"
+	:target (file+head+olp "%<%Y>/%<week_%V>.org" "#+title: %<week %V %B %Y>\n#+filetags: :private:dailies:" ("%<%m-%d, %a>"))
+	:unnarrowed t)))
 
   (require 'org-roam-protocol)
   ;; 设置 org-protocol 的 catpure 模板
@@ -589,7 +590,7 @@ will not be modified."
     "init org-roam headline node"
     (interactive)
     (progn (org-id-get-create)
-           (org-entry-put nil "CREATED" (format-time-string "[%Y-%m-%d %a %H:%M]"))))
+	   (org-entry-put nil "CREATED" (format-time-string "[%Y-%m-%d %a %H:%M]"))))
 
   (defun my/orb-init-node ()
     "init org-roam headline with REFS: for org-roam-bibxtex"
@@ -637,8 +638,8 @@ will not be modified."
     (defun my-orb-node-insert (node)
       (let* ((description (org-roam-node-title node)))
 	(insert (org-link-make-string
-                 (concat "id:" (org-roam-node-id node))
-                 description)))
+		 (concat "id:" (org-roam-node-id node))
+		 description)))
       )
     (defun bibtex-completion-create-roam-headline (keys)
       ;; 这个函数是针对 ivy-bibtex 插入 ref 时使用
@@ -671,7 +672,7 @@ will not be modified."
 (defun org-export-docx ()
   (interactive)
   (let ((docx-file (concat (file-name-sans-extension (buffer-file-name)) "-org-export" ".docx"))
-        (template-file "/home/lixunsong/Documents/org/Summaries/template.docx"))
+	(template-file "/home/lixunsong/Documents/org/Summaries/template.docx"))
     ;; (message (format "pandoc %s -o %s --reference-doc=%s" (buffer-file-name) docx-file template-file))
     (shell-command (format "pandoc %s -o %s --reference-doc=%s" (buffer-file-name) docx-file template-file))
     (message "Convert finish: %s" docx-file)))
@@ -683,8 +684,8 @@ will not be modified."
   (interactive)
   (if (memq 'org-publish-current-file after-save-hook)
       (progn
-        (remove-hook 'after-save-hook 'org-publish-current-file t)
-        (message "Disabled org html export on save for current buffer..."))
+	(remove-hook 'after-save-hook 'org-publish-current-file t)
+	(message "Disabled org html export on save for current buffer..."))
     (add-hook 'after-save-hook 'org-publish-current-file nil t)
     (message "Enabled org html export on save for current buffer...")))
 
@@ -694,18 +695,18 @@ will not be modified."
 ;;       org-src-tab-acts-natively t)
 
 ;; (defvar load-language-list '((emacs-lisp . t)
-;; 			     (perl . t)
-;; 			     (python . t)
-;; 			     (ipython . t)
-;; 			     (ruby . t)
-;; 			     (js . t)
-;; 			     (css . t)
-;; 			     (sass . t)
-;; 			     (C . t)
-;; 			     (plantuml . t)))
+;;			     (perl . t)
+;;			     (python . t)
+;;			     (ipython . t)
+;;			     (ruby . t)
+;;			     (js . t)
+;;			     (css . t)
+;;			     (sass . t)
+;;			     (C . t)
+;;			     (plantuml . t)))
 
 ;; (org-babel-do-load-languages 'org-babel-load-languages
-;; 			     load-language-list)
+;;			     load-language-list)
 
 (defun org-hide-properties ()
   "Hide all org-mode headline property drawers in buffer. Could be slow if it has a lot of overlays."
@@ -713,10 +714,10 @@ will not be modified."
   (save-excursion
     (goto-char (point-min))
     (while (re-search-forward
-            "^ *:properties:\n\\( *:.+?:.*\n\\)+ *:end:\n" nil t)
+	    "^ *:properties:\n\\( *:.+?:.*\n\\)+ *:end:\n" nil t)
       (let ((ov_this (make-overlay (match-beginning 0) (match-end 0))))
-        (overlay-put ov_this 'display "")
-        (overlay-put ov_this 'hidden-prop-drawer t))))
+	(overlay-put ov_this 'display "")
+	(overlay-put ov_this 'hidden-prop-drawer t))))
   (put 'org-toggle-properties-hide-state 'state 'hidden))
 
 (defun org-show-properties ()
@@ -756,7 +757,7 @@ will not be modified."
 (defun xs-org-img-to-clipboard-at-line ()
   (interactive)
   (let* ((line-str (buffer-substring-no-properties (line-beginning-position) (line-end-position)))
-	 (dir-path (org-download--dir))	 
+	 (dir-path (org-download--dir))
 	 (file-path (when (string-match "\\[\\[file:\\(.+\\)\\]\\]" line-str)
 		      (match-string 1 line-str)))
 	 (current-name (file-name-nondirectory file-path))
@@ -810,15 +811,15 @@ child entries.  Should be called from a tree-view buffer."
   (unless (buffer-base-buffer)
     (error "Must be in a tree buffer"))
   (let* ((pos (point))
-         (base-buffer (buffer-base-buffer))
-         (window (get-buffer-window base-buffer)))
+	 (base-buffer (buffer-base-buffer))
+	 (window (get-buffer-window base-buffer)))
     (if window
-        (progn
-          (select-window window)
-          (switch-to-buffer base-buffer))
+	(progn
+	  (select-window window)
+	  (switch-to-buffer base-buffer))
       (pop-to-buffer base-buffer
-                     (cons 'display-buffer-use-some-window
-                           (list (cons 'inhibit-same-window t)))))
+		     (cons 'display-buffer-use-some-window
+			   (list (cons 'inhibit-same-window t)))))
     (widen)
     (goto-char pos)
     (org-show-entry)
@@ -840,11 +841,11 @@ child entries.  Should be called from a tree-view buffer."
 ;; org-protocol for clicking html to org buffer
 (setq org-protocol-project-alist
       '(
-        ("My local Org-notes"
-         :base-url "file://C:/Users/xunsong.li/Documents/org/publish_html/"
-         :working-directory "~/Documents/org/org-roam-files/"
-         :online-suffix ".html"
-         :working-suffix ".org")))
+	("My local Org-notes"
+	 :base-url "file://C:/Users/xunsong.li/Documents/org/publish_html/"
+	 :working-directory "~/Documents/org/org-roam-files/"
+	 :online-suffix ".html"
+	 :working-suffix ".org")))
 (defun my-docode-uri-as-utf8 (uri)
   (decode-coding-string (url-unhex-string uri) 'utf-8)
   )
