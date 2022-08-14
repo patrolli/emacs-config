@@ -5,18 +5,18 @@
 (use-package pretty-hydra
   :init
   (cl-defun pretty-hydra-title (title &optional icon-type icon-name
-                                      &key face height v-adjust)
+				      &key face height v-adjust)
     "Add an icon in the hydra title."
     (let ((face (or face `(:foreground ,(face-background 'highlight))))
-          (height (or height 1.0))
-          (v-adjust (or v-adjust 0.0)))
+	  (height (or height 1.0))
+	  (v-adjust (or v-adjust 0.0)))
       (concat
        (when (and (icons-displayable-p) icon-type icon-name)
-         (let ((f (intern (format "all-the-icons-%s" icon-type))))
-           (when (fboundp f)
-             (concat
-              (apply f (list icon-name :face face :height height :v-adjust v-adjust))
-              " "))))
+	 (let ((f (intern (format "all-the-icons-%s" icon-type))))
+	   (when (fboundp f)
+	     (concat
+	      (apply f (list icon-name :face face :height height :v-adjust v-adjust))
+	      " "))))
        (propertize title 'face face)))))
 
 (defun hydra-indicator-f (&optional state bcolor)
@@ -42,22 +42,22 @@
 
 (defun avy-goto-word-1-backward-in-line (char &optional arg)
   (interactive (list (read-char "char: " t)
-                     current-prefix-arg))
+		     current-prefix-arg))
   (avy-goto-word-1 char arg (point-at-bol) (point) nil))
 
 (defun avy-goto-word-1-forward-in-line (char &optional arg)
   (interactive (list (read-char "char: " t)
-                     current-prefix-arg))
+		     current-prefix-arg))
   (avy-goto-word-1 char arg (point) (point-at-eol) nil))
 
 (defun view-jump-brace ()
   "Jump to correspondence parenthesis"
   (interactive)
   (let ((c (following-char))
-        (p (preceding-char)))
+	(p (preceding-char)))
     (if (eq (char-syntax c) 40) (forward-list)
       (if (eq (char-syntax p) 41) (backward-list)
-        (backward-up-list)))))
+	(backward-up-list)))))
 
 (setq cursor-in-non-selected-windows nil)
 
@@ -82,9 +82,9 @@ Version 2016-06-19"
   (let ((i 0))
     (while (< i 20)
       (if (not (xah-user-buffer-q))
-          (progn (next-buffer)
-                 (setq i (1+ i)))
-        (progn (setq i 100))))))
+	  (progn (next-buffer)
+		 (setq i (1+ i)))
+	(progn (setq i 100))))))
 
 (defun previous-user-buffer ()
   "Switch to the previous user buffer.
@@ -96,9 +96,9 @@ Version 2016-06-19"
   (let ((i 0))
     (while (< i 20)
       (if (not (xah-user-buffer-q))
-          (progn (previous-buffer)
-                 (setq i (1+ i)))
-        (progn (setq i 100))))))
+	  (progn (previous-buffer)
+		 (setq i (1+ i)))
+	(progn (setq i 100))))))
 
 (defun hydra-normal-state-cursor()
   (setq-default cursor-type 'box)
@@ -115,21 +115,21 @@ Version 2016-06-19"
   (interactive)
   (scroll-other-window-down 1))
 (defhydra hydra-window-size (:color red)
-        "Windows size"
-        ("h" shrink-window-horizontally "shrink horizontal")
-        ("j" shrink-window "shrink vertical")
-        ("k" enlarge-window "enlarge vertical")
-        ("l" enlarge-window-horizontally "enlarge horizontal")
+	"Windows size"
+	("h" shrink-window-horizontally "shrink horizontal")
+	("j" shrink-window "shrink vertical")
+	("k" enlarge-window "enlarge vertical")
+	("l" enlarge-window-horizontally "enlarge horizontal")
 	("q" hydra-pop "exit"))
 (defhydra hydra-window-frame (:color red)
-        "Frame"
-        ("f" make-frame "new frame")
-        ("x" delete-frame "delete frame")
+	"Frame"
+	("f" make-frame "new frame")
+	("x" delete-frame "delete frame")
 	("q" hydra-pop "exit"))
 (defhydra hydra-window-scroll (:color red)
-        "Scroll other window"
-        ("n" joe-scroll-other-window "scroll")
-        ("p" joe-scroll-other-window-down "scroll down")
+	"Scroll other window"
+	("n" joe-scroll-other-window "scroll")
+	("p" joe-scroll-other-window-down "scroll down")
 	("q" hydra-pop "exit"))
 
 (defhydra hydra-reading
@@ -209,11 +209,11 @@ Version 2016-06-19"
   (".f" toggle-frame-fullscreen)
 
   ;; (";j" (progn
-  ;; 	  (hydra-projectile/body)
-  ;; 	  (hydra-push '(hydra-reading/body))) :color blue)
-  (";j" projectile-find-file)
+  ;;	  (hydra-projectile/body)
+  ;;	  (hydra-push '(hydra-reading/body))) :color blue)
+  (";j" consult-projectile-find-file)
   ("; M-j" projectile-find-file-other-window)
-  (";f" counsel-file-jump)
+  ;; (";f" counsel-file-jump)
   (";a" color-rg-search-project)
   ;; (";q" color-rg-search-input-in-current-file)
   (";o" lxs/search-org)
@@ -232,8 +232,8 @@ Version 2016-06-19"
 	  (hydra-bookmarks/body)
 	  (hydra-push '(hydra-reading/body))
 	  ) :color blue)
-  (";y" counsel-yank-pop)
-  (";r" counsel-rg)
+  (";y" consult-yank-pop)
+  (";r" consult-ripgrep)
   ("zj" xah-open-file-fast)
   ;; ("zl" counsel-bookmark)
   ("zh" (lambda () (interactive) (xs-set-bookmark (read-from-minibuffer "Name:"))))
@@ -245,7 +245,7 @@ Version 2016-06-19"
   ;; (",j" backward-forward-previous-location)
   (",k" pop-global-mark)
   ;; (",k" backward-forward-next-location)
-  (",s" counsel-imenu)
+  (",s" consult-imenu)
   (",a" lxs/insert-current-date-time)
   (",cj" org-roam-dailies-capture-today)
   (",," xs-insert-two-space)
@@ -263,12 +263,14 @@ Version 2016-06-19"
   ("I" (progn (forward-char 1)) :color blue)
   ("J" (progn (end-of-line) (newline-and-indent)) :color blue)
   ("K" (progn (beginning-of-line) (open-line 1) (indent-according-to-mode)) :color blue)
-  ("S" my-counsel-grep-or-swiper)
+  ("S" consult-grep)
   ("B" ibuffer)
   ;; ("<SPC>j" scroll-down)
   ;; ("<SPC>k" scroll-up)
   ("<SPC>k" xah-clean-whitespace)
-  ("<SPC>o" xah-open-last-closed)
+  ;; ("<SPC>o" xah-open-last-closed)
+  ("<SPC>o" consult-notes)
+  ("<SPC>m" logseq-goto-today)
   ("<SPC>i" xah-open-recently-closed)
   ("<SPC>e" iedit-mode)
   ("<SPC>b" helm-mini)
@@ -279,7 +281,6 @@ Version 2016-06-19"
   ("<SPC>h" eyebrowse-prev-window-config)
   ("<SPC>l" eyebrowse-next-window-config)
   ;; ("<SPC>g" eyebrowse-switch-to-window-config)
-  ("<SPC>m" eyebrowse-create-window-config)
   ;; ("<SPC>q" replace-id-quick)
   ("<SPC><SPC>" self-insert-command)
   ("<SPC><tab>" xs-toggle-code-block)
@@ -291,9 +292,7 @@ Version 2016-06-19"
   ("W" backward-word)
   ("X" (progn (kill-line 0)))
   ("a" (progn (xah-beginning-of-line-or-block)))
-  ("b" ;; (progn (ibuffer) (swiper))
-   (ivy-switch-buffer)
-   )
+  ("b" consult-buffer)
   ;; ("c" (progn (overwrite-mode) (hydra-refresh-mode-line "[C]" "blue")) :color blue)
   ("dd" my-delete-whole-line) ;; delete without yank to kill-ring
   ("dl" my-kill-line)
@@ -310,7 +309,7 @@ Version 2016-06-19"
   ("f" (progn (call-interactively 'avy-goto-word-1-forward-in-line)))
   ;; ("g" awesome-tab-counsel-switch-group)
   ;; ("g" keyboard-quit)
-  ("g" projectile-switch-to-buffer)
+  ("g" consult-project-buffer)
   ("G" projectile-switch-open-project)
   ("h" backward-char)
   ("i" nil)
@@ -330,8 +329,8 @@ Version 2016-06-19"
   ("mb" xah-select-block)
   ("M-;" comment-line)
   ("zk" helpful-key)
-  ("zv" counsel-describe-variable)
-  ("zf" counsel-describe-function)
+  ("zv" helpful-variable)
+  ("zf" helpful-function)
   ("zg" keyboard-quit)
   ("zd" helpful-at-point)
   ;; ("n" (progn (ded/org-show-next-heading-tidily)))
@@ -343,7 +342,7 @@ Version 2016-06-19"
   ("r" undo-tree-redo)
   ;; ("s" my-counsel-grep-or-swiper)
   ;; ("s" swiper-isearch) ;TODO: 有点问题
-  ("s" swiper)
+  ("s" consult-line)
   ("t" other-window)
   ("T" (other-window -1))
   ("<SPC>t" (other-window -1))
@@ -354,7 +353,7 @@ Version 2016-06-19"
   ("cl" avy-goto-line)
   ("u" undo)
   ;; ("v" (save-excursion (and (ignore-errors (other-window-for-scrolling)) (scroll-other-window))))
-  ("v" counsel-find-file)
+  ("v" find-file)
   ("w" forward-word)
   ("x" delete-char)
   ("y" yank)
@@ -368,4 +367,3 @@ Version 2016-06-19"
 (bind-key "M-j" 'hydra-reading/body)
 
 (provide 'init-hydra)
-
