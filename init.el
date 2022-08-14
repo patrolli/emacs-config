@@ -56,7 +56,8 @@ decrease this. If you experience stuttering, increase this.")
 (require 'init-ui)
 (require 'init-hydra)
 (require 'init-edit)
-(require 'init-ivy)
+;; (require 'init-ivy)
+(require 'init-consult)
 (require 'init-company)
 (require 'init-yasnippet)
 
@@ -85,6 +86,9 @@ decrease this. If you experience stuttering, increase this.")
 (require 'init-flycheck)
 ;; (require 'init-restore)
 
+(use-package syncproj
+  :load-path "site-lisp/syncproj")
+
 (setq native-comp-async-report-warnings-errors nil)
 (put 'dired-find-alternate-file 'disabled nil)
 
@@ -96,6 +100,6 @@ decrease this. If you experience stuttering, increase this.")
    (frame-parameter nil 'font)
    charset
    (font-spec :name "-outline-思源宋体-bold-normal-normal-serif-24-*-*-*-p-*-iso10646-1"
-              :weight 'normal
-              :slant 'normal
-              :size 10.5)));; 中文
+	      :weight 'normal
+	      :slant 'normal
+	      :size 10.5)));; 中文
