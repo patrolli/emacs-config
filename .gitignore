@@ -40,3 +40,8 @@ librime/
 projects
 *.lock
 projects
+history
+server/server
+*.elc
+straight/
+projects/
