@@ -8,7 +8,7 @@ version 2016-06-18"
   (if (string-equal "*" (substring (buffer-name) 0 1))
       nil
     (if (string-equal major-mode "dired-mode")
-        nil
+	nil
       t
       )))
 
@@ -23,19 +23,19 @@ Version 2018-06-04 2021-03-16"
   (interactive)
   (let (($p (point)))
     (if (or (equal (point) (line-beginning-position))
-            (eq last-command this-command))
-        (if (re-search-backward "\n[\t\n ]*\n+" nil "move")
-            (progn
-              (skip-chars-backward "\n\t ")
-              ;; (forward-char )
-              )
-          (goto-char (point-min)))
+	    (eq last-command this-command))
+	(if (re-search-backward "\n[\t\n ]*\n+" nil "move")
+	    (progn
+	      (skip-chars-backward "\n\t ")
+	      ;; (forward-char )
+	      )
+	  (goto-char (point-min)))
       (if visual-line-mode
-          (beginning-of-visual-line)
-        (progn
-          (back-to-indentation)
-          (when (eq $p (point))
-            (beginning-of-line)))))))
+	  (beginning-of-visual-line)
+	(progn
+	  (back-to-indentation)
+	  (when (eq $p (point))
+	    (beginning-of-line)))))))
 
 (defun xah-end-of-line-or-block ()
   "Move cursor to end of line or next paragraph.
@@ -46,10 +46,10 @@ URL `http://ergoemacs.org/emacs/emacs_keybinding_design_beginning-of-line-or-blo
 Version 2018-06-04 2021-03-16"
   (interactive)
   (if (or (equal (point) (line-end-position))
-          (eq last-command this-command))
+	  (eq last-command this-command))
       (re-search-forward "\n[\t\n ]*\n+" nil "move" )
     (if visual-line-mode
-        (end-of-visual-line)
+	(end-of-visual-line)
       (end-of-line))))
 
 
@@ -63,7 +63,7 @@ Version 2019-12-02"
       (switch-to-buffer $buf)
       (funcall 'fundamental-mode)
       (dolist (x kill-ring )
-        (insert x "\n\nhh=============================================================================\n\n"))
+	(insert x "\n\nhh=============================================================================\n\n"))
       (goto-char (point-min)))))
 
 (defun xah-select-block ()
@@ -77,7 +77,7 @@ Version 2019-12-26 2021-04-04"
     (progn
       (skip-chars-forward " \n\t")
       (when (re-search-backward "\n[ \t]*\n" nil "move")
-        (re-search-forward "\n[ \t]*\n"))
+	(re-search-forward "\n[ \t]*\n"))
       (push-mark (point) t t)
       (re-search-forward "\n[ \t]*\n" nil "move"))))
 
@@ -92,7 +92,7 @@ Version 2019-02-26"
   (require 'bookmark)
   (bookmark-maybe-load-default-file)
   (let (($this-bookmark
-         (ivy-completing-read "Open bookmark:" (mapcar (lambda ($x) (car $x)) bookmark-alist))))
+	 (ivy-completing-read "Open bookmark:" (mapcar (lambda ($x) (car $x)) bookmark-alist))))
     (find-file (bookmark-get-filename $this-bookmark))
     ;; (bookmark-jump $this-bookmark)
     ))
@@ -107,7 +107,7 @@ Version 2018-08-30"
     (when (not buffer-display-table)
       (setq buffer-display-table (make-display-table)))
     (aset buffer-display-table ?\^L
-          (vconcat (make-list 70 (make-glyph-code ?─ 'font-lock-comment-face))))
+	  (vconcat (make-list 70 (make-glyph-code ?─ 'font-lock-comment-face))))
     (redraw-frame)))
 
 ;; [[file:/mnt/c/Users/lixun/Documents/org/static/img/capture_2021_05_10_11_59_03.png]]
@@ -145,7 +145,7 @@ end make each untitled buffer saved uniquely."
   (let* ((untitled-dir "~/Documents/")
 	 ;; (save-name (concat (format-time-string "%Y-%m-%d") "-" (buffer-name)))
 	 (save-name (concat (format-time-string "%Y-%m-%d") "" (replace-regexp-in-string "\\\(<\\\|>\\\|-\\\)" "_" (buffer-name))))
-	 (postfix (cdr (assoc major-mode lxs-major-mode-to-file-postfix))))  
+	 (postfix (cdr (assoc major-mode lxs-major-mode-to-file-postfix))))
     (let ((target (concat untitled-dir save-name postfix))
 	  (num 1))
       (while (f-exists-p target)
@@ -173,30 +173,30 @@ Version 2018-06-11"
   (interactive)
   (let (($org-p (string-match "^*Org Src" (buffer-name))))
     (if (string-equal major-mode "minibuffer-inactive-mode")
-        (minibuffer-keyboard-quit) ; if the buffer is minibuffer
+	(minibuffer-keyboard-quit) ; if the buffer is minibuffer
       (progn
-        ;; offer to save buffers that are non-empty and modified, even for non-file visiting buffer. (because kill-buffer does not offer to save buffers that are not associated with files)
-        (when (and (buffer-modified-p)
-                   (xah-user-buffer-q)
-                   (not (string-equal major-mode "dired-mode"))
-                   (if (equal (buffer-file-name) nil)
-                       (if (string-equal "" (save-restriction (widen) (buffer-string))) nil t)
-                     t))
-          (if (y-or-n-p (format "Buffer %s modified; Do you want to save? " (buffer-name)))
-              (save-buffer)
-            (set-buffer-modified-p nil)))
-        (when (and (buffer-modified-p)
-                   $org-p)
-          (if (y-or-n-p (format "Buffer %s modified; Do you want to save? " (buffer-name)))
-              (org-edit-src-save)
-            (set-buffer-modified-p nil)))
-        ;; save to a list of closed buffer
-        (when (buffer-file-name)
-          (setq xah-recently-closed-buffers
-                (cons (cons (buffer-name) (buffer-file-name)) xah-recently-closed-buffers))
-          (when (> (length xah-recently-closed-buffers) xah-recently-closed-buffers-max)
-            (setq xah-recently-closed-buffers (butlast xah-recently-closed-buffers 1))))
-        ;; (kill-buffer-and-window)
+	;; offer to save buffers that are non-empty and modified, even for non-file visiting buffer. (because kill-buffer does not offer to save buffers that are not associated with files)
+	(when (and (buffer-modified-p)
+		   (xah-user-buffer-q)
+		   (not (string-equal major-mode "dired-mode"))
+		   (if (equal (buffer-file-name) nil)
+		       (if (string-equal "" (save-restriction (widen) (buffer-string))) nil t)
+		     t))
+	  (if (y-or-n-p (format "Buffer %s modified; Do you want to save? " (buffer-name)))
+	      (save-buffer)
+	    (set-buffer-modified-p nil)))
+	(when (and (buffer-modified-p)
+		   $org-p)
+	  (if (y-or-n-p (format "Buffer %s modified; Do you want to save? " (buffer-name)))
+	      (org-edit-src-save)
+	    (set-buffer-modified-p nil)))
+	;; save to a list of closed buffer
+	(when (buffer-file-name)
+	  (setq xah-recently-closed-buffers
+		(-distinct (cons (cons (buffer-name) (buffer-file-name)) xah-recently-closed-buffers)))
+	  (when (> (length xah-recently-closed-buffers) xah-recently-closed-buffers-max)
+	    (setq xah-recently-closed-buffers (butlast xah-recently-closed-buffers 1))))
+	;; (kill-buffer-and-window)
 	(kill-buffer)
 	))))
 
@@ -215,7 +215,7 @@ Prompt for a choice.
 URL `http://ergoemacs.org/emacs/elisp_close_buffer_open_last_closed.html'
 Version 2016-06-19"
   (interactive)
-  (find-file (ivy-completing-read "open:" (mapcar (lambda (f) (cdr f)) xah-recently-closed-buffers))))
+  (find-file (ivy-completing-read "open:" (mapcar (lambda (f) (cdr f)) (-distinct xah-recently-closed-buffers)))))
 
 (defun xah-list-recently-closed ()
   "List recently closed file.
@@ -225,7 +225,7 @@ Version 2016-06-19"
   (let (($buf (generate-new-buffer "*recently closed*")))
     (switch-to-buffer $buf)
     (mapc (lambda ($f) (insert (cdr $f) "\n"))
-          xah-recently-closed-buffers)))
+	  xah-recently-closed-buffers)))
 
 
 (defun xah-copy-file-path (&optional @dir-path-only-p)
@@ -241,23 +241,23 @@ URL `http://ergoemacs.org/emacs/emacs_copy_file_path.html'
 Version 2017-09-01"
   (interactive "P")
   (let (($fpath
-         (if (string-equal major-mode 'dired-mode)
-             (progn
-               (let (($result (mapconcat 'identity (dired-get-marked-files) "\n")))
-                 (if (equal (length $result) 0)
-                     (progn default-directory )
-                   (progn $result))))
-           (if (buffer-file-name)
-               (buffer-file-name)
-             (expand-file-name default-directory)))))
+	 (if (string-equal major-mode 'dired-mode)
+	     (progn
+	       (let (($result (mapconcat 'identity (dired-get-marked-files) "\n")))
+		 (if (equal (length $result) 0)
+		     (progn default-directory )
+		   (progn $result))))
+	   (if (buffer-file-name)
+	       (buffer-file-name)
+	     (expand-file-name default-directory)))))
     (kill-new
      (if @dir-path-only-p
-         (progn
-           (message "Directory path copied: 「%s」" (file-name-directory $fpath))
-           (file-name-directory $fpath))
+	 (progn
+	   (message "Directory path copied: 「%s」" (file-name-directory $fpath))
+	   (file-name-directory $fpath))
        (progn
-         (message "File path copied: 「%s」" $fpath)
-         $fpath )))))
+	 (message "File path copied: 「%s」" $fpath)
+	 $fpath )))))
 
 (defun xah-select-current-block ()
   "Select the current block of text between blank lines.
@@ -282,7 +282,7 @@ Version 2019-12-26 2021-04-04"
     (progn
       (skip-chars-forward " \n\t")
       (when (re-search-backward "\n[ \t]*\n" nil "move")
-        (re-search-forward "\n[ \t]*\n"))
+	(re-search-forward "\n[ \t]*\n"))
       (push-mark (point) t t)
       (re-search-forward "\n[ \t]*\n" nil "move"))))
 
@@ -316,13 +316,13 @@ URL `http://ergoemacs.org/emacs/elisp_run_current_file.html'
 Version 2020-09-24 2021-01-21"
   (interactive)
   (let (
-        ($outBuffer "*xah-run output*")
-        (resize-mini-windows nil)
-        ($suffixMap xah-run-current-file-map )
-        $fname
-        $fSuffix
-        $progName
-        $cmdStr)
+	($outBuffer "*xah-run output*")
+	(resize-mini-windows nil)
+	($suffixMap xah-run-current-file-map )
+	$fname
+	$fSuffix
+	$progName
+	$cmdStr)
     (when (not (buffer-file-name)) (save-buffer))
     (when (buffer-modified-p) (save-buffer))
     (setq $fname (buffer-file-name))
@@ -334,11 +334,11 @@ Version 2020-09-24 2021-01-21"
      ((string-equal $fSuffix "el")
       (load $fname))
      (t (if $progName
-            (progn
-              (message "Running")
-              (shell-command $cmdStr $outBuffer )
+	    (progn
+	      (message "Running")
+	      (shell-command $cmdStr $outBuffer )
 	      )
-          (error "No recognized program file suffix for this file."))))
+	  (error "No recognized program file suffix for this file."))))
     (run-hooks 'xah-run-current-file-after-hook)))
 
 (defun xah-select-line ()
@@ -349,20 +349,20 @@ Version 2017-11-01 2021-03-19"
   (interactive)
   (if (region-active-p)
       (if visual-line-mode
-          (let (($p1 (point)))
-                (end-of-visual-line 1)
-                (when (eq $p1 (point))
-                  (end-of-visual-line 2)))
-        (progn
-          (forward-line 1)
-          (end-of-line)))
+	  (let (($p1 (point)))
+		(end-of-visual-line 1)
+		(when (eq $p1 (point))
+		  (end-of-visual-line 2)))
+	(progn
+	  (forward-line 1)
+	  (end-of-line)))
     (if visual-line-mode
-        (progn (beginning-of-visual-line)
-               (set-mark (point))
-               (end-of-visual-line))
+	(progn (beginning-of-visual-line)
+	       (set-mark (point))
+	       (end-of-visual-line))
       (progn
-        (end-of-line)
-        (set-mark (line-beginning-position))))))
+	(end-of-line)
+	(set-mark (line-beginning-position))))))
 
 (defun xah-extend-selection ()
   "Select the current word, bracket/quote expression, or expand selection.
@@ -376,92 +376,92 @@ Version 2020-02-04"
   (interactive)
   (if (region-active-p)
       (progn
-        (let (($rb (region-beginning)) ($re (region-end)))
-          (goto-char $rb)
-          (cond
-           ((looking-at "\\s(")
-            (if (eq (nth 0 (syntax-ppss)) 0)
-                (progn
-                  ;; (message "left bracket, depth 0.")
-                  (end-of-line) ; select current line
-                  (set-mark (line-beginning-position)))
-              (progn
-                ;; (message "left bracket, depth not 0")
-                (up-list -1 t t)
-                (mark-sexp))))
-           ((eq $rb (line-beginning-position))
-            (progn
-              (goto-char $rb)
-              (let (($firstLineEndPos (line-end-position)))
-                (cond
-                 ((eq $re $firstLineEndPos)
-                  (progn
-                    ;; (message "exactly 1 line. extend to next whole line." )
-                    (forward-line 1)
-                    (end-of-line)))
-                 ((< $re $firstLineEndPos)
-                  (progn
-                    ;; (message "less than 1 line. complete the line." )
-                    (end-of-line)))
-                 ((> $re $firstLineEndPos)
-                  (progn
-                    ;; (message "beginning of line, but end is greater than 1st end of line" )
-                    (goto-char $re)
-                    (if (eq (point) (line-end-position))
-                        (progn
-                          ;; (message "exactly multiple lines" )
-                          (forward-line 1)
-                          (end-of-line))
-                      (progn
-                        ;; (message "multiple lines but end is not eol. make it so" )
-                        (goto-char $re)
-                        (end-of-line)))))
-                 (t (error "logic error 42946" ))))))
-           ((and (> (point) (line-beginning-position)) (<= (point) (line-end-position)))
-            (progn
-              ;; (message "less than 1 line" )
-              (end-of-line) ; select current line
-              (set-mark (line-beginning-position))))
-           (t
-            ;; (message "last resort" )
-            nil))))
+	(let (($rb (region-beginning)) ($re (region-end)))
+	  (goto-char $rb)
+	  (cond
+	   ((looking-at "\\s(")
+	    (if (eq (nth 0 (syntax-ppss)) 0)
+		(progn
+		  ;; (message "left bracket, depth 0.")
+		  (end-of-line) ; select current line
+		  (set-mark (line-beginning-position)))
+	      (progn
+		;; (message "left bracket, depth not 0")
+		(up-list -1 t t)
+		(mark-sexp))))
+	   ((eq $rb (line-beginning-position))
+	    (progn
+	      (goto-char $rb)
+	      (let (($firstLineEndPos (line-end-position)))
+		(cond
+		 ((eq $re $firstLineEndPos)
+		  (progn
+		    ;; (message "exactly 1 line. extend to next whole line." )
+		    (forward-line 1)
+		    (end-of-line)))
+		 ((< $re $firstLineEndPos)
+		  (progn
+		    ;; (message "less than 1 line. complete the line." )
+		    (end-of-line)))
+		 ((> $re $firstLineEndPos)
+		  (progn
+		    ;; (message "beginning of line, but end is greater than 1st end of line" )
+		    (goto-char $re)
+		    (if (eq (point) (line-end-position))
+			(progn
+			  ;; (message "exactly multiple lines" )
+			  (forward-line 1)
+			  (end-of-line))
+		      (progn
+			;; (message "multiple lines but end is not eol. make it so" )
+			(goto-char $re)
+			(end-of-line)))))
+		 (t (error "logic error 42946" ))))))
+	   ((and (> (point) (line-beginning-position)) (<= (point) (line-end-position)))
+	    (progn
+	      ;; (message "less than 1 line" )
+	      (end-of-line) ; select current line
+	      (set-mark (line-beginning-position))))
+	   (t
+	    ;; (message "last resort" )
+	    nil))))
     (progn
       (cond
        ((looking-at "\\s(")
-        ;; (message "left bracket")
-        (mark-sexp)) ; left bracket
+	;; (message "left bracket")
+	(mark-sexp)) ; left bracket
        ((looking-at "\\s)")
-        ;; (message "right bracket")
-        (backward-up-list) (mark-sexp))
+	;; (message "right bracket")
+	(backward-up-list) (mark-sexp))
        ((looking-at "\\s\"")
-        ;; (message "string quote")
-        (mark-sexp)) ; string quote
+	;; (message "string quote")
+	(mark-sexp)) ; string quote
        ;; ((and (eq (point) (line-beginning-position)) (not (looking-at "\n")))
        ;;  (message "beginning of line and not empty")
        ;;  (end-of-line)
        ;;  (set-mark (line-beginning-position)))
        ((or (looking-back "\\s_" 1) (looking-back "\\sw" 1))
-        ;; (message "left is word or symbol")
-        (skip-syntax-backward "_w" )
-        ;; (re-search-backward "^\\(\\sw\\|\\s_\\)" nil t)
-        (push-mark)
-        (skip-syntax-forward "_w")
-        (setq mark-active t)
-        ;; (exchange-point-and-mark)
-        )
+	;; (message "left is word or symbol")
+	(skip-syntax-backward "_w" )
+	;; (re-search-backward "^\\(\\sw\\|\\s_\\)" nil t)
+	(push-mark)
+	(skip-syntax-forward "_w")
+	(setq mark-active t)
+	;; (exchange-point-and-mark)
+	)
        ((and (looking-at "\\s ") (looking-back "\\s " 1))
-        ;; (message "left and right both space" )
-        (skip-chars-backward "\\s " ) (set-mark (point))
-        (skip-chars-forward "\\s "))
+	;; (message "left and right both space" )
+	(skip-chars-backward "\\s " ) (set-mark (point))
+	(skip-chars-forward "\\s "))
        ((and (looking-at "\n") (looking-back "\n" 1))
-        ;; (message "left and right both newline")
-        (skip-chars-forward "\n")
-        (set-mark (point))
-        (re-search-forward "\n[ \t]*\n")) ; between blank lines, select next text block
+	;; (message "left and right both newline")
+	(skip-chars-forward "\n")
+	(set-mark (point))
+	(re-search-forward "\n[ \t]*\n")) ; between blank lines, select next text block
        (t
-        ;; (message "just mark sexp" )
-        (mark-sexp)
-        (exchange-point-and-mark))
+	;; (message "just mark sexp" )
+	(mark-sexp)
+	(exchange-point-and-mark))
        ;;
        ))))
 
@@ -475,9 +475,9 @@ URL `http://ergoemacs.org/emacs/modernization_mark-word.html'
 Version 2020-11-24"
   (interactive)
   (let (
-        ($skipChars "^\"`<>(){}[]“”‘’‹›«»「」『』【】〖〗《》〈〉〔〕（）〘〙")
-        $p1
-        )
+	($skipChars "^\"`<>(){}[]“”‘’‹›«»「」『』【】〖〗《》〈〉〔〕（）〘〙")
+	$p1
+	)
     (skip-chars-backward $skipChars)
     (setq $p1 (point))
     (skip-chars-forward $skipChars)
@@ -492,23 +492,23 @@ Version 2017-09-22 2020-09-08"
   (interactive)
   (let ($begin $end)
     (if (use-region-p)
-        (setq $begin (region-beginning) $end (region-end))
+	(setq $begin (region-beginning) $end (region-end))
       (setq $begin (point-min) $end (point-max)))
     (save-excursion
       (save-restriction
-        (narrow-to-region $begin $end)
-        (progn
-          (goto-char (point-min))
-          (while (re-search-forward "[ \t]+\n" nil "move")
-            (replace-match "\n")))
-        (progn
-          (goto-char (point-min))
-          (while (re-search-forward "\n\n\n+" nil "move")
-            (replace-match "\n\n")))
-        (progn
-          (goto-char (point-max))
-          (while (equal (char-before) 32) ; char 32 is space
-            (delete-char -1))))
+	(narrow-to-region $begin $end)
+	(progn
+	  (goto-char (point-min))
+	  (while (re-search-forward "[ \t]+\n" nil "move")
+	    (replace-match "\n")))
+	(progn
+	  (goto-char (point-min))
+	  (while (re-search-forward "\n\n\n+" nil "move")
+	    (replace-match "\n\n")))
+	(progn
+	  (goto-char (point-max))
+	  (while (equal (char-before) 32) ; char 32 is space
+	    (delete-char -1))))
       (message "white space cleaned"))))
 
 (defun xah-clean-empty-lines ()
@@ -519,14 +519,14 @@ Version 2017-09-22 2020-09-08"
   (interactive)
   (let ($begin $end)
     (if (use-region-p)
-        (setq $begin (region-beginning) $end (region-end))
+	(setq $begin (region-beginning) $end (region-end))
       (setq $begin (point-min) $end (point-max)))
     (save-excursion
       (save-restriction
-        (narrow-to-region $begin $end)
-        (progn
-          (goto-char (point-min))
-          (while (re-search-forward "\n\n\n+" nil "move")
-            (replace-match "\n\n")))))))
+	(narrow-to-region $begin $end)
+	(progn
+	  (goto-char (point-min))
+	  (while (re-search-forward "\n\n\n+" nil "move")
+	    (replace-match "\n\n")))))))
 
 (provide 'xah-utils)
