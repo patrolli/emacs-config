@@ -36,3 +36,7 @@ librime/
 *.png
 *.svg
 *.desktop
+*.data
+projects
+*.lock
+projects
