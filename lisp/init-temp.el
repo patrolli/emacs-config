@@ -178,22 +178,22 @@ clock                             ^^^^effort             ^^watcher
   "init org-roam headline node"
   (interactive)
   (progn (org-id-get-create)
-         (org-entry-put nil "CREATED" (format-time-string "[%Y-%m-%d %a %H:%M]"))))
+	 (org-entry-put nil "CREATED" (format-time-string "[%Y-%m-%d %a %H:%M]"))))
 
 (defun reverie-brother-headline ()
   "insert same level headline node"
   (interactive)
   (progn (org-insert-heading-respect-content)
-         (org-id-get-create)
-         (org-entry-put nil "CREATED" (iso8601-format (current-time)))))
+	 (org-id-get-create)
+	 (org-entry-put nil "CREATED" (iso8601-format (current-time)))))
 
 (defun reverie-child-headline ()
   "insert next level headline node"
   (interactive)
   (progn (org-insert-heading-respect-content)
-         (org-do-demote)
-         (org-id-get-create)
-         (org-entry-put nil "CREATED" (iso8601-format (current-time)))))
+	 (org-do-demote)
+	 (org-id-get-create)
+	 (org-entry-put nil "CREATED" (iso8601-format (current-time)))))
 
 (defun org-hide-properties ()
   "Hide all org-mode headline property drawers in buffer. Could be slow if it has a lot of overlays."
@@ -201,10 +201,10 @@ clock                             ^^^^effort             ^^watcher
   (save-excursion
     (goto-char (point-min))
     (while (re-search-forward
-            "^ *:properties:\n\\( *:.+?:.*\n\\)+ *:end:\n" nil t)
+	    "^ *:properties:\n\\( *:.+?:.*\n\\)+ *:end:\n" nil t)
       (let ((ov_this (make-overlay (match-beginning 0) (match-end 0))))
-        (overlay-put ov_this 'display "")
-        (overlay-put ov_this 'hidden-prop-drawer t))))
+	(overlay-put ov_this 'display "")
+	(overlay-put ov_this 'hidden-prop-drawer t))))
   (put 'org-toggle-properties-hide-state 'state 'hidden))
 
 (defun org-show-properties ()
@@ -227,9 +227,9 @@ clock                             ^^^^effort             ^^watcher
   (dolist (buf (buffer-list))
     (with-current-buffer buf
       (when (and (not (eq current-buf buf))
-                 (or  (eq 'dired-mode  major-mode)
-                      (eq 'diredp-w32-drives-mode major-mode)))
-        (kill-buffer buf)))))
+		 (or  (eq 'dired-mode  major-mode)
+		      (eq 'diredp-w32-drives-mode major-mode)))
+	(kill-buffer buf)))))
 
 (defadvice dired (before dired-single-buffer activate)
   "Replace current buffer if file is a directory."
@@ -245,10 +245,10 @@ clock                             ^^^^effort             ^^watcher
 (setq ebib-preload-bib-files '("/mnt/c/Users/lixun/Documents/bibliography/library.bib"))
 
 (advice-add #'elfeed-insert-html
-              :around
-              (lambda (fun &rest r)
-                (let ((shr-use-fonts nil))
-                  (apply fun r))))
+	      :around
+	      (lambda (fun &rest r)
+		(let ((shr-use-fonts nil))
+		  (apply fun r))))
 
 ;; 将 bibtex 文件的 entry 中的 keyword 值，同步到 org-roam 的 filetags 里面
 (defun bu-make-field-keywords (&optional arg)
@@ -263,28 +263,28 @@ the body of this command."
   (interactive "P")
   (let ((elist (save-excursion (bibtex-beginning-of-entry)
 			       (bibtex-parse-entry)))
-        (ido-ubiquitous-enable-old-style-default t)
+	(ido-ubiquitous-enable-old-style-default t)
 	append)
     (if (assoc "keywords" elist)
 	(progn (setq append t)
 	       (bibtex-beginning-of-entry)
 	       (goto-char
 		(car (last (or (bibtex-search-forward-field "keywords" t)
-                               (progn (setq append nil)
-                                      (bibtex-search-forward-field "OPTkeywords" t)))))))
+			       (progn (setq append nil)
+				      (bibtex-search-forward-field "OPTkeywords" t)))))))
       (bibtex-make-field "keywords" t nil))
     (skip-chars-backward "}\n")
     (unless arg
       (let ((cnt 0)
-            k)
+	    k)
 	(while (and (setq k (completing-read
-                             "Keyword (RET to quit): " bu-keywords-values nil))
+			     "Keyword (RET to quit): " bu-keywords-values nil))
 		    (not (equal k "")))
 	  (when append (insert ", ")
-                (setq append nil))
+		(setq append nil))
 	  (setq cnt (1+ cnt))
 	  (insert (format "%s%s" (if (> cnt 1) ", " "") k))
-          (add-to-list 'bu-keywords-values k))))))
+	  (add-to-list 'bu-keywords-values k))))))
 
 ;; 从 org buffer 中读取 cite-key
 ;; 提取其中 keyword 的内容
@@ -294,9 +294,9 @@ the body of this command."
     (interactive)
     (let* ((cite-key (substring (car (org-property-values "ROAM_REFS")) 5))
 	   (current-tags (split-string (or (cadr (assoc "FILETAGS"
-                                                        (org-collect-keywords '("filetags"))))
-                                           "")
-                                       ":" 'omit-nulls))
+							(org-collect-keywords '("filetags"))))
+					   "")
+				       ":" 'omit-nulls))
 	  (keywords (lxs-parse-bib-keywords cite-key)))
       (org-roam-set-keyword "filetags" (org-make-tag-string (seq-uniq (append keywords current-tags))))
       )
@@ -324,10 +324,10 @@ the body of this command."
   "Get a list of all regexp matches in a string"
   (save-match-data
     (let ((pos 0)
-          matches)
+	  matches)
       (while (string-match regexp string pos)
-        (push (match-string 0 string) matches)
-        (setq pos (match-end 0)))
+	(push (match-string 0 string) matches)
+	(setq pos (match-end 0)))
       matches)))
 
 (setq org-directory (concat lxs-home-dir "Documents/" "org/"))
@@ -337,47 +337,47 @@ the body of this command."
   "Nox's `imenu-create-index-function'."
   (cl-labels
       ((visit (_name one-obj-array)
-              (imenu-default-goto-function
-               nil (car (nox--range-region
-                         (nox--dcase (aref one-obj-array 0)
-                           (((SymbolInformation) location)
-                            (plist-get location :range))
-                           (((DocumentSymbol) selectionRange)
-                            selectionRange))))))
+	      (imenu-default-goto-function
+	       nil (car (nox--range-region
+			 (nox--dcase (aref one-obj-array 0)
+			   (((SymbolInformation) location)
+			    (plist-get location :range))
+			   (((DocumentSymbol) selectionRange)
+			    selectionRange))))))
        (unfurl (obj)
-               (nox--dcase obj
-                 (((SymbolInformation)) (list obj))
-                 (((DocumentSymbol) name children)
-                  (cons obj
-                        (mapcar
-                         (lambda (c)
-                           (plist-put
-                            c :containerName
-                            (let ((existing (plist-get c :containerName)))
-                              (if existing (format "%s::%s" name existing)
-                                name))))
-                         (mapcan #'unfurl children)))))))
+	       (nox--dcase obj
+		 (((SymbolInformation)) (list obj))
+		 (((DocumentSymbol) name children)
+		  (cons obj
+			(mapcar
+			 (lambda (c)
+			   (plist-put
+			    c :containerName
+			    (let ((existing (plist-get c :containerName)))
+			      (if existing (format "%s::%s" name existing)
+				name))))
+			 (mapcan #'unfurl children)))))))
     (mapcar
      (pcase-lambda (`(,kind . ,objs))
        (cons
-        (alist-get kind nox--symbol-kind-names "Unknown")
-        (mapcan (pcase-lambda (`(,container . ,objs))
-                  (let ((elems (mapcar (lambda (obj)
-                                         (list (plist-get obj :name)
-                                               `[,obj] ;; trick
-                                               #'visit))
-                                       objs)))
-                    (if container (list (cons container elems)) elems)))
-                (seq-group-by
-                 (lambda (e) (plist-get e :containerName)) objs))))
+	(alist-get kind nox--symbol-kind-names "Unknown")
+	(mapcan (pcase-lambda (`(,container . ,objs))
+		  (let ((elems (mapcar (lambda (obj)
+					 (list (plist-get obj :name)
+					       `[,obj] ;; trick
+					       #'visit))
+				       objs)))
+		    (if container (list (cons container elems)) elems)))
+		(seq-group-by
+		 (lambda (e) (plist-get e :containerName)) objs))))
      (seq-group-by
       (lambda (obj) (plist-get obj :kind))
       (mapcan #'unfurl
-              (jsonrpc-request (nox--current-server-or-lose)
-                               :textDocument/documentSymbol
-                               `(:textDocument
-                                 ,(nox--TextDocumentIdentifier))
-                               :cancel-on-input non-essential))))))
+	      (jsonrpc-request (nox--current-server-or-lose)
+			       :textDocument/documentSymbol
+			       `(:textDocument
+				 ,(nox--TextDocumentIdentifier))
+			       :cancel-on-input non-essential))))))
 
 (defun org-roam-create-note-from-headline ()
   "Create an Org-roam note from the current headline and jump to it.
@@ -389,14 +389,14 @@ Org-mode properties drawer already, keep the headline and don’t insert
 ‘#+title:’ is a bit cleaner for a short note, which Org-roam encourages."
   (interactive)
   (let ((title (nth 4 (org-heading-components)))
-        (has-properties (org-get-property-block)))
+	(has-properties (org-get-property-block)))
     (org-cut-subtree)
     (org-roam-node-find 'other-window title nil)
     (org-paste-subtree)
     (unless has-properties
       (kill-line)
       (while (outline-next-heading)
-        (org-promote)))
+	(org-promote)))
     (goto-char (point-min))
     (when has-properties
       (kill-line)
@@ -438,10 +438,10 @@ Org-mode properties drawer already, keep the headline and don’t insert
 ;; custom dogears with counsel completing backend
 (defun counsel-dogears ()
   (interactive)
-  (ivy-read "Dogear list: "
-            (cl-loop for place in dogears-list
-                     collect (cons (dogears--format-record place)
-                                   place))
+  (ivy-read "Dogear list: "
+	    (cl-loop for place in dogears-list
+		     collect (cons (dogears--format-record place)
+				   place))
 	    :action (lambda (x) (dogears-go x))
 	    )
   )
@@ -462,12 +462,12 @@ Org-mode properties drawer already, keep the headline and don’t insert
     (save-excursion
       (goto-char (org-roam-node-point node))
       (if (= (org-outline-level) 0)
-          (let ((current-tags (split-string (or (cadr (assoc "FILETAGS"
-                                                             (org-collect-keywords '("filetags"))))
-                                                "")
-                                            ":" 'omit-nulls)))
-            (org-roam-set-keyword "filetags" (org-make-tag-string (seq-uniq (append tags current-tags)))))
-        (org-set-tags (seq-uniq (append tags (org-get-tags)))))
+	  (let ((current-tags (split-string (or (cadr (assoc "FILETAGS"
+							     (org-collect-keywords '("filetags"))))
+						"")
+					    ":" 'omit-nulls)))
+	    (org-roam-set-keyword "filetags" (org-make-tag-string (seq-uniq (append tags current-tags)))))
+	(org-set-tags (seq-uniq (append tags (org-get-tags)))))
       tags)))
 
 (defun my/test ()
@@ -495,50 +495,50 @@ Org-mode properties drawer already, keep the headline and don’t insert
    :name "Numbery"
    :description "A silly taxonomy of numbers."
    :taxys (list (make-taxy
-                 :name "< 10"
-                 :description "Numbers below 10 (consuming)"
-                 :predicate (lambda (n) (< n 10))
-                 :taxys (list
-                         ;; These sub-taxys further classify the numbers below 10 into odd
-                         ;; and even.  The odd taxy "consumes" numbers, while the even one
-                         ;; doesn't, leaving them to reappear in the parent taxy's items.
-                         (make-taxy :name "Odd"
-                                    :description "(consuming)"
-                                    :predicate #'oddp)
-                         (make-taxy :name "Even"
-                                    :description "(non-consuming)"
-                                    :predicate #'evenp
-                                    :then #'identity)))
-                (make-taxy
-                 :name ">= 10"
-                 :description "Numbers above 9 (consuming)"
-                 :predicate (lambda (n) (>= n 10))
-                 :taxys (list
-                         ;; Like in the "< 10" taxy, these sub-taxys further classify
-                         ;; the numbers, but only one of them consumes numbers it
-                         ;; takes in, leaving the rest to reappear in the parent taxy.
-                         (make-taxy :name "Divisible by 3"
-                                    :description "(non-consuming)"
-                                    :predicate (lambda (n) (zerop (mod n 3)))
-                                    :then #'identity)
-                         (make-taxy :name "Divisible by 4"
-                                    :description "(non-consuming)"
-                                    :predicate (lambda (n) (zerop (mod n 4)))
-                                    :then #'identity)
-                         (make-taxy :name "Divisible by 3 or 4"
-                                    :description "(consuming)"
-                                    ;; Since this taxy's `:then' function is unset,
-                                    ;; it defaults to `ignore', which causes it to
-                                    ;; consume numbers it takes in.  Since these
-                                    ;; numbers have already been taken in (without
-                                    ;; being consumed) by the previous two sibling
-                                    ;; taxys, they also appear in them.
-                                    :predicate (lambda (n) (or (zerop (mod n 3))
-                                                               (zerop (mod n 4)))))
-                         (make-taxy :name "Divisible by 5"
-                                    :description "(non-consuming)"
-                                    :predicate (lambda (n) (zerop (mod n 5)))
-                                    :then #'identity))))))
+		 :name "< 10"
+		 :description "Numbers below 10 (consuming)"
+		 :predicate (lambda (n) (< n 10))
+		 :taxys (list
+			 ;; These sub-taxys further classify the numbers below 10 into odd
+			 ;; and even.  The odd taxy "consumes" numbers, while the even one
+			 ;; doesn't, leaving them to reappear in the parent taxy's items.
+			 (make-taxy :name "Odd"
+				    :description "(consuming)"
+				    :predicate #'oddp)
+			 (make-taxy :name "Even"
+				    :description "(non-consuming)"
+				    :predicate #'evenp
+				    :then #'identity)))
+		(make-taxy
+		 :name ">= 10"
+		 :description "Numbers above 9 (consuming)"
+		 :predicate (lambda (n) (>= n 10))
+		 :taxys (list
+			 ;; Like in the "< 10" taxy, these sub-taxys further classify
+			 ;; the numbers, but only one of them consumes numbers it
+			 ;; takes in, leaving the rest to reappear in the parent taxy.
+			 (make-taxy :name "Divisible by 3"
+				    :description "(non-consuming)"
+				    :predicate (lambda (n) (zerop (mod n 3)))
+				    :then #'identity)
+			 (make-taxy :name "Divisible by 4"
+				    :description "(non-consuming)"
+				    :predicate (lambda (n) (zerop (mod n 4)))
+				    :then #'identity)
+			 (make-taxy :name "Divisible by 3 or 4"
+				    :description "(consuming)"
+				    ;; Since this taxy's `:then' function is unset,
+				    ;; it defaults to `ignore', which causes it to
+				    ;; consume numbers it takes in.  Since these
+				    ;; numbers have already been taken in (without
+				    ;; being consumed) by the previous two sibling
+				    ;; taxys, they also appear in them.
+				    :predicate (lambda (n) (or (zerop (mod n 3))
+							       (zerop (mod n 4)))))
+			 (make-taxy :name "Divisible by 5"
+				    :description "(non-consuming)"
+				    :predicate (lambda (n) (zerop (mod n 5)))
+				    :then #'identity))))))
 
 (let ((numbers (cl-loop for i below 100 collect i))
       ;; Since `numbery' is stored in a variable, we use an emptied
@@ -566,44 +566,44 @@ Org-mode properties drawer already, keep the headline and don’t insert
     ;; (add-hook 'find-file-hook
      ;; (lambda ()
        ;; (run-with-timer 5 nil
-          ;; (lambda ()
-            ;; Reset desktop modification time so the user is not bothered
-            ;; (setq desktop-file-modtime (nth 5 (file-attributes (desktop-full-file-name))))
-            ;; (desktop-save user-emacs-directory)))))
+	  ;; (lambda ()
+	    ;; Reset desktop modification time so the user is not bothered
+	    ;; (setq desktop-file-modtime (nth 5 (file-attributes (desktop-full-file-name))))
+	    ;; (desktop-save user-emacs-directory)))))
 
     ;; Read default desktop
     (if (file-exists-p (concat desktop-dirname desktop-base-file-name))
-        (desktop-read desktop-dirname))
+	(desktop-read desktop-dirname))
 
     ;; Add a hook when emacs is closed to we reset the desktop
     ;; modification time (in this way the user does not get a warning
     ;; message about desktop modifications)
     (add-hook 'kill-emacs-hook
-              (lambda ()
-                ;; Reset desktop modification time so the user is not bothered
-                (setq desktop-file-modtime (nth 5 (file-attributes (desktop-full-file-name))))))
+	      (lambda ()
+		;; Reset desktop modification time so the user is not bothered
+		(setq desktop-file-modtime (nth 5 (file-attributes (desktop-full-file-name))))))
     )
 
 (use-package helpful
   :commands (helpful-callable
-             helpful-variable
-             helpful-key
-             helpful-at-point)
+	     helpful-variable
+	     helpful-key
+	     helpful-at-point)
   :config
   (setq helpful-max-buffers 5)
   ;; don't pop new window
   (setq helpful-switch-buffer-function
-        (lambda (buf) (if-let ((window (display-buffer-reuse-mode-window buf '((mode . helpful-mode)))))
-                          ;; ensure the helpful window is selected for `helpful-update'.
-                          (select-window window)
-                        ;; line above returns nil if no available window is found
-                        (pop-to-buffer buf))))
+	(lambda (buf) (if-let ((window (display-buffer-reuse-mode-window buf '((mode . helpful-mode)))))
+			  ;; ensure the helpful window is selected for `helpful-update'.
+			  (select-window window)
+			;; line above returns nil if no available window is found
+			(pop-to-buffer buf))))
   (defvar moon-helpful-history () "History of helpful, a list of buffers.")
   (advice-add #'helpful-update :around #'moon-helpful@helpful-update)
   (advice-add #'helpful--buffer :around (lambda (oldfunc &rest _)
-                                          (let ((buf (apply oldfunc _)))
-                                            (push buf moon-helpful-history)
-                                            buf))))
+					  (let ((buf (apply oldfunc _)))
+					    (push buf moon-helpful-history)
+					    buf))))
 
 (defun moon-helpful@helpful-update (oldfunc)
   "Insert back/forward buttons."
@@ -611,14 +611,14 @@ Org-mode properties drawer already, keep the headline and don’t insert
   (let ((inhibit-read-only t))
     (goto-char (point-min))
     (insert-text-button "Back"
-                        'action (lambda (&rest _)
-                                  (interactive)
-                                  (lxs-helpful-cycle-buffer (current-buffer) 1)))
+			'action (lambda (&rest _)
+				  (interactive)
+				  (lxs-helpful-cycle-buffer (current-buffer) 1)))
     (insert " / ")
     (insert-text-button "Forward"
-                        'action (lambda (&rest _)
-                                  (interactive)
-                                  (lxs-helpful-cycle-buffer (current-buffer)  -1)))
+			'action (lambda (&rest _)
+				  (interactive)
+				  (lxs-helpful-cycle-buffer (current-buffer)  -1)))
     (insert "\n\n")))
 ;; 这里没有必要自己维护一个 helpful buffer 的历史，只需要 cycle
 ;; helpful buffer 就可以了。
@@ -630,7 +630,7 @@ Org-mode properties drawer already, keep the headline and don’t insert
   (interactive)
   (let* ((buffers (or lxs-helpful-cur-bufs (buffer-list)))
 	 (helpful-bufs (--filter (with-current-buffer it
-                                   (eq major-mode 'helpful-mode))
+				   (eq major-mode 'helpful-mode))
 				 buffers))
 	 (idx (+ (or offset 0) (-elem-index buffer helpful-bufs)))
 	 )
@@ -651,12 +651,12 @@ Org-mode properties drawer already, keep the headline and don’t insert
 
 (defun +tab-bar-right ()
   (let* ((p (cdr (project-current)))
-         (vc (+vc-branch-name))
-         (w (string-width (concat p " " vc))))
+	 (vc (+vc-branch-name))
+	 (w (string-width (concat p " " vc))))
     (concat (propertize " " 'display `((space :align-to (- (+ right right-fringe right-margin) ,w 1))))
-            p
-            " "
-            vc)))
+	    p
+	    " "
+	    vc)))
 
 (defun +tab-bar-switch-project ()
   "Switch to project in a new tab, project name will be used as tab name.
@@ -664,24 +664,24 @@ No tab will created if the command is cancelled."
   (interactive)
   (let (succ)
     (unwind-protect
-        (progn
-          (tab-bar-new-tab)
-          (call-interactively #'project-switch-project)
-          (when-let ((proj (project-current)))
-            (tab-bar-rename-tab (format "%s" (file-name-nondirectory (directory-file-name (cdr proj)))))
-            (setq succ t)))
+	(progn
+	  (tab-bar-new-tab)
+	  (call-interactively #'project-switch-project)
+	  (when-let ((proj (project-current)))
+	    (tab-bar-rename-tab (format "%s" (file-name-nondirectory (directory-file-name (cdr proj)))))
+	    (setq succ t)))
       (unless succ
-        (tab-bar-close-tab)))))
+	(tab-bar-close-tab)))))
 
 (defun +tab-bar-tab-format-function (tab i)
   (let ((current-p (eq (car tab) 'current-tab)))
     (concat
      (propertize (concat
-                  " "
-                  (alist-get 'name tab)
-                  " ")
-                 'face
-                 (funcall tab-bar-tab-face-function tab))
+		  " "
+		  (alist-get 'name tab)
+		  " ")
+		 'face
+		 (funcall tab-bar-tab-face-function tab))
      " ")))
 
 (tab-bar-mode 1)
@@ -717,7 +717,7 @@ tab-line-tabs-function
 
 (with-current-buffer "*Completions*"
   (setq toki-tabs/buffer-group
-                              (funcall toki-tabs-project-root-function)))
+			      (funcall toki-tabs-project-root-function)))
 
 ;; 用 taxy 给 org-roam 的 tag 进行分类展示
 (require 'taxy)
@@ -731,21 +731,21 @@ tab-line-tabs-function
   (make-taxy
    :name "Buffers"
    :taxys (list
-           (make-taxy
-            :name "Modes"
-            :take (apply-partially #'taxy-take-keyed (list #'buffery-major-mode))))))
+	   (make-taxy
+	    :name "Modes"
+	    :take (apply-partially #'taxy-take-keyed (list #'buffery-major-mode))))))
 
 ;; Note the use of `taxy-emptied' to avoid mutating the original taxy definition.
 (taxy-plain
  (taxy-fill (buffer-list)
-            (taxy-emptied buffery)))
+	    (taxy-emptied buffery)))
 
 ;; 使用 make-taxy 来定义一个分类 (taxy)
 (defvar numbery
   (make-taxy :name "Numbery"
 	     :description "A silly taxonomy of numbers."
-             :predicate #'(lambda (x) (> x 2))
-             :then #'ignore
+	     :predicate #'(lambda (x) (> x 2))
+	     :then #'ignore
     ))
 
 ;; taxy-plain 用于渲染显示 taxy 的结果
@@ -767,12 +767,12 @@ tab-line-tabs-function
   "Returns a function to scroll forward or back in the Elfeed
   search results, displaying entries without switching to them."
       (lambda (times)
-        (interactive "p")
-        (forward-line (* times (or 1 0)))
-        (recenter)
-        (call-interactively #'elfeed-search-show-entry)
-        (select-window (previous-window))
-        (unless elfeed-search-remain-on-entry (forward-line -1))))
+	(interactive "p")
+	(forward-line (* times (or 1 0)))
+	(recenter)
+	(call-interactively #'elfeed-search-show-entry)
+	(select-window (previous-window))
+	(unless elfeed-search-remain-on-entry (forward-line -1))))
 
   (define-key elfeed-search-mode-map (kbd "n") (elfeed-search-show-entry-pre +1))
   (define-key elfeed-search-mode-map (kbd "p") (elfeed-search-show-entry-pre -1))
@@ -803,7 +803,7 @@ tab-line-tabs-function
 (setq org-id-extra-files (find-lisp-find-files org-roam-directory "\.org$"))
 
 ;; (setq ivy-dispatching-done-hydra-exit-keys '(("M-o" '(lambda () (pop hydra-stack)))
-                                             ;; ("C-g" '(lambda () (pop hydra-stack)))))
+					     ;; ("C-g" '(lambda () (pop hydra-stack)))))
 
 ;; 根据 roam tag 设置 hugo tag
 (defun insert-hugo-tag-from-roam ()
@@ -830,7 +830,7 @@ tab-line-tabs-function
 Such as 'Two Sum' will be converted to 'two-sum'."
   (let* ((str1 (replace-regexp-in-string "\s-\s" "-" (downcase title)))
 	 (str2 (replace-regexp-in-string "\s+" "-" str1))
-         (res (replace-regexp-in-string "[(),]" "" str2)))
+	 (res (replace-regexp-in-string "[(),]" "" str2)))
     res))
 
 (leetcode--slugify-title (plist-get (leetcode--get-problem-by-id 167) :title))
@@ -888,30 +888,30 @@ Such as 'Two Sum' will be converted to 'two-sum'."
   (require 'json)
   (require 'org)
   (let ((data (let ((json-object-type 'alist)
-                    (json-array-type  'list)
-                    (json-key-type    'symbol)
-                    (json-false       nil)
-                    (json-null        nil))
-                (json-read-file chrome-bookmarks-file)))
-        level)
+		    (json-array-type  'list)
+		    (json-key-type    'symbol)
+		    (json-false       nil)
+		    (json-null        nil))
+		(json-read-file chrome-bookmarks-file)))
+	level)
     (cl-labels ((fn
-                 (al)
-                 (pcase (alist-get 'type al)
-                   ("folder"
-                    (insert
-                     (format "%s %s\n"
-                             (make-string level ?*)
-                             (alist-get 'name al)))
-                    (cl-incf level)
-                    (mapc #'fn (alist-get 'children al))
-                    (cl-decf level))
-                   ("url"
-                    (insert
-                     (format "%s %s\n"
-                             (make-string level ?*)
-                             (org-make-link-string
-                              (alist-get 'url al)
-                              (alist-get 'name al))))))))
+		 (al)
+		 (pcase (alist-get 'type al)
+		   ("folder"
+		    (insert
+		     (format "%s %s\n"
+			     (make-string level ?*)
+			     (alist-get 'name al)))
+		    (cl-incf level)
+		    (mapc #'fn (alist-get 'children al))
+		    (cl-decf level))
+		   ("url"
+		    (insert
+		     (format "%s %s\n"
+			     (make-string level ?*)
+			     (org-make-link-string
+			      (alist-get 'url al)
+			      (alist-get 'name al))))))))
       (setq level 1)
       (fn (alist-get 'bookmark_bar (alist-get 'roots data)))
       (setq level 1)
@@ -980,12 +980,12 @@ Such as 'Two Sum' will be converted to 'two-sum'."
 (defun +org/opened-buffer-files ()
   "Return the list of files currently opened in emacs"
   (delq nil
-        (mapcar (lambda (x)
-                  (if (and (buffer-file-name x)
-                           (string-match "\\.org$"
-                                         (buffer-file-name x)))
-                      (buffer-file-name x)))
-                (buffer-list))))
+	(mapcar (lambda (x)
+		  (if (and (buffer-file-name x)
+			   (string-match "\\.org$"
+					 (buffer-file-name x)))
+		      (buffer-file-name x)))
+		(buffer-list))))
 
 (setq org-refile-targets '((+org/opened-buffer-files :maxlevel . 4)))
 (setq org-refile-use-outline-path 'file)
@@ -1001,53 +1001,53 @@ Such as 'Two Sum' will be converted to 'two-sum'."
 (defun swint-dired-rsync (action)
   (interactive)
   (let ((remote (completing-read "Remote repo: "
-                                 (split-string
-                                  (shell-command-to-string
-                                   "cat ~/.ssh/config | grep \"^Host \" | awk '{print $2}'"))))
-        (path (abbreviate-file-name default-directory))
-        (is-push (equal action "push"))
-        (is-pull (equal action "pull"))
-        (string-to-escape "\\( \\|(\\|)\\|\\[\\|\\]\\|{\\|}\\)")
-        rsync-command)
+				 (split-string
+				  (shell-command-to-string
+				   "cat ~/.ssh/config | grep \"^Host \" | awk '{print $2}'"))))
+	(path (abbreviate-file-name default-directory))
+	(is-push (equal action "push"))
+	(is-pull (equal action "pull"))
+	(string-to-escape "\\( \\|(\\|)\\|\\[\\|\\]\\|{\\|}\\)")
+	rsync-command)
     ;; 对于rsync，escape本地路径用\，远程路径用\\\。
     (cl-flet ((escape-local (x)
-                            (replace-regexp-in-string string-to-escape
-                                                      "\\\\\\1" x))
-              (escape-remote (x)
-                             (replace-regexp-in-string string-to-escape
-                                                       "\\\\\\\\\\\\\\1" x)))
+			    (replace-regexp-in-string string-to-escape
+						      "\\\\\\1" x))
+	      (escape-remote (x)
+			     (replace-regexp-in-string string-to-escape
+						       "\\\\\\\\\\\\\\1" x)))
       (let ((files (cond (is-push
-                          (cl-loop for f in (dired-get-marked-files)
-                                   collect (escape-local f)))
-                         (is-pull
-                          (let ((remote-files (helm-comp-read "Remote files: "
-                                                              (split-string (shell-command-to-string
-                                                                             ;; 连接remote列出path下文件绝对路径，并不显示错误信息。
-                                                                             (format "proxychains4 ssh %s '(cd %s && ls -A | sed \"s:^:`pwd`/:\") 2>/dev/null'"
-                                                                                     remote (escape-local path))) "\n")
-                                                              :marked-candidates t
-                                                              :buffer (format "*ivy rsync %s*" remote))))
-                            (cl-loop for f in remote-files
-                                     collect (concat remote ":" (escape-remote (if (directory-name-p f)
-                                                                                   (directory-file-name f)
-                                                                                 f))))))))
-            (dest (cond (is-pull (escape-local path))
-                        (is-push (escape-remote (concat remote ":" path))))))
-        (setq rsync-command "proxychains4 rsync -arv --progress ")
-        (dolist (file files)
-          (setq rsync-command
-                (concat rsync-command file " ")))
-        (setq rsync-command (concat rsync-command dest))))
+			  (cl-loop for f in (dired-get-marked-files)
+				   collect (escape-local f)))
+			 (is-pull
+			  (let ((remote-files (helm-comp-read "Remote files: "
+							      (split-string (shell-command-to-string
+									     ;; 连接remote列出path下文件绝对路径，并不显示错误信息。
+									     (format "proxychains4 ssh %s '(cd %s && ls -A | sed \"s:^:`pwd`/:\") 2>/dev/null'"
+										     remote (escape-local path))) "\n")
+							      :marked-candidates t
+							      :buffer (format "*ivy rsync %s*" remote))))
+			    (cl-loop for f in remote-files
+				     collect (concat remote ":" (escape-remote (if (directory-name-p f)
+										   (directory-file-name f)
+										 f))))))))
+	    (dest (cond (is-pull (escape-local path))
+			(is-push (escape-remote (concat remote ":" path))))))
+	(setq rsync-command "proxychains4 rsync -arv --progress ")
+	(dolist (file files)
+	  (setq rsync-command
+		(concat rsync-command file " ")))
+	(setq rsync-command (concat rsync-command dest))))
     (let ((process (start-process-shell-command "rsync" "*rsync*" rsync-command)))
       (lexical-let ((pos (memq 'mode-line-modes mode-line-format))
-                    (mode-string action))
-        (setcdr pos (cons (concat "Rsync/Unison " mode-string " ") (cdr pos)))
-        (set-process-sentinel
-         process
-         (lambda (process signal)
-           (when (memq (process-status process) '(exit signal))
-             (message "Rsync/Unison %s done." mode-string)
-             (setcdr pos (remove (concat "Rsync/Unison " mode-string " ") (cdr pos))))))))))
+		    (mode-string action))
+	(setcdr pos (cons (concat "Rsync/Unison " mode-string " ") (cdr pos)))
+	(set-process-sentinel
+	 process
+	 (lambda (process signal)
+	   (when (memq (process-status process) '(exit signal))
+	     (message "Rsync/Unison %s done." mode-string)
+	     (setcdr pos (remove (concat "Rsync/Unison " mode-string " ") (cdr pos))))))))))
 
 (defun swint-dired-rsync-push ()
   (interactive)
@@ -1070,16 +1070,16 @@ Such as 'Two Sum' will be converted to 'two-sum'."
   ;; (dirvish-mode . (lambda () (dired-hide-details-mode -1)))
   :bind
   (:map dired-mode-map
-        ("SPC" . dirvish-show-history)
-        ("r"   . dirvish-roam)
-        ("b"   . dirvish-goto-bookmark)
-        ("f"   . dirvish-file-info-menu)
-        ("M-a" . dirvish-mark-actions-menu)
-        ("M-s" . dirvish-setup-menu)
-        ("M-f" . dirvish-toggle-fullscreen)
-        ([remap dired-summary] . dirvish-dispatch)
-        ([remap dired-do-copy] . dirvish-yank)
-        ([remap mode-line-other-buffer] . dirvish-other-buffer)))
+	("SPC" . dirvish-show-history)
+	("r"   . dirvish-roam)
+	("b"   . dirvish-goto-bookmark)
+	("f"   . dirvish-file-info-menu)
+	("M-a" . dirvish-mark-actions-menu)
+	("M-s" . dirvish-setup-menu)
+	("M-f" . dirvish-toggle-fullscreen)
+	([remap dired-summary] . dirvish-dispatch)
+	([remap dired-do-copy] . dirvish-yank)
+	([remap mode-line-other-buffer] . dirvish-other-buffer)))
 
 (defun replace-id-quick ()
   (interactive)
@@ -1129,11 +1129,11 @@ Such as 'Two Sum' will be converted to 'two-sum'."
    :children
    (list
     (list :name "gtd"
-          :face 'font-lock-keyword-face
-          :click (lambda() (interactive) (message "bbb")))
+	  :face 'font-lock-keyword-face
+	  :click (lambda() (interactive) (message "bbb")))
     (list :name "bookmark"
-          :face 'font-lock-keyword-face
-          :click 'maple-explorer-fold
+	  :face 'font-lock-keyword-face
+	  :click 'maple-explorer-fold
 	  :status 'open
 	  :children (list (maple-explorer-bm-list))
       ))))
@@ -1171,13 +1171,13 @@ Such as 'Two Sum' will be converted to 'two-sum'."
   ;;         (shell-command "cd ~/.emacs.d/site-lisp/; git clone git@github.com:ag91/moldable-emacs.git"))
   :load-path "~/.emacs.d/site-lisp/moldable-emacs/"
   :bind (("C-c m m" . me-mold)
-         ("C-c m f" . me-go-forward)
-         ("C-c m b" . me-go-back)
-         ("C-c m o" . me-open-at-point)
-         ("C-c m d" . me-mold-docs)
-         ("C-c m g" . me-goto-mold-source)
-         ("C-c m e a" . me-mold-add-last-example)
-         )
+	 ("C-c m f" . me-go-forward)
+	 ("C-c m b" . me-go-back)
+	 ("C-c m o" . me-open-at-point)
+	 ("C-c m d" . me-mold-docs)
+	 ("C-c m g" . me-goto-mold-source)
+	 ("C-c m e a" . me-mold-add-last-example)
+	 )
   :config
   (require 'moldable-emacs)
   ;; (add-to-list 'me-files-with-molds (concat (file-name-directory (symbol-file 'me-mold)) "molds/experiments.el")) ;; TODO this is relevant only if you have private molds
@@ -1196,19 +1196,19 @@ Such as 'Two Sum' will be converted to 'two-sum'."
 (defun toggle-org-custom-inline-style ()
   (interactive)
   (let ((hook 'org-export-before-parsing-hook)
-        (fun 'set-org-html-style))
+	(fun 'set-org-html-style))
     (if (memq fun (eval hook))
-        (progn
-          (remove-hook hook fun 'buffer-local)
-          (message "Removed %s from %s" (symbol-name fun) (symbol-name hook)))
+	(progn
+	  (remove-hook hook fun 'buffer-local)
+	  (message "Removed %s from %s" (symbol-name fun) (symbol-name hook)))
       (add-hook hook fun nil 'buffer-local)
       (message "Added %s to %s" (symbol-name fun) (symbol-name hook)))))
 
 (defun org-theme ()
   (interactive)
   (let* ((cssdir org-theme-css-dir)
-         (css-choices (directory-files cssdir nil ".css$"))
-         (css (completing-read "theme: " css-choices nil t)))
+	 (css-choices (directory-files cssdir nil ".css$"))
+	 (css (completing-read "theme: " css-choices nil t)))
     (concat cssdir css)))
 
 (defun set-org-html-style (&optional backend)
@@ -1216,19 +1216,19 @@ Such as 'Two Sum' will be converted to 'two-sum'."
   (when (or (null backend) (eq backend 'html))
     (let ((f (or (and (boundp 'org-theme-css) org-theme-css) (org-theme))))
       (if (file-exists-p f)
-          (progn
-            (set (make-local-variable 'org-theme-css) f)
-            (set (make-local-variable 'org-html-head)
-                 (with-temp-buffer
-                   (insert "<style type=\"text/css\">\n<!--/*--><![CDATA[/*><!--*/\n")
-                   (insert-file-contents f)
-                   (goto-char (point-max))
-                   (insert "\n/*]]>*/-->\n</style>\n")
-                   (buffer-string)))
-            (set (make-local-variable 'org-html-head-include-default-style)
-                 nil)
-            (message "Set custom style from %s" f))
-        (message "Custom header file %s doesnt exist")))))
+	  (progn
+	    (set (make-local-variable 'org-theme-css) f)
+	    (set (make-local-variable 'org-html-head)
+		 (with-temp-buffer
+		   (insert "<style type=\"text/css\">\n<!--/*--><![CDATA[/*><!--*/\n")
+		   (insert-file-contents f)
+		   (goto-char (point-max))
+		   (insert "\n/*]]>*/-->\n</style>\n")
+		   (buffer-string)))
+	    (set (make-local-variable 'org-html-head-include-default-style)
+		 nil)
+	    (message "Set custom style from %s" f))
+	(message "Custom header file %s doesnt exist")))))
 ; 使用
 (use-package recursive-search-references
   :load-path "site-lisp/recursive-search-references")
@@ -1241,7 +1241,7 @@ Such as 'Two Sum' will be converted to 'two-sum'."
   (let* ((inds (mapcar #'car (org-roam-db-query [:select [file] :from tags :join nodes :on (= tags:node_id nodes:id) :where (= tag "index")])))
 	 (names (mapcar #'file-name-base inds))
 	 (name (completing-read "choose the index html:\n" names)))
-    (insert (concat name ".html"))))
+    (insert (concat "#+HTML_LINK_UP: " name ".html"))))
 
 (use-package embark
   :ensure t
@@ -1257,19 +1257,19 @@ Such as 'Two Sum' will be converted to 'two-sum'."
   :config
   ;; Hide the mode line of the Embark live/completions buffers
   (add-to-list 'display-buffer-alist
-               '("\\`\\*Embark Collect \\(Live\\|Completions\\)\\*"
-                 nil
-                 (window-parameters (mode-line-format . none)))))
+	       '("\\`\\*Embark Collect \\(Live\\|Completions\\)\\*"
+		 nil
+		 (window-parameters (mode-line-format . none)))))
 
 (defun my-select-tab-by-name (tab)
   (interactive
    (list
     (let ((tab-list (or (mapcar (lambda (tab) (cdr (assq 'name tab)))
-                                (tab-bar-tabs))
-                        (user-error "No tabs found"))))
+				(tab-bar-tabs))
+			(user-error "No tabs found"))))
       (consult--read tab-list
-                     :prompt "Tabs: "
-                     :category 'tab))))
+		     :prompt "Tabs: "
+		     :category 'tab))))
   (tab-bar-select-tab-by-name tab))
 
 (embark-define-keymap embark-bib-actions
@@ -1293,7 +1293,7 @@ Such as 'Two Sum' will be converted to 'two-sum'."
   (interactive)
   (let ((cands (worf--goto-candidates)))
     (ivy-read "Heading: " cands
-              :action 'bjm/worf-insert-internal-link-action)))
+	      :action 'bjm/worf-insert-internal-link-action)))
 
 (defun bjm/worf-insert-internal-link-action (x)
   "Insert link for `bjm/worf-insert-internal-link'"
@@ -1327,8 +1327,6 @@ Such as 'Two Sum' will be converted to 'two-sum'."
 
 (require 'yasnippet)
 
-
-
 (require 'corfu)
 (require 'corfu-info)
 (require 'corfu-history)
@@ -1347,7 +1345,7 @@ CHECKER.  BUFFER is the buffer which was checked.
 
 Return the errors parsed with the error patterns of CHECKER."
   (let ((sanitized-output (replace-regexp-in-string "\r" "" output))
-        )
+	)
     (funcall (flycheck-checker-get checker 'error-parser) sanitized-output checker buffer)))
 
 (add-to-list 'load-path "~/.emacs.d/site-lisp/emacs-application-framework/")
@@ -1357,15 +1355,15 @@ Return the errors parsed with the error patterns of CHECKER."
 
 (defun org-ask-location ()
   (let* ((org-refile-targets '((nil :maxlevel . 9)))
-         (hd (condition-case nil
-                 (car (org-refile-get-location "Headline" nil t))
-               (error (car org-refile-history)))))
+	 (hd (condition-case nil
+		 (car (org-refile-get-location "Headline" nil t))
+	       (error (car org-refile-history)))))
     (goto-char (point-min))
     (outline-next-heading)
     (if (re-search-forward
-         (format org-complex-heading-regexp-format (regexp-quote hd))
-         nil t)
-        (goto-char (point-at-bol))
+	 (format org-complex-heading-regexp-format (regexp-quote hd))
+	 nil t)
+	(goto-char (point-at-bol))
       (goto-char (point-max))
       (or (bolp) (insert "\n"))
       (insert "* " hd "\n")))
@@ -1389,8 +1387,8 @@ Return the errors parsed with the error patterns of CHECKER."
   "Run powershell"
   (interactive)
   (async-shell-command "C:/Windows/system32/WindowsPowerShell/v1.0/powershell.exe -Command -"
-               nil
-               nil))
+	       nil
+	       nil))
 
 (defun xs-insert-two-space ()
   (interactive)
@@ -1405,15 +1403,15 @@ Return the errors parsed with the error patterns of CHECKER."
     ;; and smaller 80 column windows for smaller displays
     ;; pick whatever numbers make sense for you
     (if (> (x-display-pixel-width) 1280)
-           (add-to-list 'default-frame-alist (cons 'width 220))
-           (add-to-list 'default-frame-alist (cons 'width 80)))
+	   (add-to-list 'default-frame-alist (cons 'width 220))
+	   (add-to-list 'default-frame-alist (cons 'width 80)))
     ;; for the height, subtract a couple hundred pixels
     ;; from the screen height (for panels, menubars and
     ;; whatnot), then divide by the height of a char to
     ;; get the height we want
     (add-to-list 'default-frame-alist
-         (cons 'height (/ (- (x-display-pixel-height) 200)
-                             (frame-char-height)))))))
+	 (cons 'height (/ (- (x-display-pixel-height) 200)
+			     (frame-char-height)))))))
 
 (set-frame-size-according-to-resolution)
 
@@ -1437,7 +1435,6 @@ Return the errors parsed with the error patterns of CHECKER."
 	 (getenv "PATH")))
 (setq eshell-path-env (concat "C:\\Users\\xunsong.li\\AppData\\Roaming\\Python\\Python310\\Scripts\\" ";" eshell-path-env))
 
-
 (defun tt-print-items ()
   "print all headings in current buffer (of org mode).
 2019-01-14"
@@ -1445,12 +1442,10 @@ Return the errors parsed with the error patterns of CHECKER."
   (with-output-to-temp-buffer "*xah temp out*"
     (org-element-map (org-element-parse-buffer) 'link
       (lambda (x)
-        (princ (org-element-property :raw-link x))
-        (terpri )))))
+	(princ (org-element-property :raw-link x))
+	(terpri )))))
 
 (setq flycheck-flake8rc ".flake8")
-
-
 
 (add-to-list 'load-path "~/.emacs.d/site-lisp/lsp-bridge")
 (require 'lsp-bridge)
@@ -1460,15 +1455,12 @@ Return the errors parsed with the error patterns of CHECKER."
 (define-key acm-mode-map "\M-j" #'hydra-reading/nil)
 (define-key acm-mode-map "\M-k" #'pyim-convert-string-at-point)
 
-
 (define-key prog-mode-map "\M-." #'lsp-bridge-find-def)
 (define-key prog-mode-map "\M-," #'lsp-bridge-return-from-def)
-
 
 ;; add time display for rsync command
 ;; this command can run in cmd
 ;; wsl ~/.local/bin/when-changed -r -v -1 -s /mnt/c/users/xunsong.li/Bridge/ -c "sshpass -p \"Lxs1183236604@\" rsync -auvz --timeout=15 $(git rev-parse --show-toplevel) dev013:~/; echo \"\\033[31;1;4m$(date)\\033[0m\n\""
-
 
 (defvar acm-mode-map
   (let ((map (make-sparse-keymap)))
@@ -1499,7 +1491,6 @@ in the dynamic table"
     (goto-char pos)
     (org-open-at-point)))
 
-
 ;; 读取 node tag, 根据 tag 找对应的 index node name
 (setq org-tag-to-index-node '(("python" "python 编程指南")))
 
@@ -1528,10 +1519,8 @@ in the dynamic table"
       (end-of-buffer)
       (insert "- ")
       (insert (org-link-make-string
-               (concat "id:" id)
-               description)))))
-
-
+	       (concat "id:" id)
+	       description)))))
 
 (defun xs/lsp-bridge-not-in-comment ()
   "Hide completion if cursor in comment area."
@@ -1553,3 +1542,164 @@ in the dynamic table"
 (defun syp-check-sync-state ()
   ()
   )
+
+(require 'org-ehtml)
+
+(defvar xs-css-template '(("worg" . "#+HTML_HEAD: <link rel=\"stylesheet\" type=\"text/css\" href=\"../css/worg.css\"></link>")
+			  ("readtheorg" . "#+SETUPFILE: ../org-html-themes/org/theme-readtheorg-local.setup")))
+
+(defun xs/choose-css-template ()
+  (interactive)
+  (let ((css-key (completing-read "choose a css template: " (mapcar 'car xs-css-template)))
+	)
+    (insert (cdr (assoc css-key xs-css-template)))))
+
+(setq org-html-postamble t)
+(setq org-html-postamble-format '(("en" "<div id=\"footer\">
+<p class=\"author\">Author: %a (%e)</p>\n
+<p class=\"date\">Last Modifid: %C</p>\n
+</div>")))
+
+(setq org-html-preamble t)
+(setq org-html-preamble-format
+      '(("en" "<div>
+<ul>
+<li><a href=\"index.html\" title=\"Sitemap\">Sitemap</a></li>
+</ul></div>")))
+
+(require 'org-static-blog)
+(setq org-static-blog-publish-title "My Static Org Blog")
+(setq org-static-blog-publish-url "127.0.0.1:8888")
+(setq org-static-blog-publish-directory "~/Documents/org-publish/")
+(setq org-static-blog-posts-directory "~/Documents/org-publish/posts/")
+(setq org-static-blog-drafts-directory "~/Documents/org-publish/drafts/")
+(setq org-static-blog-enable-tags t)
+(setq org-export-with-toc nil)
+(setq org-export-with-section-numbers nil)
+
+(setq org-static-blog-page-header
+      "<meta name=\"author\" content=\"John Dow\">
+<meta name=\"referrer\" content=\"no-referrer\">
+<link href= \"css/style.css\" rel=\"stylesheet\" type=\"text/css\" />
+<link rel=\"icon\" href=\"static/favicon.ico\">")
+
+(use-package simple-httpd
+  :ensure t)
+
+(require 'denote)
+(setq denote-directory (expand-file-name "~/Documents/org/denotes"))
+(require 'denote-dired)
+
+(use-package consult-notes
+  :straight (:type git :host github :repo "mclear-tools/consult-notes")
+  :commands (consult-notes
+	     consult-notes-search-in-all-notes
+	     consult-notes-org-roam-find-node
+	     consult-notes-org-roam-find-node-relation)
+  :config
+  (setq consult-notes-sources
+      '(("logseq pages"             ?o "~/Documents/logseq/pages")
+	))
+  )
+
+(defvar prot-dired--limit-hist '()
+  "Minibuffer history for `prot-dired-limit-regexp'.")
+
+;;;###autoload
+(defun prot-dired-limit-regexp (regexp omit)
+  "Limit Dired to keep files matching REGEXP.
+
+With optional OMIT argument as a prefix (\\[universal-argument]),
+exclude files matching REGEXP.
+
+Restore the buffer with \\<dired-mode-map>`\\[revert-buffer]'."
+  (interactive
+   (list
+    (read-regexp
+     (concat "Files "
+	     (when current-prefix-arg
+	       (propertize "NOT " 'face 'warning))
+	     "matching PATTERN: ")
+     nil 'prot-dired--limit-hist)
+    current-prefix-arg))
+  (dired-mark-files-regexp regexp)
+  (unless omit (dired-toggle-marks))
+  (dired-do-kill-lines))
+
+(defvar consult--source-dogears
+  (list :name     "Dogears"
+	:narrow   ?d
+	:category 'dogears
+	:items    (lambda ()
+		    (mapcar
+		     (lambda (place)
+		       (propertize (dogears--format-record place)
+				   'consult--candidate place))
+		     dogears-list))
+	:action   (lambda (cand)
+		    (dogears-go (get-text-property 0 'consult--candidate cand)))))
+
+(defun consult-dogears ()
+  (interactive)
+  (consult--multi '(consult--source-dogears)))
+
+(use-package consult-projectile
+  :ensure t)
+
+(use-package consult-org-roam
+  :ensure t
+  :config
+   ;; Eventually suppress previewing for certain functions
+   (consult-customize
+    consult-org-roam-forward-links
+    :preview-key (kbd "M-.")))
+
+
+(projectile-load-known-projects)
+(setq my-consult-source-projectile-projects
+      `(:name "Projectile projects"
+	:narrow   ?P
+	:category project
+	:action   ,#'projectile-switch-project-by-name
+	:items    ,projectile-known-projects))
+(add-to-list 'consult-buffer-sources my-consult-source-projectile-projects 'append)
+
+(use-package consult-jump-project
+  ;; :load-path "~/code/emacs/consult-jump-project/"
+  :straight (consult-jump-project :type git :host github :repo "jdtsmith/consult-jump-project")
+  :bind ("C-x p j" . consult-jump-project))
+
+(defvar bootstrap-version)
+(let ((bootstrap-file
+       (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
+      (bootstrap-version 5))
+  (unless (file-exists-p bootstrap-file)
+    (with-current-buffer
+	(url-retrieve-synchronously
+	 "https://raw.githubusercontent.com/raxod502/straight.el/develop/install.el"
+	 'silent 'inhibit-cookies)
+      (goto-char (point-max))
+      (eval-print-last-sexp)))
+  (load bootstrap-file nil 'nomessage))
+
+
+
+(shell-command-to-string (format "convert clipboard: %s" "./image_test.png"))
+
+(setf (cdr (assoc 'file org-link-frame-setup)) 'find-file)
+
+
+(add-to-list 'load-path (expand-file-name "~/.emacs.d/site-lisp/git-emacs"))
+(use-package git
+  :load-path "site-lisp/git")
+
+
+(defun zin/org-tag-match-context (&optional todo-only match)
+  "Identical search to `org-match-sparse-tree', but shows the content of the matches."
+  (interactive "P")
+  (org-agenda-prepare-buffers (list (current-buffer)))
+  (org-overview)
+  (org-remove-occur-highlights)
+  (org-scan-tags '(progn (org-show-entry)
+			 (org-show-context))
+		 (cdr (org-make-tags-matcher match)) todo-only))
