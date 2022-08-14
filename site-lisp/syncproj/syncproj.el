@@ -30,23 +30,23 @@ project to the chosen remote, we will skip it.
 "
   (interactive)
   (let* ((p-path (project-root (project-current t)))
-         (remote (completing-read "Remote repo: "
-                                  (split-string
-                                   (shell-command-to-string
-                                    (if sys/linuxp "cat ~/.ssh/config | grep \"^Host \" | awk '{print $2}'"
+	 (remote (completing-read "Remote repo: "
+				  (split-string
+				   (shell-command-to-string
+				    (if sys/linuxp "cat ~/.ssh/config | grep \"^Host \" | awk '{print $2}'"
 				      "powershell cat ~/.ssh/config | wsl grep \"^Host \" | wsl awk '{print $2}'")))))
-         (p-name (concat (file-name-nondirectory (directory-file-name p-path))
-                         "-" remote))
+	 (p-name (concat (file-name-nondirectory (directory-file-name p-path))
+			 "-" remote))
 	 (sync-fname (completing-read "sync file: "
 				      (directory-files p-path) nil nil ".syncproj")))
       (cond ((syp-is-sync-project p-name) (message "%s is rsyncing!" p-name))
-            (t (let ((out-buf (get-buffer-create (format "*my-rsync-%s*" p-name))))
-                 (syp-run p-path p-name remote out-buf))))))
+	    (t (let ((out-buf (get-buffer-create (format "*my-rsync-%s*" p-name))))
+		 (syp-run p-path p-name remote out-buf))))))
 
 (defun syp-dry-run (p-path p-name remote out-buf)
   "Run a test to check which files are rsync."
   (let* ((rsync-cmd (format rsync-cmd-template "-n" p-path remote remote-base-path p-name))
-         (cmd (format syp-when-changed-cmd-templeate p-path rsync-cmd)))
+	 (cmd (format syp-when-changed-cmd-templeate p-path rsync-cmd)))
     (async-shell-command cmd out-buf nil)))
 
 (defun syp-run (p-path p-name remote out-buf &optional sync-fname)
@@ -54,9 +54,9 @@ project to the chosen remote, we will skip it.
 it will parse this file and return its contents as the rsync command to start.
 "
   (let* ((sync-f (file-name-concat p-path (or sync-fname ".syncproj")))
-         rsync-cmd wc-cmd)
+	 rsync-cmd wc-cmd)
     (if (file-exists-p sync-f)
-        (setq rsync-cmd (syp-parse-file sync-f remote))
+	(setq rsync-cmd (syp-parse-file sync-f remote))
       (setq rsync-cmd (format rsync-cmd-template "" p-path remote remote-base-path p-name)))
     (if sys/win32p
 	(setq p-path (convert-windows-home-to-wsl (file-truename p-path))))
@@ -68,18 +68,18 @@ it will parse this file and return its contents as the rsync command to start.
   "Replace '<remote>' in .syncproj with selected remote name
 ;TODO: skip lines begin with #"
     (let* ((cmd-tmp (f-read-text f-path))
-           (regex "\\\s\\(<remote>\\):"))
+	   (regex "\\\s\\(<remote>\\):"))
       (with-temp-buffer
-        (insert cmd-tmp)
-        (goto-char (point-min))
-        (while (re-search-forward regex nil t)
-          (replace-match remote nil nil nil 1))
-         (buffer-string))))
+	(insert cmd-tmp)
+	(goto-char (point-min))
+	(while (re-search-forward regex nil t)
+	  (replace-match remote nil nil nil 1))
+	 (buffer-string))))
 
 (defun syp-list-all-sync-buffers ()
   "get all buffer with name like my-rsync-*"
   (let* (
-         (bufs (remove-if-not #'(lambda (x) (string-prefix-p "*my-rsync-" (buffer-name x))) (buffer-list))))
+	 (bufs (remove-if-not #'(lambda (x) (string-prefix-p "*my-rsync-" (buffer-name x))) (buffer-list))))
     (or nil bufs)))
 
 (defun syp-list-proj-sync-buffers (proj-name)
@@ -103,7 +103,7 @@ it will parse this file and return its contents as the rsync command to start.
   create and jump to it"
   (let* ((fpath (concat p-path "/rsync_exclude.txt")))
     (if (file-exists-p fpath)
-        (find-file fpath)
+	(find-file fpath)
       (with-temp-buffer (write-file fpath nil)))))
 
 (defun syp-is-sync-project (proj-name)
@@ -112,7 +112,7 @@ it will parse this file and return its contents as the rsync command to start.
   TODO: predicate should be improved!"
   (if-let (proj-bufs (syp-list-all-sync-buffers))
       (progn
-        (car (cl-remove-if-not #'(lambda (x) (string-equal proj-name (nth 2 (split-string (buffer-name x))))) proj-bufs)))))
+	(car (cl-remove-if-not #'(lambda (x) (string-equal proj-name (nth 2 (split-string (buffer-name x))))) proj-bufs)))))
 
 (defun syp-shutdown--project (proj-name)
   "给定 project 的名称，然后找到其对应的 sync buffer, 然后杀掉这个进程"
@@ -125,19 +125,20 @@ it will parse this file and return its contents as the rsync command to start.
 
 (defun syp-shutdown--buffer (buf)
   (when-let (process (get-buffer-process buf))
-    (kill-process process)
-    (sleep-for 0.1)) ;; wait until the process has been killed
-  (kill-buffer buf)
-  (message "kill rsync buffer %s" (buffer-name buf)))
+    (let* ((bn (buffer-name buf)))
+      (kill-process process)
+      (sleep-for 0.1) ;; wait until the process has been killed
+      (kill-buffer buf)
+      (message "kill rsync buffer %s"  bn))))
 
 (defun syp-shutdown-project ()
   (interactive)
   (if-let ((proj-bufs (syp-list-all-sync-buffers))
-           (choices (mapcar #'(lambda (x) (apply 'format "%s<%s>" (syp-parse-proc-buf-name (buffer-name x)))) proj-bufs))
-           (chosen (completing-read "choose to shutdown: " choices))
-           (idx (-elem-index chosen choices))
-           (chosen-buf (nth idx proj-bufs)))
-      (syp-shutdown--project (car (syp-parse-proc-buf-name (buffer-name chosen-buf))))))
+	   (choices (mapcar #'(lambda (x) (apply 'format "%s<%s>" (syp-parse-proc-buf-name (buffer-name x)))) proj-bufs))
+	   (chosen (completing-read "choose to shutdown: " choices))
+	   (idx (-elem-index chosen choices))
+	   (chosen-buf (nth idx proj-bufs)))
+      (syp-shutdown--buffer chosen-buf)))
 
 (defun syp-restart-project ()
   "Run this command in a project, and choose a remote to restart sync process."
@@ -147,7 +148,7 @@ it will parse this file and return its contents as the rsync command to start.
 	   (sync-bufs (syp-list-proj-sync-buffers cur-pname))
 	   (remotes (mapcar #'(lambda (x) (cdr (syp-parse-proc-buf-name (buffer-name x)))) sync-bufs)) ;; remotes is a nested list: (("remote1"))
 	   (chosen-remote (completing-read "choose to shutdown: " remotes))
-           (idx (-elem-index chosen-remote (car remotes)))
+	   (idx (-elem-index chosen-remote (car remotes)))
 	   (chosen-buf (nth idx sync-bufs)))
       (progn
 	(syp-shutdown--buffer chosen-buf)
@@ -161,11 +162,12 @@ name into project name (myProject) and remote name (Remote)
 "
   (save-match-data
     (if (string-match "\\*my-rsync-\\(.+\\)-\\(.+\\)\\*" bufname)
-        (progn (setq proj-name (match-string 1 bufname))
-               (setq remote (match-string 2 bufname))
-               (list proj-name remote))
+	(progn (setq proj-name (match-string 1 bufname))
+	       (setq remote (match-string 2 bufname))
+	       (list proj-name remote))
       (list nil nil))))
 
+(provide 'syncproj)
 ;; tests
 ;; (syp-shutdown--project "rsync-project")
 ;; (get-buffer-create "*my-rsync-test*")
