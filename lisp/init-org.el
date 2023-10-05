@@ -1,8 +1,8 @@
 (require 'init-custom)
 (require 'init-const)
 
-(use-package alert-toast
-  :load-path "alert-toast")
+;; (use-package alert-toast
+  ;; :load-path "alert-toast")
 
 (use-package org
   :ensure nil
@@ -637,8 +637,8 @@ will not be modified."
     (ivy-bibtex-ivify-action bibtex-completion-insert-headline ivy-bibtex-insert-headline))
 
 ;; 在 bibtex mode 下一些有用的函数
-(use-package bibtex-utils
-  :load-path "site-lisp/bibtex-utils")
+;; (use-package bibtex-utils
+;;   :load-path "site-lisp/bibtex-utils")
 
 ;; export org to docx
 (defun org-export-docx ()
@@ -835,5 +835,13 @@ child entries.  Should be called from a tree-view buffer."
 (global-set-key (kbd "<f5>") #'xs-toggle-gtd-sidebar)
 
 (server-start)
+
+(use-package denote
+  :ensure t
+  :config
+  (setq denote-directory (file-name-concat lxs-home-dir "Documents" "org" "denotes")))
+
+(use-package denote-menu
+  :ensure t)
 
 (provide 'init-org)

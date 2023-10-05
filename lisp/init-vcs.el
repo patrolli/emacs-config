@@ -135,47 +135,47 @@
     (advice-add #'git-messenger:popup-message :override #'my-git-messenger:popup-message)))
 
 ;; Resolve diff3 conflicts
-(use-package smerge-mode
-  :ensure nil
-  :diminish
-  :pretty-hydra
-  ((:title (pretty-hydra-title "Smerge" 'octicon "diff")
-    :color pink :quit-key "q")
-   ("Move"
-    (("n" smerge-next "next")
-     ("p" smerge-prev "previous"))
-    "Keep"
-    (("b" smerge-keep-base "base")
-     ("u" smerge-keep-upper "upper")
-     ("l" smerge-keep-lower "lower")
-     ("a" smerge-keep-all "all")
-     ("RET" smerge-keep-current "current")
-     ("C-m" smerge-keep-current "current"))
-    "Diff"
-    (("<" smerge-diff-base-upper "upper/base")
-     ("=" smerge-diff-upper-lower "upper/lower")
-     (">" smerge-diff-base-lower "upper/lower")
-     ("R" smerge-refine "refine")
-     ("E" smerge-ediff "ediff"))
-    "Other"
-    (("C" smerge-combine-with-next "combine")
-     ("r" smerge-resolve "resolve")
-     ("k" smerge-kill-current "kill")
-     ("ZZ" (lambda ()
-             (interactive)
-             (save-buffer)
-             (bury-buffer))
-      "Save and bury buffer" :exit t))))
-  :bind (:map smerge-mode-map
-         ("C-c m" . smerge-mode-hydra/body))
-  :hook ((find-file . (lambda ()
-                        (save-excursion
-                          (goto-char (point-min))
-                          (when (re-search-forward "^<<<<<<< " nil t)
-                            (smerge-mode 1)))))
-         (magit-diff-visit-file . (lambda ()
-                                    (when smerge-mode
-                                      (hydra-smerge/body))))))
+;; (use-package smerge-mode
+;;   :ensure nil
+;;   :diminish
+;;   :pretty-hydra
+;;   ((:title (pretty-hydra-title "Smerge" 'octicon "diff")
+;;     :color pink :quit-key "q")
+;;    ("Move"
+;;     (("n" smerge-next "next")
+;;      ("p" smerge-prev "previous"))
+;;     "Keep"
+;;     (("b" smerge-keep-base "base")
+;;      ("u" smerge-keep-upper "upper")
+;;      ("l" smerge-keep-lower "lower")
+;;      ("a" smerge-keep-all "all")
+;;      ("RET" smerge-keep-current "current")
+;;      ("C-m" smerge-keep-current "current"))
+;;     "Diff"
+;;     (("<" smerge-diff-base-upper "upper/base")
+;;      ("=" smerge-diff-upper-lower "upper/lower")
+;;      (">" smerge-diff-base-lower "upper/lower")
+;;      ("R" smerge-refine "refine")
+;;      ("E" smerge-ediff "ediff"))
+;;     "Other"
+;;     (("C" smerge-combine-with-next "combine")
+;;      ("r" smerge-resolve "resolve")
+;;      ("k" smerge-kill-current "kill")
+;;      ("ZZ" (lambda ()
+;;              (interactive)
+;;              (save-buffer)
+;;              (bury-buffer))
+;;       "Save and bury buffer" :exit t))))
+;;   :bind (:map smerge-mode-map
+;;          ("C-c m" . smerge-mode-hydra/body))
+;;   :hook ((find-file . (lambda ()
+;;                         (save-excursion
+;;                           (goto-char (point-min))
+;;                           (when (re-search-forward "^<<<<<<< " nil t)
+;;                             (smerge-mode 1)))))
+;;          (magit-diff-visit-file . (lambda ()
+;;                                     (when smerge-mode
+;;                                       (hydra-smerge/body))))))
 
 ;; Open github/gitlab/bitbucket page
 (use-package browse-at-remote

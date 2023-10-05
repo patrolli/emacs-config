@@ -4,7 +4,7 @@
 
 ;; Automatic parenthesis pairing
 (use-package elec-pair
-  :ensure nil
+  :ensure t 
   :hook (after-init . electric-pair-mode)
   :init (setq electric-pair-inhibit-predicate 'electric-pair-conservative-inhibit)
   :config
@@ -28,14 +28,14 @@
     (make-variable-buffer-local 'undo-tree-visualizer-diff)
     (setq-default undo-tree-visualizer-diff t)))
 
-(use-package imenu
-  :ensure t
-  :bind
-  (("C-'" . imenu-list-smart-toggle))
-  :config
-  (setq imenu-list-position 'right)
-  (setq imenu-list-focus-after-activation t)
-  )
+;; (use-package imenu
+;;   :ensure t
+;;   :bind
+;;   (("C-'" . imenu-list-smart-toggle))
+;;   :config
+;;   (setq imenu-list-position 'right)
+;;   (setq imenu-list-focus-after-activation t)
+;;   )
 
 (use-package rainbow-mode
   :ensure t
@@ -87,24 +87,24 @@
                 avy-style 'pre))
 
 ;; Flexible text folding
-(use-package origami
-  :pretty-hydra
-  ((:title (pretty-hydra-title "Origami" 'octicon "fold" :height 1.1 :v-adjust -0.05)
-    :color amaranth :quit-key "q")
-   ("Node"
-    ((":" origami-recursively-toggle-node "toggle recursively")
-     ("a" origami-toggle-all-nodes "toggle all")
-     ("t" origami-toggle-node "toggle current")
-     ("o" origami-show-only-node "only show current"))
-    "Actions"
-    (("u" origami-undo "undo")
-     ("d" origami-redo "redo")
-     ("r" origami-reset "reset"))))
-  :bind (:map origami-mode-map
-         ("C-`" . origami-hydra/body))
-  :hook (prog-mode . origami-mode)
-  :init (setq origami-show-fold-header t)
-  :config (face-spec-reset-face 'origami-fold-header-face))
+;; (use-package origami
+;;   :pretty-hydra
+;;   ((:title (pretty-hydra-title "Origami" 'octicon "fold" :height 1.1 :v-adjust -0.05)
+;;     :color amaranth :quit-key "q")
+;;    ("Node"
+;;     ((":" origami-recursively-toggle-node "toggle recursively")
+;;      ("a" origami-toggle-all-nodes "toggle all")
+;;      ("t" origami-toggle-node "toggle current")
+;;      ("o" origami-show-only-node "only show current"))
+;;     "Actions"
+;;     (("u" origami-undo "undo")
+;;      ("d" origami-redo "redo")
+;;      ("r" origami-reset "reset"))))
+;;   :bind (:map origami-mode-map
+;;          ("C-`" . origami-hydra/body))
+;;   :hook (prog-mode . origami-mode)
+;;   :init (setq origami-show-fold-header t)
+;;   :config (face-spec-reset-face 'origami-fold-header-face))
 
 ;; display ^L as a line to split file into blocks
 ;; navigated by C-x [ and C-x ]
@@ -113,7 +113,6 @@
   (global-page-break-lines-mode)
   )
 
-
 ;; auto-insert file headers
 ;; https://honmaple.me/articles/2018/01/emacs%E8%87%AA%E5%8A%A8%E6%B7%BB%E5%8A%A0%E6%96%87%E4%BB%B6%E5%A4%B4.html
 (defun maple--insert-string()
@@ -204,5 +203,8 @@
 (use-package backward-forward
   :config
   (backward-forward-mode))
+
+;; comment lines
+(global-set-key (kbd "s-/") #'comment-line)
 
 (provide 'init-edit)

@@ -237,4 +237,12 @@ Uses `current-date-time-format' for the formatting the date/time."
   (let ((filename (or name (format "%s:%s" (buffer-name) (line-number-at-pos)))))
     (bookmark-set filename)))
 
+(defun newline-without-break-of-line ()
+  "1. move to end of the line.
+2. open new line and move to new line"
+  (interactive)
+  (end-of-line)
+  (open-line 1)
+  (right-char))
+
 (provide 'personal)

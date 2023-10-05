@@ -16,7 +16,7 @@
 ;; Speed up startup
 (defvar centaur-gc-cons-threshold (if (display-graphic-p) 16000000 1600000)
   "The default value to use for `gc-cons-threshold'. If you experience freezing,
-decrease this. If you experience stuttering, increase this.")
+decrease this.If you experience stuttering, increase this.")
 
 (defvar centaur-gc-cons-upper-limit (if (display-graphic-p) 400000000 100000000)
   "The temporary value for `gc-cons-threshold' to defer it.")
@@ -57,20 +57,21 @@ decrease this. If you experience stuttering, increase this.")
 
 (require 'init-basic)
 (require 'init-locales)
-(require 'init-input-method)
+;;(require 'init-input-method)
 (require 'init-utils)
 
 (require 'init-ui)
-(require 'init-hydra)
+;; (require 'init-hydra)
 (require 'init-edit)
 (require 'init-ivy)
+;; (require 'init-consult)
 (require 'init-company)
 (require 'init-yasnippet)
 
 (require 'init-dashboard)
-(require 'init-dired)
-(require 'init-projectile)
-(require 'init-better-defaults)
+;; (require 'init-dired)
+;; (require 'init-projectile)
+;; (require 'init-better-defaults)
 
 (require 'init-term)
 
@@ -80,18 +81,18 @@ decrease this. If you experience stuttering, increase this.")
 (require 'init-vcs)
 (require 'init-elisp)
 
-(require 'init-org)
-(require 'init-org-clock)
-(require 'init-org-utils)
-(require 'init-markdown)
-(require 'init-reader)
+;; (require 'init-org)
+;; ;; (require 'init-org-clock)
+;; (require 'init-org-utils)
+;; (require 'init-markdown)
+;; (require 'init-reader)
 
 (require 'init-window)
-(require 'personal)
-(require 'init-abbrev)
+;; (require 'personal)
+;; (require 'init-abbrev)
 (require 'init-flycheck)
-(require 'init-term-cursor)
-;; (require 'init-restore)
+;; (require 'init-term-cursor)
+;; ;; (require 'init-restore)
 
 ;; 暂时停用 desktop mode
 ;; 在启动时选择手动恢复会话，而不是自动恢复
@@ -99,12 +100,12 @@ decrease this. If you experience stuttering, increase this.")
 ;; (require 'init-restore)
 
 
-(set-face-attribute
- 'default nil
- :font (font-spec :name "-WenQ-WenQuanYi Zen Hei Mono-medium-normal-normal-*-19-*-*-*-*-0-iso10646-1"
-                  :weight 'normal
-                  :slant 'normal
-                  :size 14.5))
+;; (set-face-attribute
+ ;; 'default nil
+ ;; :font (font-spec :name "-WenQ-WenQuanYi Zen Hei Mono-medium-normal-normal-*-19-*-*-*-*-0-iso10646-1"
+                  ;; :weight 'normal
+                  ;; :slant 'normal
+                  ;; :size 14.5))
 ;; -WQYF-WenQuanYi Micro Hei Mono-regular-normal-normal-*-17-*-*-*-*-0-iso10646-1
 ;; (set-face-attribute
 ;;  'default nil
@@ -113,14 +114,35 @@ decrease this. If you experience stuttering, increase this.")
 ;;                   :slant 'normal
 ;;                   :size 14.5))
 
-(dolist (charset '(kana han symbol cjk-misc bopomofo))
-  (set-fontset-font
-   (frame-parameter nil 'font)
-   charset
-   (font-spec :name "-ADBO-思源宋体 CN-normal-normal-normal-*-*-*-*-*-*-0-iso10646-1"
-              :weight 'normal
-              :slant 'normal
-              :size 12.5)))
+ ;; (dolist (charset '(kana han symbol cjk-misc bopomofo))
+ ;;   (set-fontset-font
+ ;;    (frame-parameter nil 'font)
+ ;;    charset
+ ;;    (font-spec :name "-ADBO-思源宋体 CN-normal-normal-normal-*-*-*-*-*-*-0-iso10646-1"
+ ;;               :weight 'normal
+ ;;               :slant 'normal
+ ;;              ; :size 12.5)))
+(require 'evil)
+(evil-mode 1)
+
+(global-set-key (kbd "s-x") #'counsel-M-x)
+(global-set-key (kbd "s-/") #'comment-line)
+(global-set-key (kbd "s-p") #'helm-mini)
+
+(use-package helm
+  :ensure t
+  :config
+  (setq helm-mini-default-sources
+	'(helm-source-recentf helm-source-buffers-list helm-source-buffer-not-found helm-source-projectile-files-list))
+  ; 单独的 frame 显示 helm 搜索
+  (setq helm-display-function 'helm-default-display-buffer))
+
+(use-package helm-projectile
+  :ensure t)
+
+(use-package helm-rg
+  :ensure t)
+
 
 (put 'dired-find-alternate-file 'disabled nil)
 (setq native-comp-async-report-warnings-errors nil)

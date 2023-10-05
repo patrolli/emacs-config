@@ -235,6 +235,7 @@
 	  ("*Go Translate*" :select t :size 20 :align 'below)
 	  ("*Bookmark List*" :select t :size 10 :align 'below)
 	  ("*Dogears List*" :select t :size 10 :align 'below)
+	  ("\\`\\*helm.*?\\*\\'" :regexp t :align t :ratio 0.4)
 
           ((" *Agenda Commands*" " *Org todo*" "*Org Dashboard*" "*Org Select*") :select t :size 10 :align 'below :autoclose t)
 	  ("*Org Agenda*" :select t :size 10 :align 'right)

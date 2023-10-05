@@ -22,6 +22,7 @@
         `(("http" . ,lxs-proxy)
           ("https" . ,lxs-proxy)
           ("no_proxy" . "^\\(localhost\\|192.168.*\\|10.*\\)")))
+
   (proxy-http-show))
 
 (defun proxy-http-disable ()

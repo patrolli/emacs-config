@@ -1,5 +1,5 @@
 (scroll-bar-mode -1)
-(global-linum-mode -1)
+;; (global-linum-mode -1)
 (global-hl-line-mode 1)
 
 ;; randomly pick my favourite themes
@@ -65,6 +65,10 @@
   :init
   :config
   :functions (all-the-icons-icon-for-buffer))
+
+(use-package nerd-icons
+  :ensure t
+  )
 
 ;; automatically change the theme without be mess up
 (defcustom load-theme-before-hook nil

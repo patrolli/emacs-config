@@ -1,16 +1,3 @@
-;; (use-package lsp-bridge
-;;   :load-path "site-lisp/lsp-bridge"
-;;   :config
-;;   (global-lsp-bridge-mode)
-;;   )
-(add-to-list 'load-path "~/.emacs.d/site-lisp/lsp-bridge")
-(require 'lsp-bridge)
-(global-lsp-bridge-mode)
-
-
-(use-package lsp-bridge-icon
-  :load-path "site-lisp/lsp-bridge")
-
 (use-package eglot
   :ensure t
   :config
@@ -23,9 +10,10 @@
   :ensure t
   :hook (python-mode . pyvenv-mode)
   :init
-  (setenv "WORKON_HOME" "~/.pyenv/versions")
-  :config
-  (pyvenv-workon "py39"))
+  (setenv "WORKON_HOME" "~/.pyenv/versions"))
+
+(use-package conda
+  :ensure t)
 
 (add-hook 'prog-mode-hook 'show-paren-mode)
 
