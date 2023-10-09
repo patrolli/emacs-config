@@ -176,5 +176,6 @@ mermaid.initialize({
     (facemenu-set-foreground "white" start end)))
 
 (add-hook 'text-mode-hook 'enriched-mode)
+(add-hook 'git-commit-setup-hook #'(lambda () (enriched-mode -1)))
 
 (provide 'init-markdown)
