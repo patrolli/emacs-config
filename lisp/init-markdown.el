@@ -137,7 +137,44 @@ mermaid.initialize({
   :hook
   (markdown-mode . abbrev-mode))
 
+;; rich-style will affect the style of either the selected region,
+;; or the current line if no region is selected.
+;; style may be an atom indicating a rich-style face,
+;; e.g. 'italic or 'bold, using
+;;   (put-text-property START END PROPERTY VALUE &optional OBJECT)
+;; or a color string, e.g. "red", using
+;;   (facemenu-set-foreground COLOR &optional START END)
+;; or nil, in which case style will be removed.
+(defun rich-style (style)
+  (let* ((start (if (use-region-p)
+                    (region-beginning) (line-beginning-position)))
+                    
+         (end   (if (use-region-p)
+                    (region-end)  (line-end-position))))
+    (cond
+     ((null style)      (set-text-properties start end nil))
+     ((stringp style)   (facemenu-set-foreground style start end))
+     (t                 (add-text-properties start end (list 'face style)))
+     )))
 
+(defun rich-style-add-front-color()
+  (interactive)
+  (let ((color (completing-read "Choose color" '("red" "blue" "sea green"))))
+  (rich-style color)))
 
+(defvar rich-style-bg-color-history nil)
+(defun rich-style-add-bg-color ()
+  (interactive)
+  (let* (
+	 (color (completing-read "Choose color: " '("red" "blue" "green") nil t nil 'rich-style-bg-color-history))
+	 (start (if (use-region-p)
+                    (region-beginning) (line-beginning-position)))
+         (end   (if (use-region-p)
+                    (region-end)  (line-end-position))))
+    (setq rich-style-bg-color-history (cons color rich-style-bg-color-history))
+    (facemenu-set-background color start end)
+    (facemenu-set-foreground "white" start end)))
+
+(add-hook 'text-mode-hook 'enriched-mode)
 
 (provide 'init-markdown)
