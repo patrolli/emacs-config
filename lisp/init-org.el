@@ -839,7 +839,8 @@ child entries.  Should be called from a tree-view buffer."
 (use-package denote
   :ensure t
   :config
-  (setq denote-directory (file-name-concat lxs-home-dir "Documents" "org" "denotes")))
+  (setq denote-directory (file-name-concat lxs-home-dir "Documents" "org" "denotes")
+	denote-file-type 'markdown-yaml))
 
 (use-package denote-menu
   :ensure t)

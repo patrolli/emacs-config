@@ -1,6 +1,7 @@
 ;; highlight todo related keywords 
 (use-package hl-todo
   :ensure t
+  :disabled t
   :custom
   (hl-todo-keyword-faces '(("TODO"   . "#FF0000")
 			   ("FIXME"  . "#FF0000")
@@ -26,6 +27,7 @@
 ;; Highlight uncommitted changes using VC
 (use-package diff-hl
   :custom-face
+  :disabled t
   ;; (diff-hl-change ((t (:foreground ,(face-background 'highlight) :background nil))))
   ;; (diff-hl-insert ((t (:background nil))))
   ;; (diff-hl-delete ((t (:background nil))))
