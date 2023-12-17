@@ -70,7 +70,6 @@ decrease this.If you experience stuttering, increase this.")
 
 (require 'init-dashboard)
 ;; (require 'init-dired)
-;; (require 'init-projectile)
 (require 'init-better-defaults)
 
 (require 'init-term)
@@ -82,7 +81,6 @@ decrease this.If you experience stuttering, increase this.")
 ;; (require 'init-elisp)
 
 (require 'init-org)
-;; (require 'init-org-clock)
 ;; (require 'init-org-utils)
 (require 'init-markdown)
 ;; (require 'init-reader)
@@ -91,13 +89,7 @@ decrease this.If you experience stuttering, increase this.")
 ;; (require 'personal)
 ;; (require 'init-abbrev)
 ;; (require 'init-flycheck)
-;; (require 'init-term-cursor)
 ;; ;; (require 'init-restore)
-
-;; 暂时停用 desktop mode
-;; 在启动时选择手动恢复会话，而不是自动恢复
-;; 现在还不支持手动，后面在 dashboard 加入 restore 的选项
-;; (require 'init-restore)
 
 
 ;; (set-face-attribute
@@ -142,6 +134,9 @@ decrease this.If you experience stuttering, increase this.")
 
 (use-package helm-rg
   :ensure t)
+
+;; Specify font type of code block in markdown/org modes, when using modus theme
+(set-face-attribute 'fixed-pitch nil :family "Fira Code" :height 1.0)
 
 
 (put 'dired-find-alternate-file 'disabled nil)

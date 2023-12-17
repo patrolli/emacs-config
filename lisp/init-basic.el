@@ -31,21 +31,6 @@
   :defer t
   :ensure t)
 
-(use-package color-rg
-  :load-path "site-lisp/color-rg/"
-  :init
-  (define-key global-map (kbd "C-x l") (make-sparse-keymap))
-  :bind
-  (("C-x l p" . color-rg-search-project)
-   ("C-x l i" . color-rg-search-input)
-   ("C-x l s" . color-rg-search-symbol)
-   ("C-x l o" . lxs/search-org)
-   )
-  )
-
-;; (use-package thing-edit
-  ;; :load-path "site-lisp/thing-edit/")
-
 (use-package openwith
   :hook
   (after-init . openwith-mode)
@@ -72,32 +57,6 @@
   :config
   (super-save-mode +1))
 
-;; 检测文件是否已经被导出 hugo
-(defun lxs-org-is-hugo-file-p (fPath)
-  "Predict if the org file has been converted into hugo"
-  (with-temp-buffer
-    (let ((keyline "#+HUGO_DRAFT: false\n"))
-	  (insert-file-contents fPath)
-	  (and (search-forward keyline nil t) t)
-	  )
-    ))
-(defun lxs-list-org-in-directory (dPath)
-  "list org files under a directory path"
-  (directory-files-recursively dPath "\.org$")
-  )
-(defun my--export-to-hugo (dPath)
-  "Convert org files under a directory path into hugo .md files"
-  (mapc
-   (lambda (file-name)
-     (progn
-       (if (lxs-org-is-hugo-file-p file-name)		
-	   (with-current-buffer (find-file-noselect file-name)
-	     (org-hugo-export-wim-to-md)
-	     ))
-       ))
-   (lxs-list-org-in-directory dPath)
-   )
-  (message "export to hugo md file end!"))
 (defun my--choose-directory ()
   "Return a directory chosen by the user.  The user will be prompted
 to choose a directory"
