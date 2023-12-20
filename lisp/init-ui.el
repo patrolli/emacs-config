@@ -88,4 +88,7 @@
 
 (advice-add 'load-theme :around #'load-theme-hook-wrapper)
 
+(use-package ef-themes
+  :ensure t)
+
 (provide 'init-ui)

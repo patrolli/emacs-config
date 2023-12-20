@@ -61,90 +61,6 @@ mermaid.initialize({
     :bind (:map markdown-mode-command-map
            ("r" . markdown-toc-generate-or-refresh-toc))))
 
-(defvar nb/current-line '(0 . 0)
-   "(start . end) of current line in current buffer")
- (make-variable-buffer-local 'nb/current-line)
-
- (defun nb/unhide-current-line (limit)
-   "Font-lock function"
-   (let ((start (max (point) (car nb/current-line)))
-         (end (min limit (cdr nb/current-line))))
-     (when (< start end)
-       (remove-text-properties start end
-                       '(invisible t display "" composition ""))
-       (goto-char limit)
-       t)))
-
- (defun nb/refontify-on-linemove ()
-   "Post-command-hook"
-   (let* ((start (line-beginning-position))
-          (end (line-beginning-position 2))
-          (needs-update (not (equal start (car nb/current-line)))))
-     (setq nb/current-line (cons start end))
-     (when needs-update
-       (font-lock-fontify-block 3))))
-
- (defun nb/markdown-unhighlight ()
-   "Enable markdown concealling"
-   (interactive)
-   (markdown-toggle-markup-hiding 'toggle)
-   (font-lock-add-keywords nil '((nb/unhide-current-line)) t)
-   (add-hook 'post-command-hook #'nb/refontify-on-linemove nil t))
-
-(add-hook 'markdown-mode-hook #'nb/markdown-unhighlight)
-
-(use-package markdown-mode
-  :hook
-  (markdown-mode . nb/markdown-unhighlight)
-  :config
-  (defvar nb/current-line '(0 . 0)
-    "(start . end) of current line in current buffer")
-  (make-variable-buffer-local 'nb/current-line)
-
-  (defun nb/unhide-current-line (limit)
-    "Font-lock function"
-    (let ((start (max (point) (car nb/current-line)))
-          (end (min limit (cdr nb/current-line))))
-      (when (< start end)
-        (remove-text-properties start end
-                                '(invisible t display "" composition ""))
-        (goto-char limit)
-        t)))
-
-  (defun nb/refontify-on-linemove ()
-    "Post-command-hook"
-    (let* ((start (line-beginning-position))
-           (end (line-beginning-position 2))
-           (needs-update (not (equal start (car nb/current-line)))))
-      (setq nb/current-line (cons start end))
-      (when needs-update
-        (font-lock-fontify-block 3))))
-
-  (defun nb/markdown-unhighlight ()
-    "Enable markdown concealling"
-    (interactive)
-    (markdown-toggle-markup-hiding 'toggle)
-    (font-lock-add-keywords nil '((nb/unhide-current-line)) t)
-    (add-hook 'post-command-hook #'nb/refontify-on-linemove nil t))
-  :custom-face
-  (markdown-header-delimiter-face ((t (:foreground "#616161" :height 0.9))))
-  (markdown-header-face-1 ((t (:height 1.6  :foreground "#A3BE8C" :weight extra-bold :inherit markdown-header-face))))
-  (markdown-header-face-2 ((t (:height 1.4  :foreground "#EBCB8B" :weight extra-bold :inherit markdown-header-face))))
-  (markdown-header-face-3 ((t (:height 1.2  :foreground "#D08770" :weight extra-bold :inherit markdown-header-face))))
-  (markdown-header-face-4 ((t (:height 1.15 :foreground "#BF616A" :weight bold :inherit markdown-header-face))))
-  (markdown-header-face-5 ((t (:height 1.1  :foreground "#b48ead" :weight bold :inherit markdown-header-face))))
-  (markdown-header-face-6 ((t (:height 1.05 :foreground "#5e81ac" :weight semi-bold :inherit markdown-header-face))))
-  :hook
-  (markdown-mode . abbrev-mode))
-
-;; rich-style will affect the style of either the selected region,
-;; or the current line if no region is selected.
-;; style may be an atom indicating a rich-style face,
-;; e.g. 'italic or 'bold, using
-;;   (put-text-property START END PROPERTY VALUE &optional OBJECT)
-;; or a color string, e.g. "red", using
-;;   (facemenu-set-foreground COLOR &optional START END)
-;; or nil, in which case style will be removed.
 (defun rich-style (style)
   (let* ((start (if (use-region-p)
                     (region-beginning) (line-beginning-position)))
@@ -159,14 +75,14 @@ mermaid.initialize({
 
 (defun rich-style-add-front-color()
   (interactive)
-  (let ((color (completing-read "Choose color" '("red" "blue" "sea green"))))
+  (let ((color (completing-read "Choose color" '("red" "blue" "sea green" "purple"))))
   (rich-style color)))
 
 (defvar rich-style-bg-color-history nil)
 (defun rich-style-add-bg-color ()
   (interactive)
   (let* (
-	 (color (completing-read "Choose color: " '("red" "blue" "green") nil t nil 'rich-style-bg-color-history))
+	 (color (completing-read "Choose color: " '("red" "blue" "green" "purple" "grey") nil t nil 'rich-style-bg-color-history))
 	 (start (if (use-region-p)
                     (region-beginning) (line-beginning-position)))
          (end   (if (use-region-p)
@@ -175,7 +91,17 @@ mermaid.initialize({
     (facemenu-set-background color start end)
     (facemenu-set-foreground "white" start end)))
 
-(add-hook 'text-mode-hook 'enriched-mode)
-(add-hook 'git-commit-setup-hook #'(lambda () (enriched-mode -1)))
+(use-package enriched
+  :config
+  (keymap-set enriched-mode-map "<remap> <newline-and-indent>" nil)
+  (define-key enriched-mode-map (kbd "<return>") #'newline-and-indent)
+  ;; (keymap-set enriched-mode-map "<remap> <reindent-then-newline-and-indent>" nil)
+  )
+
+;; (add-hook 'text-mode-hook 'enriched-mode)
+;; (add-hook 'git-commit-setup-hook #'(lambda () (enriched-mode -1)))
+;; (add-hook 'prog-mode-hook #'(lambda () (enriched-mode -1)))
+
+
 
 (provide 'init-markdown)

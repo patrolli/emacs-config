@@ -77,20 +77,22 @@ decrease this.If you experience stuttering, increase this.")
 
 (require 'init-prog)
 (require 'init-python)
-(require 'init-highlight)
+
+;(require 'init-highlight)		
 (require 'init-vcs)
-(require 'init-elisp)
+;(require 'init-elisp)
 
 ;; (require 'init-org)
 ;; ;; (require 'init-org-clock)
 ;; (require 'init-org-utils)
-;; (require 'init-markdown)
+(require 'init-markdown)
+(require 'init-blog)
 ;; (require 'init-reader)
 
 (require 'init-window)
 ;; (require 'personal)
 ;; (require 'init-abbrev)
-(require 'init-flycheck)
+;(require 'init-flycheck)
 ;; (require 'init-term-cursor)
 ;; ;; (require 'init-restore)
 
@@ -114,26 +116,40 @@ decrease this.If you experience stuttering, increase this.")
 ;;                   :slant 'normal
 ;;                   :size 14.5))
 
- ;; (dolist (charset '(kana han symbol cjk-misc bopomofo))
- ;;   (set-fontset-font
- ;;    (frame-parameter nil 'font)
- ;;    charset
- ;;    (font-spec :name "-ADBO-思源宋体 CN-normal-normal-normal-*-*-*-*-*-*-0-iso10646-1"
- ;;               :weight 'normal
- ;;               :slant 'normal
- ;;              ; :size 12.5)))
-(require 'evil)
-(evil-mode 1)
+;;  (dolist (charset '(kana han symbol cjk-misc bopomofo))
+;;    (set-fontset-font
+;;     (frame-parameter nil 'font)
+;;     charset
+;;     (font-spec :name "-ADBO-思源宋体 CN-normal-normal-normal-*-*-*-*-*-*-0-iso10646-1"
+;;                :weight 'normal
+;;                :slant 'normal
+;;               :size 12.5)))
+(use-package evil
+  :ensure t
+  :config
+    (evil-mode 1)
+    ;; better move around visual lines
+;;     (defun evil-next-line--check-visual-line-mode (orig-fun &rest args)
+;; 	(if visual-line-mode
+;; 	    (apply 'evil-next-visual-line args)
+;; 	    (apply orig-fun args)))
+;;     (advice-add 'evil-next-line :around 'evil-next-line--check-visual-line-mode)
+;;     (defun evil-previous-line--check-visual-line-mode (orig-fun &rest args)
+;; 	(if visual-line-mode
+;; 	    (apply 'evil-previous-visual-line args)
+;; 	    (apply orig-fun args)))
+;;     (advice-add 'evil-previous-line :around 'evil-previous-line--check-visual-line-mode)
+)
 
-(global-set-key (kbd "s-x") #'counsel-M-x)
-(global-set-key (kbd "s-/") #'comment-line)
-(global-set-key (kbd "s-p") #'helm-mini)
 
 (use-package helm
   :ensure t
   :config
+  ;; (setq helm-mini-default-sources
+  ;; 	'(helm-source-recentf helm-source-buffers-list helm-source-buffer-not-found helm-source-projectile-files-list))
+  ;; default
   (setq helm-mini-default-sources
-	'(helm-source-recentf helm-source-buffers-list helm-source-buffer-not-found helm-source-projectile-files-list))
+	'(helm-source-bookmarks helm-source-buffers-list helm-source-recentf helm-source-buffer-not-found))
   ; 单独的 frame 显示 helm 搜索
   (setq helm-display-function 'helm-default-display-buffer))
 
@@ -143,6 +159,38 @@ decrease this.If you experience stuttering, increase this.")
 (use-package helm-rg
   :ensure t)
 
+;(global-set-key (kbd "s-x") #'counsel-M-x)
+;(global-set-key (kbd "s-/") #'comment-line)
+;(global-set-key (kbd "s-p") #'helm-mini)
+
+(defun xs-open-inbox-md ()
+  (interactive)
+  (find-file "C:/Users/xunsong.li/Documents/org/denotes/daily-inbox.md")
+  )
+
+;; for windows, bind leader key to ctrl, which needs to
+;; overwrite the evil-mode keymappings
+(define-key evil-normal-state-map (kbd "C-p") 'helm-mini)
+(define-key evil-insert-state-map (kbd "C-p") 'helm-mini)
+(define-key evil-normal-state-map (kbd "C-/") 'comment-line)
+(define-key evil-insert-state-map (kbd "C-/") 'comment-line)
+(define-key evil-visual-state-map (kbd "C-/") 'comment-line)
+(global-set-key (kbd "C-s") #'save-buffer)
+(global-set-key (kbd "<f1>") #'xs-open-inbox-md)
+
+(use-package denote
+  :ensure t
+  :config
+  ;; This directory is temp, just for mt windows computer
+  (setq denote-directory (file-name-concat "c:/Users/xunsong.li/" "Documents" "org" "denotes")
+	denote-file-type 'markdown-yaml))
 
 (put 'dired-find-alternate-file 'disabled nil)
 (setq native-comp-async-report-warnings-errors nil)
+
+(use-package cnfonts
+  :ensure t
+  :config
+  (cnfonts-set-font))
+
+(setq make-backup-files nil)

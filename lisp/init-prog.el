@@ -13,7 +13,8 @@
   (setenv "WORKON_HOME" "~/.pyenv/versions"))
 
 (use-package conda
-  :ensure t)
+  :ensure t
+  :disabled t)
 
 (add-hook 'prog-mode-hook 'show-paren-mode)
 
