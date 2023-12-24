@@ -171,19 +171,27 @@ Links, footnotes  C-c C-a    _L_: link          _U_: uri        _F_: footnote   
     (insert "<" tag ">")
 ))
 
-(defun add-html-font-color (color) (interactive "Font color: ")
+(defun add-html-font-color (color)
+  (interactive "sFont color ")
   (let (
         (rstart (if (region-active-p) (region-beginning) (point)))
         (rend   (if (region-active-p) (region-end)       (point))))
 
-    ;; Insert the close tag first, because inserting the open tag
-    ;; will mess up the rend position.
     (goto-char rend)
     (insert "</font>")
 
-    ;; Now the open tag:
     (goto-char rstart)
     (insert "<font color=\'" color "\'>")
 ))
+
+;; 添加 todo, done, doing 标签
+(defun insert-task-tag ()
+  "Insert a task tag in a Markdown file with distinct colors."
+  (interactive)
+  (let* ((tags '(("TODO" . "Chartreuse") ("DOING" . "Orange") ("DONE" . "DodgerBlue")))
+         (tag (completing-read "Select task tag (TODO/DOING/DONE): " (mapcar 'car tags) nil t)))
+    (insert (format "<b><font color='%s' class='bold'>%s</font></b>" (cdr (assoc tag tags)) tag))))
+
+
 
 (provide 'init-markdown)
