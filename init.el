@@ -57,66 +57,36 @@ decrease this.If you experience stuttering, increase this.")
 
 (require 'init-basic)
 (require 'init-locales)
-;;(require 'init-input-method)
-(require 'init-utils)
 
 (require 'init-ui)
 ;; (require 'init-hydra)
 (require 'init-edit)
 (require 'init-ivy)
-;; (require 'init-consult)
 (require 'init-company)
-;; (require 'init-yasnippet)
 
 (require 'init-dashboard)
-;; (require 'init-dired)
-(require 'init-better-defaults)
+(require 'init-dired)
 
 (require 'init-term)
 
 (require 'init-prog)
 (require 'init-python)
-;; (require 'init-highlight)
-;; (require 'init-vcs)
+(require 'init-highlight)
+(require 'init-vcs)
 ;; (require 'init-elisp)
 
 (require 'init-org)
-;; (require 'init-org-utils)
 (require 'init-markdown)
-;; (require 'init-reader)
 
 (require 'init-window)
 ;; (require 'personal)
-;; (require 'init-abbrev)
 ;; (require 'init-flycheck)
-;; ;; (require 'init-restore)
 
 
-;; (set-face-attribute
- ;; 'default nil
- ;; :font (font-spec :name "-WenQ-WenQuanYi Zen Hei Mono-medium-normal-normal-*-19-*-*-*-*-0-iso10646-1"
-                  ;; :weight 'normal
-                  ;; :slant 'normal
-                  ;; :size 14.5))
-;; -WQYF-WenQuanYi Micro Hei Mono-regular-normal-normal-*-17-*-*-*-*-0-iso10646-1
-;; (set-face-attribute
-;;  'default nil
-;;  :font (font-spec :name "Iosevka"
-;;                   :weight 'normal
-;;                   :slant 'normal
-;;                   :size 14.5))
-
- ;; (dolist (charset '(kana han symbol cjk-misc bopomofo))
- ;;   (set-fontset-font
- ;;    (frame-parameter nil 'font)
- ;;    charset
- ;;    (font-spec :name "-ADBO-思源宋体 CN-normal-normal-normal-*-*-*-*-*-*-0-iso10646-1"
- ;;               :weight 'normal
- ;;               :slant 'normal
- ;;              ; :size 12.5)))
 (require 'evil)
 (evil-mode 1)
 
+;; ----- global keybindings ----- 
 (global-set-key (kbd "s-x") #'counsel-M-x)
 (global-set-key (kbd "s-/") #'comment-line)
 (global-set-key (kbd "s-p") #'helm-mini)
@@ -139,5 +109,3 @@ decrease this.If you experience stuttering, increase this.")
 (set-face-attribute 'fixed-pitch nil :family "Fira Code" :height 1.0)
 
 
-(put 'dired-find-alternate-file 'disabled nil)
-(setq native-comp-async-report-warnings-errors nil)

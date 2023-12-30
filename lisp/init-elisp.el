@@ -331,8 +331,5 @@ Lisp function does not specify a special indentation."
          :map lisp-interaction-mode-map
          ("C-c e" . macrostep-expand)))
 
-;; (use-package lispy
-;;   :hook (emacs-lisp-mode-hook . (lambda () (lispy-mode 1))))
-
 (provide 'init-elisp)
 
