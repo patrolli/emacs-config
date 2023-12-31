@@ -21,6 +21,9 @@
 (setq make-backup-files nil)
 (global-auto-revert-mode t)
 (setq native-comp-async-report-warnings-errors nil)
+;; ui
+(scroll-bar-mode -1)
+(global-hl-line-mode 1)
 
 (use-package posframe
   :defer t

@@ -58,10 +58,12 @@ decrease this.If you experience stuttering, increase this.")
 (require 'init-basic)
 (require 'init-locales)
 
+(require 'init-evil)
 (require 'init-ui)
-;; (require 'init-hydra)
+(require 'init-hydra)
 (require 'init-edit)
 (require 'init-ivy)
+(require 'init-helm)
 (require 'init-company)
 
 (require 'init-dashboard)
@@ -73,39 +75,15 @@ decrease this.If you experience stuttering, increase this.")
 (require 'init-python)
 (require 'init-highlight)
 (require 'init-vcs)
-;; (require 'init-elisp)
+(require 'init-elisp)
 
 (require 'init-org)
 (require 'init-markdown)
 
 (require 'init-window)
-;; (require 'personal)
-;; (require 'init-flycheck)
-
-
-(require 'evil)
-(evil-mode 1)
+(require 'personal)
 
 ;; ----- global keybindings ----- 
 (global-set-key (kbd "s-x") #'counsel-M-x)
 (global-set-key (kbd "s-/") #'comment-line)
 (global-set-key (kbd "s-p") #'helm-mini)
-
-(use-package helm
-  :ensure t
-  :config
-  (setq helm-mini-default-sources
-	'(helm-source-bookmarks helm-source-recentf helm-source-buffers-list helm-source-buffer-not-found helm-source-projectile-files-list))
-  ; 单独的 frame 显示 helm 搜索
-  (setq helm-display-function 'helm-default-display-buffer))
-
-(use-package helm-projectile
-  :ensure t)
-
-(use-package helm-rg
-  :ensure t)
-
-;; Specify font type of code block in markdown/org modes, when using modus theme
-(set-face-attribute 'fixed-pitch nil :family "Fira Code" :height 1.0)
-
-

@@ -1,7 +1,3 @@
-(scroll-bar-mode -1)
-;; (global-linum-mode -1)
-(global-hl-line-mode 1)
-
 ;; randomly pick my favourite themes
 ;; ref: https://github.com/redguardtoo/emacs.d/blob/5c0f5702eebc430363d05e058077f65c4d6c2a2d/lisp/init-theme.el#L10
 (defvar my-favourite-color-themes '(doom-gruvbox doom-one-light doom-zenburn
@@ -22,7 +18,7 @@
     (counsel-load-theme-action theme)
     (message "Color theme [%s] loaded" theme)))
 
-(defun lxs/pick-my-favorite-themes ()
+(defun xs/pick-my-favorite-themes ()
   (interactive)
   (my-pick-random-theme (or my-favourite-color-themes
 			    (custom-available-themes))))
@@ -32,10 +28,6 @@
        :config
        (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
          doom-themes-enable-italic t) ; if nil, italics is universally disabled
-       ;; (load-theme 'doom-one t)
-       ;; (load-theme 'doom-gruvbox-light)
-       ;; (load-theme 'modus-vivendi)
-       ;; (load-theme 'doom-zenburn t)
        (call-interactively 'lxs/pick-my-favorite-themes)
        (doom-themes-org-config)
        ;; (doom-themes-neotree-config)
@@ -67,8 +59,7 @@
   :functions (all-the-icons-icon-for-buffer))
 
 (use-package nerd-icons
-  :ensure t
-  )
+  :ensure t)
 
 ;; automatically change the theme without be mess up
 (defcustom load-theme-before-hook nil
@@ -87,5 +78,8 @@
   (run-hook-with-args 'load-theme-after-hook theme))
 
 (advice-add 'load-theme :around #'load-theme-hook-wrapper)
+
+;; Specify font type of code block in markdown/org modes, when using modus theme
+(set-face-attribute 'fixed-pitch nil :family "Fira Code" :height 1.0)
 
 (provide 'init-ui)

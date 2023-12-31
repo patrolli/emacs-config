@@ -1,6 +1,4 @@
 (require 'init-const)
-(require 'xah-utils)
-(require 'personal)
 
 (use-package pretty-hydra
   :init
