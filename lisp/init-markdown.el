@@ -184,14 +184,34 @@ Links, footnotes  C-c C-a    _L_: link          _U_: uri        _F_: footnote   
     (insert "<font color=\'" color "\'>")
 ))
 
-;; 添加 todo, done, doing 标签
-(defun insert-task-tag ()
+(defvar md-todo-states-color-alist
+  '(("TODO" . "Chartreuse")
+    ("DOING" . "Orange")
+    ("DONE" . "DodgerBlue"))
+  "An alist mapping TODO states to their corresponding colors.")
+
+(defun md-insert-task-tag ()
   "Insert a task tag in a Markdown file with distinct colors."
   (interactive)
-  (let* ((tags '(("TODO" . "Chartreuse") ("DOING" . "Orange") ("DONE" . "DodgerBlue")))
-         (tag (completing-read "Select task tag (TODO/DOING/DONE): " (mapcar 'car tags) nil t)))
-    (insert (format "<b><font color='%s' class='bold'>%s</font></b>" (cdr (assoc tag tags)) tag))))
+  (let* ((tag (completing-read "Select task tag (TODO/DOING/DONE): " (mapcar 'car md-todo-states-color-alist) nil t))
+         (color (cdr (assoc tag md-todo-states-color-alist))))
+    (insert (format "<b><font color='%s'>%s</font></b>" color tag))))
 
+(defun toggle-todo-state ()
+  "Toggle TODO state in the current line."
+  (interactive)
+  (save-excursion
+    (beginning-of-line)
+    (when (search-forward-regexp "<b><font color='\\([A-Za-z]+\\)'>\\(TODO\\|DOING\\|DONE\\)</font></b>" (line-end-position) t)
+      (let* ((color (match-string 1))
+             (todo-state (match-string 2))
+             (next-state (cond
+                           ((equal todo-state "TODO") "DOING")
+                           ((equal todo-state "DOING") "DONE")
+                           ((equal todo-state "DONE") "TODO")
+                           (t ""))) ; fallback to empty string
+             (next-color (cdr (assoc next-state md-todo-states-color-alist))))
+        (replace-match (format "<b><font color='%s'>%s</font></b>" next-color next-state))))))
 
 
 (provide 'init-markdown)

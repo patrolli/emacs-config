@@ -21,6 +21,7 @@ ID.  Advanced users are advised to consult Info node `(denote)
 Change the front matter format'.")
 
 (defun pelican-directory-files ()
+  "返回 `pelican-content-path' 目录下所有的 md 文件" 
   (directory-files-recursively pelican-content-path ".md$"))
 
 (defun pelican-open-or-create (target)
@@ -31,25 +32,21 @@ filename doesn't exist, create a new file."
   (let* ((target-file (file-name-concat pelican-content-path target)))
     (if (file-exists-p target-file)
 	(find-file target-file)
-	(pelican-create-file target))
-    )
-  )
+	(pelican-create-file target))))
 
 (defun pelican-create-file (title)
-  (find-file (file-name-concat (file-name-concat pelican-content-path (format "%s.md" title))))
+  (find-file (file-name-concat (file-name-concat pelican-content-path (format "%s.md" (pelican-sluggify title)))))
   (insert (pelican--format-front-matter title (format-time-string pelican-date-format))))
 
 (defun pelican--format-front-matter (title date)
-  (format pelican-yaml-front-matter title date)
-  )
+  (format pelican-yaml-front-matter title date))
 
 (defun pelican-file-prompt (&optional initial-text)
   "Prompt for file with identifier in variable `denote-directory'.
 With optional INITIAL-TEXT, use it to prepopulate the minibuffer."
   (let ((md-files (directory-files pelican-content-path t "\\.md$"))
 	)
-	(completing-read "Open or create .md file: " (mapcar #'file-name-nondirectory md-files) nil nil)
-  ))
+	(completing-read "Open or create .md file: " (mapcar #'file-name-nondirectory md-files) nil nil)))
 
 (defun pelican--inferred-keywords ()
   (let ((files (directory-files-recursively pelican-content-path ".md$")))
@@ -64,8 +61,7 @@ With optional INITIAL-TEXT, use it to prepopulate the minibuffer."
 	  (while (string-match "^[T\\|t]ags[:]? [=]?+.*\\[\\(.+?\\)\\]$" source pos)
 	    (push (match-string 1 source) matches)
 	    (setq pos (match-end 0)))
-	  (setq pelican-current-session-tags matches)))))
-  )
+	  (setq pelican-current-session-tags matches))))))
 
 (defun pelican-keywords ()
   ;; 得到 contents/ 下的文件中全部的 tag
@@ -83,8 +79,7 @@ With optional INITIAL-TEXT, use it to prepopulate the minibuffer."
 	  (push (match-string-no-properties 1 source) matches)
 	  (setq pos (match-end 0))
 	  )
-	matches))))
-  )
+	matches)))))
 
 (defun pelican-insert-tag ()
   (interactive)
@@ -95,11 +90,7 @@ With optional INITIAL-TEXT, use it to prepopulate the minibuffer."
       ;; TODO: 将选择的 tag insert 到 buffer 中
       ;; 首先获取当前 buffer 的 tags, 如果选择的 tag 在其中，就不操作，否则加入 tags，将 tags 一行进行重写
       (unless (member new-tag cur-tags)
-	(pelican--rewrite-keywords (buffer-file-name) (push new-tag cur-tags))
-	)
-      )
-    )
-  )
+	(pelican--rewrite-keywords (buffer-file-name) (push new-tag cur-tags))))))
 
 (defun pelican--rewrite-keywords (file kwds)
   ;; TODO: slugify input keywords, wrap with \"\"
@@ -117,12 +108,33 @@ With optional INITIAL-TEXT, use it to prepopulate the minibuffer."
 	      (insert (format " %s" kwd)))
 	    )
 	  (insert "]")
-	  (goto-char (line-end-position)))
-      )
-    )
-  )
+	  (goto-char (line-end-position))))))
 
 
+;; slugify titles, borrowed from denote
+(defconst pelican-excluded-punctuation-regexp "[][{}!@#$%^&*()=+'\"?,.\|;:~`‘’“”/]*"
+  "Punctionation that is removed from file names.
+We consider those characters illegal for our purposes.")
+
+
+(defun pelican--slug-no-punct (str)
+  "Convert STR to a file name slug."
+  (replace-regexp-in-string
+   pelican-excluded-punctuation-regexp "" str))
+
+(defun pelican--slug-hyphenate (str)
+  "Replace spaces and underscores with hyphens in STR.
+Also replace multiple hyphens with a single one and remove any
+leading and trailing hyphen."
+  (replace-regexp-in-string
+   "^-\\|-$" ""
+   (replace-regexp-in-string
+    "-\\{2,\\}" "-"
+    (replace-regexp-in-string "_\\|\s+" "-" str))))
+
+(defun pelican-sluggify (str)
+  "Make STR an appropriate slug for file names and related."
+  (downcase (pelican--slug-hyphenate (pelican--slug-no-punct str))))
 
 ;; bind-keys
 (global-set-key (kbd "C-c 1") #'pelican-open-or-create)
