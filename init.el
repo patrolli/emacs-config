@@ -79,6 +79,7 @@ decrease this.If you experience stuttering, increase this.")
 
 (require 'init-org)
 (require 'init-markdown)
+(require 'init-pelican)
 
 (require 'init-window)
 (require 'personal)

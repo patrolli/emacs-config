@@ -197,7 +197,7 @@ Links, footnotes  C-c C-a    _L_: link          _U_: uri        _F_: footnote   
          (color (cdr (assoc tag md-todo-states-color-alist))))
     (insert (format "<b><font color='%s'>%s</font></b>" color tag))))
 
-(defun toggle-todo-state ()
+(defun md-toggle-todo-state ()
   "Toggle TODO state in the current line."
   (interactive)
   (save-excursion

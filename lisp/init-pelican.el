@@ -1,6 +1,18 @@
 (defconst pelican-date-format "%Y%m%dT%H%M%S")
 
-(defvar pelican-keywords-regexp "^[T\\|t]ags[:]? [=]?+.*\\[\\(.+?\\)\\]$")
+(defvar pelican-keywords-regexp "^[Tt]ags[:]?[[:space:]]*\\(?:=[[:space:]]*\\)?\\([^\n]+?\\)$"
+  "Regular expression for matching Pelican-style tags in front matter.")
+
+(defun extract-tags-from-front-matter ()
+  "Extract tags from the front matter of the current buffer."
+  (interactive)
+  (save-excursion
+    (beginning-of-line)
+    (when (re-search-forward pelican-keywords-regexp (line-end-position) t)
+      (let* ((tags-str (match-string-no-properties 1))
+             (tags (if (string-blank-p tags-str) nil (split-string tags-str "[[:space:],]+"))))
+        (message "Tags: %s" tags)
+	tags))))
 
 (defvar pelican-current-session-tags nil)
 
@@ -49,19 +61,15 @@ With optional INITIAL-TEXT, use it to prepopulate the minibuffer."
 	(completing-read "Open or create .md file: " (mapcar #'file-name-nondirectory md-files) nil nil)))
 
 (defun pelican--inferred-keywords ()
-  (let ((files (directory-files-recursively pelican-content-path ".md$")))
-    (let ((source (with-temp-buffer
-		    (while files
-		      (insert-file-contents (car files))
-		      (pop files))
-		    (buffer-string))))
-      (save-match-data
-	(let ((pos 0)
-	      matches)
-	  (while (string-match "^[T\\|t]ags[:]? [=]?+.*\\[\\(.+?\\)\\]$" source pos)
-	    (push (match-string 1 source) matches)
-	    (setq pos (match-end 0)))
-	  (setq pelican-current-session-tags matches))))))
+  (setq pelican-current-session-tags '())
+  (let ((files (directory-files-recursively pelican-content-path "\\.md$")))
+    (dolist (file files)
+      (when (file-regular-p file)
+	(with-current-buffer (find-file-noselect file)
+	  (setq pelican-current-session-tags (append pelican-current-session-tags (extract-tags-from-front-matter))))))
+    ;; delete duplicated keywords
+    (setq pelican-current-session-tags (delete-dups pelican-current-session-tags))
+    pelican-current-session-tags))
 
 (defun pelican-keywords ()
   ;; 得到 contents/ 下的文件中全部的 tag
@@ -77,8 +85,7 @@ With optional INITIAL-TEXT, use it to prepopulate the minibuffer."
 	    matches)
 	(while (string-match pelican-keywords-regexp source pos)
 	  (push (match-string-no-properties 1 source) matches)
-	  (setq pos (match-end 0))
-	  )
+	  (setq pos (match-end 0)))
 	matches)))))
 
 (defun pelican-insert-tag ()
@@ -101,13 +108,15 @@ With optional INITIAL-TEXT, use it to prepopulate the minibuffer."
       (when (re-search-forward "^tags\\s-*:" nil t 1)
           (goto-char (line-beginning-position))
 	  (kill-line)
-          (insert "tags:        [")
-	  (when kwds
-	    (insert (format "%s" (car kwds)))
-	    (dolist (kwd (cdr kwds))
-	      (insert (format " %s" kwd)))
-	    )
-	  (insert "]")
+          (insert "tags:        ")
+	  (cond
+	    ((<= (length kwds) 1)
+	    (when kwds
+		(insert (car kwds))))
+	    (t
+	    (dolist (kwd (butlast kwds))
+		(insert (format "%s, " kwd)))
+	    (insert (car (last kwds)))))
 	  (goto-char (line-end-position))))))
 
 
@@ -149,3 +158,7 @@ leading and trailing hyphen."
 
 ;; TODO: 图片的添加和管理，需要 markdown 那边的配合
 ;; 把图片放到 images/ 目录下，按放入的时间排序，然后提供一个命令，显示图片？
+
+(format-time-string "%Y%m%dT%H%M" (file-attribute-modification-time (file-attributes (buffer-file-name))))
+
+(provide 'init-pelican)
