@@ -1,25 +1,15 @@
-(defconst pelican-date-format "%Y%m%dT%H%M%S")
+(defconst pelican-date-time-format "%Y%m%dT%H%M%S")
+(defconst pelican-date-format "%Y%m%d")
 
-(defvar pelican-keywords-regexp "^[Tt]ags[:]?[[:space:]]*\\(?:=[[:space:]]*\\)?\\([^\n]+?\\)$"
+(defvar pelican-keywords-regexp "^[Tt]ags:[[:space:]]*\\(.+?\\)$"
   "Regular expression for matching Pelican-style tags in front matter.")
-
-(defun extract-tags-from-front-matter ()
-  "Extract tags from the front matter of the current buffer."
-  (interactive)
-  (save-excursion
-    (beginning-of-line)
-    (when (re-search-forward pelican-keywords-regexp (line-end-position) t)
-      (let* ((tags-str (match-string-no-properties 1))
-             (tags (if (string-blank-p tags-str) nil (split-string tags-str "[[:space:],]+"))))
-        (message "Tags: %s" tags)
-	tags))))
 
 (defvar pelican-current-session-tags nil)
 
 (defvar pelican-content-path
 	(if (eq system-type 'windows-nt)
-	"C:/Users/xunsong.li/Documents/project/website/content"
-	"~/Documents/project/website/content"))
+	"C:/Users/xunsong.li/SynologyDrive/project/website/content"
+	"~/SynologyDrive/project/website/content"))
 
 (defvar pelican-yaml-front-matter 
   "---
@@ -47,8 +37,8 @@ filename doesn't exist, create a new file."
 	(pelican-create-file target))))
 
 (defun pelican-create-file (title)
-  (find-file (file-name-concat (file-name-concat pelican-content-path (format "%s.md" (pelican-sluggify title)))))
-  (insert (pelican--format-front-matter title (format-time-string pelican-date-format))))
+  (find-file (file-name-concat (file-name-concat pelican-content-path (format "%s--%s.md" (format-time-string pelican-date-format) (pelican-sluggify title)))))
+  (insert (pelican--format-front-matter title (format-time-string pelican-date-time-format))))
 
 (defun pelican--format-front-matter (title date)
   (format pelican-yaml-front-matter title date))
@@ -66,8 +56,7 @@ With optional INITIAL-TEXT, use it to prepopulate the minibuffer."
     (dolist (file files)
       (when (file-regular-p file)
 	(with-current-buffer (find-file-noselect file)
-	  (setq pelican-current-session-tags (append pelican-current-session-tags (extract-tags-from-front-matter))))))
-    ;; delete duplicated keywords
+	  (setq pelican-current-session-tags (append pelican-current-session-tags (pelican--keywords-in-cur-buffer))))))
     (setq pelican-current-session-tags (delete-dups pelican-current-session-tags))
     pelican-current-session-tags))
 
@@ -76,23 +65,22 @@ With optional INITIAL-TEXT, use it to prepopulate the minibuffer."
   (delete-dups (pelican--inferred-keywords)))
 
 (defun pelican--keywords-in-cur-buffer ()
-  (with-current-buffer (buffer-name)
-      (save-excursion
-      (goto-char (point-min))
-    (save-match-data
-      (let ((source (buffer-string))
-	    (pos 0)
-	    matches)
-	(while (string-match pelican-keywords-regexp source pos)
-	  (push (match-string-no-properties 1 source) matches)
-	  (setq pos (match-end 0)))
-	matches)))))
+  "Extract tags from the front matter of the current buffer."
+  (save-excursion
+    (beginning-of-buffer)
+    (re-search-forward "^[T\\|t]ags[:]?" nil t)
+    (beginning-of-line)
+    (when (re-search-forward pelican-keywords-regexp (+ 1 (line-end-position)) t)
+      (let* ((tags-str (match-string-no-properties 1))
+             (tags (if (string-blank-p tags-str) nil (split-string tags-str "[[:space:],]+"))))
+        (message "Tags: %s" tags)
+	tags))))
 
 (defun pelican-insert-tag ()
   (interactive)
   (if (eq pelican-current-session-tags nil)
       (pelican-keywords)
-    (let ((new-tag (completing-read "Select tags: " pelican-current-session-tags))
+    (let ((new-tag (completing-read "Select tags: " (pelican-keywords)))
 	  (cur-tags (pelican--keywords-in-cur-buffer)))
       ;; TODO: 将选择的 tag insert 到 buffer 中
       ;; 首先获取当前 buffer 的 tags, 如果选择的 tag 在其中，就不操作，否则加入 tags，将 tags 一行进行重写
@@ -125,7 +113,6 @@ With optional INITIAL-TEXT, use it to prepopulate the minibuffer."
   "Punctionation that is removed from file names.
 We consider those characters illegal for our purposes.")
 
-
 (defun pelican--slug-no-punct (str)
   "Convert STR to a file name slug."
   (replace-regexp-in-string
@@ -154,10 +141,11 @@ leading and trailing hyphen."
 ;; TODO: 文件管理可以简单通过 dired 实现，而不需要额外写一些函数
 ;; (dired pelican-content-path)
 
-;; DOING: 通过命令插入或删除 tag，支持从已有的 tag 中补全
+;; DONE: 通过命令插入或删除 tag，支持从已有的 tag 中补全
 
 ;; TODO: 图片的添加和管理，需要 markdown 那边的配合
 ;; 把图片放到 images/ 目录下，按放入的时间排序，然后提供一个命令，显示图片？
+;; DONE: 文件名创建时加上日期，便于搜索排序
 
 (format-time-string "%Y%m%dT%H%M" (file-attribute-modification-time (file-attributes (buffer-file-name))))
 

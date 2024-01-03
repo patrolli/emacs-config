@@ -88,3 +88,6 @@ decrease this.If you experience stuttering, increase this.")
 (global-set-key (kbd "s-x") #'counsel-M-x)
 (global-set-key (kbd "s-/") #'comment-line)
 (global-set-key (kbd "s-p") #'helm-mini)
+
+;; font size setting
+(set-face-attribute 'default nil :family "Menlo" :height 150)

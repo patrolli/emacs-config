@@ -213,5 +213,16 @@ Links, footnotes  C-c C-a    _L_: link          _U_: uri        _F_: footnote   
              (next-color (cdr (assoc next-state md-todo-states-color-alist))))
         (replace-match (format "<b><font color='%s'>%s</font></b>" next-color next-state))))))
 
+(defun md-insert-clipboard-image ()
+"Generate png file from a clipboard image and insert a link to current buffer."
+(interactive)
+(let* ((filename (concat "./images/" (format-time-string "%Y%m%dT%H%M%S") ".png")))
+    (message "Create File %s..." filename)
+    (if sys/win32p
+	(call-process "powershell" nil nil nil "powershell -ExecutionPolicy RemoteSigned -File \"$Env:HOME/.emacs.d/windows/paste_image.ps1\" -FileName " filename)
+    ;; for macos
+    (shell-command (concat "pngpaste " filename)))
+    (if (file-exists-p filename)
+	(insert (concat "![](" filename ")")))))
 
 (provide 'init-markdown)
