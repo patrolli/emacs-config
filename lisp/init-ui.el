@@ -1,42 +1,8 @@
-;; randomly pick my favourite themes
-;; ref: https://github.com/redguardtoo/emacs.d/blob/5c0f5702eebc430363d05e058077f65c4d6c2a2d/lisp/init-theme.el#L10
-(defvar my-favourite-color-themes '(doom-gruvbox doom-one-light doom-zenburn
-						 modus-operandi doom-dracula
-						 doom-material-dark doom-manegarm
-						 doom-peacock)
-  "A set of themes randomly picked when eamcs starts up")
-
-(defun random-choice (items)
-  (let* ((size (length items))
-	 (index (random size)))
-    (nth index items)))
-
-(defun my-pick-random-theme (themes)
+(use-package ef-themes
+  :ensure t
+  :config
   (my-ensure 'counsel)
-  (let* ((available-themes (mapcar 'symbol-name themes))
-	 (theme (nth (random (length available-themes)) available-themes)))
-    (counsel-load-theme-action theme)
-    (message "Color theme [%s] loaded" theme)))
-
-(defun xs/pick-my-favorite-themes ()
-  (interactive)
-  (my-pick-random-theme (or my-favourite-color-themes
-			    (custom-available-themes))))
-
-(use-package doom-themes
-       :ensure t
-       :config
-       (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
-         doom-themes-enable-italic t) ; if nil, italics is universally disabled
-       (call-interactively 'lxs/pick-my-favorite-themes)
-       (doom-themes-org-config)
-       ;; (doom-themes-neotree-config)
-     (setq org-src-fontify-natively t)
-     (with-eval-after-load 'org 
-       (custom-theme-set-faces
-        'user
-        `(org-latex-and-related ((t (:foreground ,(doom-color 'green))))))
-       (setq org-highlight-latex-and-related '(latex script entities))))
+  (counsel-load-theme-action "ef-spring"))
 
 ;; use doom-modeline instead of spaceline
 (use-package doom-modeline
