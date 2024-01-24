@@ -36,9 +36,7 @@ Version 2018-06-04 2021-03-16"
           (back-to-indentation)
           (when (eq $p (point))
             (beginning-of-line)))))))
-
-(defun xah-end-of-line-or-block ()
-  "Move cursor to end of line or next paragraph.
+(defun xah-end-of-line-or-block () "Move cursor to end of line or next paragraph.
 • When called first time, move cursor to end of line.
 • When called again, move cursor forward by jumping over any sequence of whitespaces containing 2 blank lines.
 • if `visual-line-mode' is on, end of line means visual line.
@@ -528,5 +526,44 @@ Version 2017-09-22 2020-09-08"
           (goto-char (point-min))
           (while (re-search-forward "\n\n\n+" nil "move")
             (replace-match "\n\n")))))))
+
+(defun xah-insert-date ()
+  "Insert current date time.
+Insert date in this format: yyyy-mm-dd.
+If `universal-argument' is called first, prompt for a format to use.
+If there is selection, delete it first.
+
+URL `http://xahlee.info/emacs/emacs/elisp_insert-date-time.html'
+Version: 2013-05-10 2023-09-30 2023-09-30"
+  (interactive)
+  (let (xmenu xstyle)
+    (setq
+     xmenu
+     '(("ISO date • 2018-04-12" . (format-time-string "%Y-%m-%d"))
+       ("all digits datetime • 20180412224611" . (format-time-string "%Y%m%d%H%M%S"))
+       ("date _ time digits • 2018-04-12_224611" . (format-time-string "%Y-%m-%d_%H%M%S"))
+       ("ISO datetime full • 2018-04-12T22:46:11-07:00" .
+        (concat
+         (format-time-string "%Y-%m-%dT%T")
+         ((lambda (xx) (format "%s:%s" (substring xx 0 3) (substring xx 3 5)))
+          (format-time-string "%z"))))
+       ("ISO datetime w space • 2018-04-12 22:46:11-07:00" .
+        (concat
+         (format-time-string "%Y-%m-%d %T")
+         ((lambda (xx) (format "%s:%s" (substring xx 0 3) (substring xx 3 5)))
+          (format-time-string "%z"))))
+       ("ISO date + weekday • 2018-04-12 Thursday" . (format-time-string "%Y-%m-%d %A"))
+       ("USA date + weekday • Thursday, April 12, 2018" . (format-time-string "%A, %B %d, %Y"))
+       ("USA date + weekday abbrev • Thu, Apr 12, 2018" . (format-time-string "%a, %b %d, %Y"))
+       ("USA date • April 12, 2018" . (format-time-string "%B %d, %Y"))
+       ("USA date abbrev • Apr 12, 2018" . (format-time-string "%b %d, %Y")))
+
+     xstyle
+     (if current-prefix-arg
+         (let ((completion-ignore-case t))
+           (completing-read "Style:" xmenu nil t nil nil (caar xmenu)))
+       (caar xmenu)))
+    (when (region-active-p) (delete-region (region-beginning) (region-end)))
+    (insert (eval (cdr (assoc xstyle xmenu))))))
 
 (provide 'xah-utils)
