@@ -4,6 +4,9 @@
 (defvar pelican-keywords-regexp "^[Tt]ags:[[:space:]]*\\(.+?\\)$"
   "Regular expression for matching Pelican-style tags in front matter.")
 
+(defvar pelican-slug-regexp "^[Ss]lug:[[:space:]]*\\(.+?\\)$"
+   "Regular expression for matching Pelican slug in front matter.")
+
 (defvar pelican-current-session-tags nil)
 
 (defvar pelican-content-path
@@ -16,6 +19,7 @@
 title:      %s
 date:       %s
 tags:       
+slug:       %s
 ---\n\n"
   "YAML (Markdown) front matter.
 It is passed to `format' with arguments TITLE, DATE, KEYWORDS,
@@ -38,10 +42,10 @@ filename doesn't exist, create a new file."
 
 (defun pelican-create-file (title)
   (find-file (file-name-concat (file-name-concat pelican-content-path (format "%s--%s.md" (format-time-string pelican-date-format) (pelican-sluggify title)))))
-  (insert (pelican--format-front-matter title (format-time-string pelican-date-time-format))))
+  (insert (pelican--format-front-matter title (format-time-string pelican-date-time-format) (pelican-sluggify title))))
 
-(defun pelican--format-front-matter (title date)
-  (format pelican-yaml-front-matter title date))
+(defun pelican--format-front-matter (title date slug)
+  (format pelican-yaml-front-matter title date slug))
 
 (defun pelican-file-prompt (&optional initial-text)
   "Prompt for file with identifier in variable `denote-directory'.
@@ -76,6 +80,15 @@ With optional INITIAL-TEXT, use it to prepopulate the minibuffer."
         (message "Tags: %s" tags)
 	tags))))
 
+(defun pelican--slug-in-cur-buffer ()
+    (save-excursion
+	(beginning-of-buffer)
+	(re-search-forward "^[S\\|s]lug[:]?" nil t)
+	(beginning-of-line)
+	(when (re-search-forward pelican-slug-regexp (+ 1 (line-end-position)) t)
+	    (let* ((slug-str (match-string-no-properties 1)))
+	    slug-str))))
+
 (defun pelican-insert-tag ()
   (interactive)
   (if (eq pelican-current-session-tags nil)
@@ -96,7 +109,7 @@ With optional INITIAL-TEXT, use it to prepopulate the minibuffer."
       (when (re-search-forward "^tags\\s-*:" nil t 1)
           (goto-char (line-beginning-position))
 	  (kill-line)
-          (insert "tags:        ")
+          (insert "tags:       ")
 	  (cond
 	    ((<= (length kwds) 1)
 	    (when kwds
@@ -134,7 +147,14 @@ leading and trailing hyphen."
 
 ;; bind-keys
 (global-set-key (kbd "C-c 1") #'pelican-open-or-create)
+(global-set-key (kbd "C-c 2") #'pelican-open-in-browser)
 
+(defun pelican-open-in-browser ()
+  (interactive)
+  (let ((slug (pelican--slug-in-cur-buffer)))
+    (if slug
+	(browse-url (format  "http://127.0.0.1:5500/%s.html" slug)))
+    ))
 
 ;; 添加 modified time
 
