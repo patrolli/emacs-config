@@ -12,9 +12,6 @@
   :init
   (setenv "WORKON_HOME" "~/.pyenv/versions"))
 
-(use-package conda
-  :ensure t)
-
 (add-hook 'prog-mode-hook 'show-paren-mode)
 
 (provide 'init-prog)

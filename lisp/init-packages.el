@@ -1,4 +1,3 @@
-
  ;; cl - Common Lisp Extension
 (require 'cl-lib)
 (require 'init-const)
@@ -42,21 +41,6 @@
 ;; Required by `use-package'
 (use-package diminish)
 (use-package bind-key)
-
-
-
-(cl-letf (((symbol-function 'define-obsolete-function-alias) #'defalias))
-  (use-package benchmark-init
-    :config
-    (require 'benchmark-init-modes)                                     ; explicitly required
-    (add-hook 'after-init-hook #'benchmark-init/deactivate)))
-
-
-;; (use-package benchmark-init
-  ;; :ensure t
-  ;; :config
-  ;; To disable collection of benchmark data after init is done.
-  ;; (add-hook 'after-init-hook 'benchmark-init/deactivate))
 
 (provide 'init-packages)
 

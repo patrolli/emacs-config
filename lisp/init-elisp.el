@@ -189,12 +189,6 @@ Lisp function does not specify a special indentation."
               (revert-buffer nil t)))))))
   (bind-key "r" #'remove-hook-at-point help-mode-map))
 
-;; Show function arglist or variable docstring
-;; `global-eldoc-mode' is enabled by default.
-(use-package eldoc
-  :ensure nil
-  :diminish)
-
 (use-package helpful
   ;; :disabled t
   :defines (counsel-describe-function-function
@@ -317,19 +311,6 @@ Lisp function does not specify a special indentation."
       (display-buffer (nth 0 helpful-bufs)))))
 
 (global-set-key (kbd "<f3>") #'lxs-helpful-toggle)
-
-(use-package elisp-demos
-  :config
-  (advice-add 'helpful-update :after #'elisp-demos-advice-helpful-update))
-
-(use-package macrostep
-  :ensure t
-  :custom-face
-  (macrostep-expansion-highlight-face ((t (:inherit tooltip :extend t))))
-  :bind (:map emacs-lisp-mode-map
-         ("C-c e" . macrostep-expand)
-         :map lisp-interaction-mode-map
-         ("C-c e" . macrostep-expand)))
 
 (provide 'init-elisp)
 

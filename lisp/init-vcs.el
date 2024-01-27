@@ -132,9 +132,4 @@
     (advice-add #'git-messenger:popup-close :override #'ignore)
     (advice-add #'git-messenger:popup-message :override #'my-git-messenger:popup-message)))
 
-;; Open github/gitlab/bitbucket page
-(use-package browse-at-remote
-  :bind (:map vc-prefix-map
-         ("B" . browse-at-remote)))
-
 (provide 'init-vcs)

@@ -69,8 +69,6 @@ decrease this.If you experience stuttering, increase this.")
 (require 'init-dashboard)
 (require 'init-dired)
 
-(require 'init-term)
-
 (require 'init-prog)
 (require 'init-python)
 (require 'init-highlight)
@@ -88,6 +86,8 @@ decrease this.If you experience stuttering, increase this.")
 (global-set-key (kbd "s-x") #'counsel-M-x)
 (global-set-key (kbd "s-/") #'comment-line)
 (global-set-key (kbd "s-p") #'helm-mini)
+;; comment lines
+(global-set-key (kbd "s-/") #'comment-line)
 
 ;; font size setting
 (set-face-attribute 'default nil :family "Menlo" :height 150)

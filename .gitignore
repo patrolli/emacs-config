@@ -35,3 +35,6 @@ rime/
 librime/
 *.png
 *.svg
+pyim/
+history
+dirvish/

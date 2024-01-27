@@ -9,7 +9,4 @@
 (use-package helm-projectile
   :ensure t)
 
-(use-package helm-rg
-  :ensure t)
-
 (provide 'init-helm)
