@@ -168,8 +168,7 @@ Links, footnotes  C-c C-a    _L_: link          _U_: uri        _F_: footnote   
 
     ;; Now the open tag:
     (goto-char rstart)
-    (insert "<" tag ">")
-))
+    (insert "<" tag ">")))
 
 (defun add-html-font-color (color)
   (interactive "sFont color ")
@@ -185,7 +184,7 @@ Links, footnotes  C-c C-a    _L_: link          _U_: uri        _F_: footnote   
 ))
 
 (defvar md-todo-states-color-alist
-  '(("TODO" . "Chartreuse")
+  '(("TODO" . "Red")
     ("DOING" . "Orange")
     ("DONE" . "DodgerBlue"))
   "An alist mapping TODO states to their corresponding colors.")
@@ -224,5 +223,20 @@ Links, footnotes  C-c C-a    _L_: link          _U_: uri        _F_: footnote   
     (shell-command (concat "pngpaste " filename)))
     (if (file-exists-p filename)
 	(insert (concat "![](" filename ")")))))
+
+(defun md-clear-html-block-markup ()
+  "Clear markup symbols for the html code block, allow browser parse them as pure html codes, instead of code snippets.
+Version 2024-01-06 "
+  (interactive)
+  (let* ((bounds (markdown-get-enclosing-fenced-block-construct))
+	(begin (and bounds (not (null (nth 0 bounds))) (goto-char (nth 0 bounds)) (line-number-at-pos)))
+	(end (and bounds (not (null (nth 1 bounds)))  (goto-char (nth 1 bounds)) (line-number-at-pos) )))
+    (if (and begin end (string-equal "html" (markdown-code-block-lang)))
+    (save-excursion
+      (goto-line begin)
+      (delete-region (line-beginning-position) (line-end-position))
+      (goto-line end)
+      (delete-region (line-beginning-position) (line-end-position))))))
+;; TODO: add a command to add html code block markup, as the reversed operation of the above one.
 
 (provide 'init-markdown)
