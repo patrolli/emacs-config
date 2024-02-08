@@ -7,6 +7,8 @@
 (defvar pelican-slug-regexp "^[Ss]lug:[[:space:]]*\\(.+?\\)$"
    "Regular expression for matching Pelican slug in front matter.")
 
+(defvar pelican-title-regexp "^[Tt]itle:[[:space:]]*\\(.+?\\)$")
+
 (defvar pelican-current-session-tags nil)
 
 (defvar pelican-content-path
@@ -31,9 +33,7 @@ Change the front matter format'.")
   (directory-files-recursively pelican-content-path ".md$"))
 
 (defun pelican-open-or-create (target)
-  "Open or create a Markdown (.md) file in the specified DIRECTORY.
-List existing .md files and allow narrowing. If the entered
-filename doesn't exist, create a new file."
+  "Open or create a Markdown (.md) file in the specified DIRECTORY. List existing .md files and allow narrowing. If the entered filename doesn't exist, create a new file."
   (interactive (list (pelican-file-prompt)))
   (let* ((target-file (file-name-concat pelican-content-path target)))
     (if (file-exists-p target-file)
@@ -50,23 +50,8 @@ filename doesn't exist, create a new file."
 (defun pelican-file-prompt (&optional initial-text)
   "Prompt for file with identifier in variable `denote-directory'.
 With optional INITIAL-TEXT, use it to prepopulate the minibuffer."
-  (let ((md-files (directory-files pelican-content-path t "\\.md$"))
-	)
-	(completing-read "Open or create .md file: " (mapcar #'file-name-nondirectory md-files) nil nil)))
-
-(defun pelican--inferred-keywords ()
-  (setq pelican-current-session-tags '())
-  (let ((files (directory-files-recursively pelican-content-path "\\.md$")))
-    (dolist (file files)
-      (when (file-regular-p file)
-	(with-current-buffer (find-file-noselect file)
-	  (setq pelican-current-session-tags (append pelican-current-session-tags (pelican--keywords-in-cur-buffer))))))
-    (setq pelican-current-session-tags (delete-dups pelican-current-session-tags))
-    pelican-current-session-tags))
-
-(defun pelican-keywords ()
-  ;; 得到 contents/ 下的文件中全部的 tag
-  (delete-dups (pelican--inferred-keywords)))
+  (let ((md-files (directory-files pelican-content-path t "\\.md$")))
+    (completing-read "Open or create .md file: " (mapcar #'file-name-nondirectory md-files) nil nil)))
 
 (defun pelican--keywords-in-cur-buffer ()
   "Extract tags from the front matter of the current buffer."
@@ -80,6 +65,21 @@ With optional INITIAL-TEXT, use it to prepopulate the minibuffer."
         (message "Tags: %s" tags)
 	tags))))
 
+(defun pelican--inferred-keywords ()
+  "Collect all keywords from each md file, duplicated items are included."
+  (setq pelican-current-session-tags '())
+  (let ((files (pelican-directory-files)))
+    (dolist (file files)
+      (when (file-regular-p file)
+	(with-current-buffer (find-file-noselect file)
+	  (setq pelican-current-session-tags (append pelican-current-session-tags (pelican--keywords-in-cur-buffer))))))
+    (setq pelican-current-session-tags (delete-dups pelican-current-session-tags))
+    pelican-current-session-tags))
+
+(defun pelican-keywords ()
+  "Get all keywords under content/ directory."
+  (delete-dups (pelican--inferred-keywords)))
+
 (defun pelican--slug-in-cur-buffer ()
     (save-excursion
 	(beginning-of-buffer)
@@ -88,6 +88,36 @@ With optional INITIAL-TEXT, use it to prepopulate the minibuffer."
 	(when (re-search-forward pelican-slug-regexp (+ 1 (line-end-position)) t)
 	    (let* ((slug-str (match-string-no-properties 1)))
 	    slug-str))))
+
+(defun pelican--title-in-cur-buffer ()
+  (save-excursion
+    (beginning-of-buffer)
+    (re-search-forward "^[T\\|t]itle[:]?" nil t)
+    (beginning-of-line)
+    (when (re-search-forward pelican-title-regexp (+ 1 (line-end-position)) t)
+      (let* ((title-str (match-string-no-properties 1)))
+	title-str))))
+
+(defun pelican-insert-link ()
+  "Insert the link of a certain file."
+  (interactive)
+  (let ((candidates '())
+	(selected-file "")
+	(files (directory-files-recursively pelican-content-path "\\.md$")))
+    (dolist (file files)
+      (when (file-regular-p file)
+	(with-current-buffer (find-file-noselect file)
+	  (let ((slug (pelican--slug-in-cur-buffer))
+		(title (pelican--title-in-cur-buffer)))
+	    (when slug
+		(push `(,title . ,slug) candidates))
+	    ))))
+    ;; Create candidate list from collected slugs and titles
+    (setq selected-file (completing-read "Select a file: " candidates nil t))
+    (when (not (string-empty-p selected-file))
+      (let ((selected-slug (cdr (assoc selected-file candidates))))
+	(insert (format "[%s](./%s.html)" selected-file selected-slug))))
+    ))
 
 (defun pelican-insert-tag ()
   (interactive)
@@ -101,7 +131,7 @@ With optional INITIAL-TEXT, use it to prepopulate the minibuffer."
 	(pelican--rewrite-keywords (buffer-file-name) (push new-tag cur-tags))))))
 
 (defun pelican--rewrite-keywords (file kwds)
-  ;; TODO: slugify input keywords, wrap with \"\"
+  "Modify keywords in file front matter, by rewriting the line."
   (with-current-buffer (find-file-noselect file)
     (save-excursion
       (widen)
@@ -120,8 +150,7 @@ With optional INITIAL-TEXT, use it to prepopulate the minibuffer."
 	    (insert (car (last kwds)))))
 	  (goto-char (line-end-position))))))
 
-
-;; slugify titles, borrowed from denote
+;; {{ sluggify titles for file name and slug attribute
 (defconst pelican-excluded-punctuation-regexp "[][{}!@#$%^&*()=+'\"?,.\|;:~`‘’“”/]*"
   "Punctionation that is removed from file names.
 We consider those characters illegal for our purposes.")
@@ -145,28 +174,18 @@ leading and trailing hyphen."
   "Make STR an appropriate slug for file names and related."
   (downcase (pelican--slug-hyphenate (pelican--slug-no-punct str))))
 
-;; bind-keys
-(global-set-key (kbd "C-c 1") #'pelican-open-or-create)
-(global-set-key (kbd "C-c 2") #'pelican-open-in-browser)
+;; }}
 
 (defun pelican-open-in-browser ()
   (interactive)
   (let ((slug (pelican--slug-in-cur-buffer)))
     (if slug
-	(browse-url (format  "http://127.0.0.1:5500/%s.html" slug)))
-    ))
+	(browse-url (format  "http://127.0.0.1:5500/%s.html" slug))))
+  )
 
-;; 添加 modified time
-
-;; TODO: 文件管理可以简单通过 dired 实现，而不需要额外写一些函数
-;; (dired pelican-content-path)
-
-;; DONE: 通过命令插入或删除 tag，支持从已有的 tag 中补全
-
-;; TODO: 图片的添加和管理，需要 markdown 那边的配合
-;; 把图片放到 images/ 目录下，按放入的时间排序，然后提供一个命令，显示图片？
-;; DONE: 文件名创建时加上日期，便于搜索排序
-
-(format-time-string "%Y%m%dT%H%M" (file-attribute-modification-time (file-attributes (buffer-file-name))))
+;; {{ bind-keys
+(global-set-key (kbd "C-c 1") #'pelican-open-or-create)
+(global-set-key (kbd "C-c 2") #'pelican-open-in-browser)
+;; }}
 
 (provide 'init-pelican)
