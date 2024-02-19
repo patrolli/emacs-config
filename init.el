@@ -82,6 +82,10 @@ decrease this.If you experience stuttering, increase this.")
 (require 'init-window)
 (require 'personal)
 
+;; {{ load site-lisp packages 
+(require 'xah-utils)
+;; }}
+
 ;; ----- global keybindings ----- 
 (global-set-key (kbd "s-x") #'counsel-M-x)
 (global-set-key (kbd "s-/") #'comment-line)
@@ -90,4 +94,5 @@ decrease this.If you experience stuttering, increase this.")
 (global-set-key (kbd "s-/") #'comment-line)
 
 ;; font size setting
-(set-face-attribute 'default nil :family "Menlo" :height 150)
+;; (set-face-attribute 'default nil :family "Menlo" :height 150)
+(set-face-attribute 'default nil :family "Monaco" :height 150)

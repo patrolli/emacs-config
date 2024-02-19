@@ -566,4 +566,37 @@ Version: 2013-05-10 2023-09-30 2023-09-30"
     (when (region-active-p) (delete-region (region-beginning) (region-end)))
     (insert (eval (cdr (assoc xstyle xmenu))))))
 
+(defun xah-next-user-buffer ()
+  "Switch to the next user buffer.
+“user buffer” is determined by `xah-user-buffer-q'.
+URL `http://xahlee.info/emacs/emacs/elisp_next_prev_user_buffer.html'
+Version 2016-06-19"
+  (interactive)
+  (next-buffer)
+  (let ((i 0))
+    (while (< i 20)
+      (if (not (xah-user-buffer-q))
+          (progn (next-buffer)
+                 (setq i (1+ i)))
+        (progn (setq i 100))))))
+
+(defun xah-previous-user-buffer ()
+  "Switch to the previous user buffer.
+“user buffer” is determined by `xah-user-buffer-q'.
+URL `http://xahlee.info/emacs/emacs/elisp_next_prev_user_buffer.html'
+Version 2016-06-19"
+  (interactive)
+  (previous-buffer)
+  (let ((i 0))
+    (while (< i 20)
+      (if (not (xah-user-buffer-q))
+          (progn (previous-buffer)
+                 (setq i (1+ i)))
+        (progn (setq i 100))))))
+
+;; {{ key-bindings
+
+(global-set-key (kbd "<f11>") #'xah-previous-user-buffer)
+(global-set-key (kbd "<f12>") #'xah-next-user-buffer)
+
 (provide 'xah-utils)
