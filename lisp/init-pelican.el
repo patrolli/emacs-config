@@ -47,10 +47,17 @@ Change the front matter format'.")
 (defun pelican--format-front-matter (title date slug)
   (format pelican-yaml-front-matter title date slug))
 
+(defun pelican--sort-files-by-modification-time (directory &optional full match)
+  "Return a sorted list of files in DIRECTORY sorted by modification time."
+  (mapcar #'car
+          (sort (directory-files-and-attributes directory full match)
+                (lambda (file1 file2)
+                  (time-less-p (nth 6 file2) (nth 6 file1))))))
+
 (defun pelican-file-prompt (&optional initial-text)
   "Prompt for file with identifier in variable `denote-directory'.
 With optional INITIAL-TEXT, use it to prepopulate the minibuffer."
-  (let ((md-files (directory-files pelican-content-path t "\\.md$")))
+  (let ((md-files (pelican--sort-files-by-modification-time pelican-content-path t "\\.md$")))
     (completing-read "Open or create .md file: " (mapcar #'file-name-nondirectory md-files) nil nil)))
 
 (defun pelican--keywords-in-cur-buffer ()
