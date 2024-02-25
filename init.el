@@ -60,6 +60,7 @@ decrease this.If you experience stuttering, increase this.")
 
 (require 'init-evil)
 (require 'init-ui)
+(require 'init-input-method)
 (require 'init-hydra)
 (require 'init-edit)
 (require 'init-ivy)
