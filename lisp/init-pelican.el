@@ -87,6 +87,31 @@ With optional INITIAL-TEXT, use it to prepopulate the minibuffer."
   "Get all keywords under content/ directory."
   (delete-dups (pelican--inferred-keywords)))
 
+;;;; Front matter or content retrieval functions
+
+(defun pelican-retrieve-slug (file)
+  "Return slug value from FILE front matter"
+  (with-temp-buffer
+    (insert-file-contents file)
+    (goto-char (point-min))
+    (when (re-search-forward "^[S\\|s]lug[:]?" nil t)
+      (beginning-of-line)
+      (when (re-search-forward pelican-slug-regexp (+ 1 (line-end-position)) t 1)
+	(let* ((slug-str (match-string-no-properties 1)))
+	  slug-str)))))
+
+(defun pelican-retrieve-title (file)
+  "Return title value from FILE front matter"
+  (with-temp-buffer
+    (insert-file-contents file)
+    (goto-char (point-min))
+    (when (re-search-forward "^[T\\|t]itle[:]?" nil t)
+      (beginning-of-line)
+      (when (re-search-forward pelican-title-regexp (+ 1 (line-end-position)) t)
+      (let* ((title-str (match-string-no-properties 1)))
+	title-str))) 
+    ))
+
 (defun pelican--slug-in-cur-buffer ()
     (save-excursion
 	(beginning-of-buffer)
@@ -105,25 +130,39 @@ With optional INITIAL-TEXT, use it to prepopulate the minibuffer."
       (let* ((title-str (match-string-no-properties 1)))
 	title-str))))
 
+(defun pelican-link--format-link (file-title file-slug &optional description)
+  "Prepare link to file. If DESCRIPTION is non-nil, use it as link description instead of FILE's title"
+  (let* ((fm "[%s](./%s.html)")
+	 (link-text (or description file-title)))
+    (format fm link-text file-slug)
+    ))
+
 (defun pelican-insert-link ()
-  "Insert the link of a certain file."
+  "Insert the link of a certain file. When region is active, use
+its text as the link's description."
   (interactive)
-  (let ((candidates '())
+  (let ((beg (point))
+	(description (when-let* (((region-active-p))
+				 (beg (region-beginning))
+				 (end (region-end))
+				 (selected-text
+				  (string-trim (buffer-substring-no-properties beg end))))
+			(delete-region beg end)
+		       selected-text))
+	(candidates '())
 	(selected-file "")
-	(files (directory-files-recursively pelican-content-path "\\.md$")))
+	(files (pelican--sort-files-by-modification-time pelican-content-path t "\\.md$")))
     (dolist (file files)
       (when (file-regular-p file)
-	(with-current-buffer (find-file-noselect file)
-	  (let ((slug (pelican--slug-in-cur-buffer))
-		(title (pelican--title-in-cur-buffer)))
-	    (when slug
-		(push `(,title . ,slug) candidates))
-	    ))))
+	(let ((slug (pelican-retrieve-slug file))
+	      (title (pelican-retrieve-title file)))
+	  (when slug
+	    (add-to-list 'candidates `(,title . ,slug) t)))))
     ;; Create candidate list from collected slugs and titles
     (setq selected-file (completing-read "Select a file: " candidates nil t))
     (when (not (string-empty-p selected-file))
       (let ((selected-slug (cdr (assoc selected-file candidates))))
-	(insert (format "[%s](./%s.html)" selected-file selected-slug))))
+	(insert (pelican-link--format-link selected-file selected-slug description))))
     ))
 
 (defun pelican-insert-tag ()

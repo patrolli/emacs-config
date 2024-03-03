@@ -11,7 +11,8 @@
   :ensure t
   :config
   (setq-default evil-escape-delay 0.3)
-  (setq-default evil-escape-key-sequence "kj")
+  (setq-default evil-escape-key-sequence "jj")
+  (setq evil-escape-inhibit-functions '(evil-visual-state-p))
   (evil-escape-mode 1))
 
 ;; (use-package evil-collection
